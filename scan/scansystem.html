@@ -43,6 +43,11 @@
             padding: 8px 16px;
             margin-top: 10px;
             cursor: pointer;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -51,6 +56,10 @@
 
     <!-- 输入框 -->
     <input type="text" id="barcodeInput" placeholder="扫描条码号或手动输入" autofocus>
+    
+    <!-- 扫码按钮 -->
+    <button id="scanBtn">扫描条形码</button>
+
     <div id="qr-reader"></div> <!-- 二维码扫描框 -->
 
     <!-- 查询结果显示区域 -->
@@ -93,6 +102,18 @@
                 }
             });
 
+            // 扫码按钮的点击事件
+            $('#scanBtn').on('click', function () {
+                html5QrCode.start(
+                    { facingMode: "environment" }, // 使用后置摄像头
+                    { fps: 10, qrbox: 250 },
+                    onScanSuccess,
+                    onScanFailure
+                ).catch((err) => {
+                    console.error(`初始化扫描器失败: ${err}`);
+                });
+            });
+
             // 扫码成功的回调函数
             function onScanSuccess(decodedText, decodedResult) {
                 queryBook(decodedText);  // 扫描后自动调用查询
@@ -103,19 +124,9 @@
                 console.warn(`扫描失败: ${error}`);
             }
 
-            // 启动扫码功能
+            // 初始化二维码扫描器
             const html5QrCode = new Html5Qrcode("qr-reader");
-            const qrConfig = { fps: 10, qrbox: 250 };  // 每秒扫描10帧，扫描框大小250px
 
-            // 启动扫码器
-            html5QrCode.start(
-                { facingMode: "environment" }, // 使用后置摄像头
-                qrConfig,
-                onScanSuccess,
-                onScanFailure
-            ).catch((err) => {
-                console.error(`初始化扫描器失败: ${err}`);
-            });
         });
     </script>
 </body>
