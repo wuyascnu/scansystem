@@ -49,12 +49,9 @@
 <body>
     <h1>书籍位置查询系统</h1>
 
-    <!-- 输入框和按钮 -->
-    <input type="text" id="barcodeInput" placeholder="扫描条码号" autofocus>
-    <button id="scanBtn">扫一扫</button>
-
-    <!-- 显示二维码扫描框 -->
-    <div id="qr-reader"></div>
+    <!-- 输入框 -->
+    <input type="text" id="barcodeInput" placeholder="扫描条码号或手动输入" autofocus>
+    <div id="qr-reader"></div> <!-- 二维码扫描框 -->
 
     <!-- 查询结果显示区域 -->
     <div class="results">
@@ -64,19 +61,14 @@
 
     <script>
         $(document).ready(function () {
-            const html5QrCode = new Html5Qrcode("qr-reader");
-            const qrConfig = { fps: 10, qrbox: 250 }; // 每秒扫描10帧，扫描框大小250px
-
-            // 扫码成功的回调函数
-            function onScanSuccess(decodedText, decodedResult) {
-                // 使用扫码得到的条形码号去后端查询书籍信息
+            // 自动进行查询的函数
+            function queryBook(barcode) {
                 $.ajax({
-                    url: "/query", // 后端查询接口，返回书籍信息
+                    url: "/query", // 后端接口，替换为实际的 API 地址
                     method: "GET",
-                    data: { barcode: decodedText },
+                    data: { barcode: barcode },
                     success: function (data) {
                         if (data) {
-                            // 显示书籍的书名和层架位置
                             const { barcode, title, location } = data;
                             $("#resultsContainer").html(`
                                 <div><strong>条码号：</strong> ${barcode}</div>
@@ -84,7 +76,7 @@
                                 <div><strong>位置：</strong> ${location}</div>
                             `);
                         } else {
-                            alert("未找到条码号：" + decodedText);
+                            $("#resultsContainer").html("未找到条码号：" + barcode);
                         }
                     },
                     error: function () {
@@ -93,21 +85,36 @@
                 });
             }
 
+            // 输入框的手动输入事件
+            $("#barcodeInput").on("input", function () {
+                const barcode = $(this).val().trim();
+                if (barcode.length === 7) { // 假设条码是7位
+                    queryBook(barcode);  // 调用查询函数
+                }
+            });
+
+            // 扫码成功的回调函数
+            function onScanSuccess(decodedText, decodedResult) {
+                queryBook(decodedText);  // 扫描后自动调用查询
+            }
+
             // 扫码失败的回调函数
             function onScanFailure(error) {
                 console.warn(`扫描失败: ${error}`);
             }
 
-            // 启动扫码
-            $('#scanBtn').on('click', function () {
-                html5QrCode.start(
-                    { facingMode: "environment" }, // 使用后置摄像头
-                    qrConfig,
-                    onScanSuccess,
-                    onScanFailure
-                ).catch((err) => {
-                    console.error(`初始化扫描器失败: ${err}`);
-                });
+            // 启动扫码功能
+            const html5QrCode = new Html5Qrcode("qr-reader");
+            const qrConfig = { fps: 10, qrbox: 250 };  // 每秒扫描10帧，扫描框大小250px
+
+            // 启动扫码器
+            html5QrCode.start(
+                { facingMode: "environment" }, // 使用后置摄像头
+                qrConfig,
+                onScanSuccess,
+                onScanFailure
+            ).catch((err) => {
+                console.error(`初始化扫描器失败: ${err}`);
             });
         });
     </script>
