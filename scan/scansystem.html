@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>书籍位置查询系统</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        #qr-reader {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+            border: 2px solid #ccc;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        .results {
+            margin: 20px;
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ccc;
+        }
+        .results div {
+            margin-bottom: 10px;
+        }
+        h1 {
+            text-align: center;
+        }
+        input[type="text"] {
+            padding: 8px;
+            margin-top: 10px;
+            width: 80%;
+            max-width: 300px;
+        }
+        button {
+            padding: 8px 16px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>书籍位置查询系统</h1>
+
+    <!-- 输入框和按钮 -->
+    <input type="text" id="barcodeInput" placeholder="扫描条码号" autofocus>
+    <button id="scanBtn">扫一扫</button>
+
+    <!-- 显示二维码扫描框 -->
+    <div id="qr-reader"></div>
+
+    <!-- 查询结果显示区域 -->
+    <div class="results">
+        <h3>查询结果：</h3>
+        <div id="resultsContainer">请扫描书籍条形码</div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            const html5QrCode = new Html5Qrcode("qr-reader");
+            const qrConfig = { fps: 10, qrbox: 250 }; // 每秒扫描10帧，扫描框大小250px
+
+            // 扫码成功的回调函数
+            function onScanSuccess(decodedText, decodedResult) {
+                // 使用扫码得到的条形码号去后端查询书籍信息
+                $.ajax({
+                    url: "/query", // 后端查询接口，返回书籍信息
+                    method: "GET",
+                    data: { barcode: decodedText },
+                    success: function (data) {
+                        if (data) {
+                            // 显示书籍的书名和层架位置
+                            const { barcode, title, location } = data;
+                            $("#resultsContainer").html(`
+                                <div><strong>条码号：</strong> ${barcode}</div>
+                                <div><strong>书名：</strong> ${title}</div>
+                                <div><strong>位置：</strong> ${location}</div>
+                            `);
+                        } else {
+                            alert("未找到条码号：" + decodedText);
+                        }
+                    },
+                    error: function () {
+                        alert("查询失败，请检查网络或后端服务！");
+                    },
+                });
+            }
+
+            // 扫码失败的回调函数
+            function onScanFailure(error) {
+                console.warn(`扫描失败: ${error}`);
+            }
+
+            // 启动扫码
+            $('#scanBtn').on('click', function () {
+                html5QrCode.start(
+                    { facingMode: "environment" }, // 使用后置摄像头
+                    qrConfig,
+                    onScanSuccess,
+                    onScanFailure
+                ).catch((err) => {
+                    console.error(`初始化扫描器失败: ${err}`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
