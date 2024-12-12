@@ -1,99 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>书籍位置查询系统</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-        }
-        h1 {
-            font-size: 24px;
-            margin-top: 20px;
-        }
-        #qr-reader {
-            width: 100%;
-            max-width: 400px;
-            margin: 20px auto;
-            padding: 10px;
-            background-color: #f9f9f9;
-        }
-        input[type="text"] {
-            padding: 8px;
-            margin-top: 10px;
-            width: 80%;
-            max-width: 300px;
-        }
-        button {
-            padding: 10px 20px;
-            margin-top: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-        .results {
-            margin: 20px;
-            padding: 10px;
-            background: #f9f9f9;
-            border: 1px solid #ccc;
-        }
-        .results div {
-            margin-bottom: 10px;
-        }
-
-        /* 强制页面内容适应屏幕 */
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 20px;
-            }
-            input[type="text"], button {
-                width: 90%;
-                font-size: 14px;
-            }
-        }
-    </style>
+    <!-- ...其他头部内容保持不变... -->
 </head>
 <body>
-    <h1>书籍位置查询系统</h1>
-
-    <!-- 输入框 -->
-    <input type="text" id="barcodeInput" placeholder="扫描条码号或手动输入" autofocus>
-    
-    <!-- 扫码按钮 -->
-    <button id="scanBtn">扫描条形码</button>
-
-    <div id="qr-reader"></div> <!-- 二维码扫描框 -->
-
-    <!-- 查询结果显示区域 -->
-    <div class="results">
-        <h3>查询结果：</h3>
-        <div id="resultsContainer">请扫描书籍条形码</div>
-    </div>
+    <!-- ...页面内容保持不变... -->
 
     <script>
         $(document).ready(function () {
-            // 自动进行查询的函数
+            const html5QrCode = new Html5Qrcode("qr-reader"); // 初始化二维码扫描器
+
             function queryBook(barcode) {
                 $.ajax({
-                    url: "/query", // 后端接口，替换为实际的 API 地址
+                    url: "/query",
                     method: "GET",
                     data: { barcode: barcode },
                     success: function (data) {
                         if (data) {
-                            const { barcode, title, location } = data;
                             $("#resultsContainer").html(`
-                                <div><strong>条码号：</strong> ${barcode}</div>
-                                <div><strong>书名：</strong> ${title}</div>
-                                <div><strong>位置：</strong> ${location}</div>
+                                <div><strong>条码号：</strong> ${data.barcode}</div>
+                                <div><strong>书名：</strong> ${data.title}</div>
+                                <div><strong>位置：</strong> ${data.location}</div>
                             `);
                         } else {
                             $("#resultsContainer").html("未找到条码号：" + barcode);
@@ -105,39 +32,27 @@
                 });
             }
 
-            // 输入框的手动输入事件
             $("#barcodeInput").on("input", function () {
                 const barcode = $(this).val().trim();
-                if (barcode.length === 7) { // 假设条码是7位
-                    queryBook(barcode);  // 调用查询函数
+                if (barcode.length === 7) {
+                    queryBook(barcode);
                 }
             });
 
-            // 扫码按钮的点击事件
             $('#scanBtn').on('click', function () {
-                // 确保扫描器已经启动并能够访问摄像头
                 html5QrCode.start(
-                    { facingMode: "environment" }, // 使用后置摄像头
+                    { facingMode: "environment" },
                     { fps: 10, qrbox: 250 },
-                    onScanSuccess,
-                    onScanFailure
+                    function(decodedText, decodedResult) {
+                        queryBook(decodedText);
+                    },
+                    function(error) {
+                        console.warn(`扫描失败: ${error}`);
+                    }
                 ).catch((err) => {
                     console.error(`初始化扫描器失败: ${err}`);
                 });
             });
-
-            // 扫码成功的回调函数
-            function onScanSuccess(decodedText, decodedResult) {
-                queryBook(decodedText);  // 扫描后自动调用查询
-            }
-
-            // 扫码失败的回调函数
-            function onScanFailure(error) {
-                console.warn(`扫描失败: ${error}`);
-            }
-
-            // 初始化二维码扫描器
-            const html5QrCode = new Html5Qrcode("qr-reader");
         });
     </script>
 </body>
