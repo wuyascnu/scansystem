@@ -4,11 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>书籍位置查询系统</title>
-    <!-- 先加载 jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- 确保在使用前加载 Html5Qrcode 库 -->
-    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
- <style>
+    <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -25,7 +21,6 @@
             margin: auto;
             padding: 10px;
             background-color: #f9f9f9;
-            display: none; /* Initially hidden */
         }
         input[type="text"], button {
             width: 90%;
@@ -44,83 +39,51 @@
         }
     </style>
 </head>
-
 <body>
     <h1>书籍位置查询系统</h1>
-
     <input type="text" id="barcodeInput" placeholder="手动输入条码号" autofocus>
     <button id="scanBtn">扫描条形码</button>
-
-    <div id="qr-reader"></div> <!-- Scanning output element -->
-
+    <div id="qr-reader" style="display:none;"></div>
     <div class="results">
         <h3>查询结果：</h3>
         <div id="resultsContainer">请扫描书籍条形码</div>
     </div>
 
+    <!-- 确保 jQuery 和 Html5Qrcode 库加载后再加载你的脚本 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
     <script>
         $(document).ready(function() {
             var html5QrCode = new Html5Qrcode("qr-reader");
-            var cameraHasStarted = false; // To manage the camera state
-
             $("#scanBtn").click(function() {
-                // Toggle camera on and off
-                if (cameraHasStarted) {
-                    html5QrCode.stop().then(() => {
-                        $("#qr-reader").hide(); // Hide scanner
-                        cameraHasStarted = false;
-                    }).catch(err => {
-                        console.error("Failed to stop camera: ", err);
-                    });
-                } else {
-                    $("#qr-reader").show(); // Show scanner
+                if ($("#qr-reader").css('display') === 'none') {
+                    $("#qr-reader").show();
                     html5QrCode.start(
                         { facingMode: "environment" },
                         { fps: 10, qrbox: { width: 250, height: 250 } },
                         function(decodedText, decodedResult) {
-                            // Handle successful scan
                             $("#barcodeInput").val(decodedText);
-                            queryBook(decodedText);
                             html5QrCode.stop().then(() => {
-                                $("#qr-reader").hide(); // Hide scanner
-                                cameraHasStarted = false;
+                                $("#qr-reader").hide();
                             }).catch(err => {
                                 console.error("Failed to stop camera: ", err);
                             });
                         },
                         function(errorMessage) {
-                            // Handle scanning error
                             console.warn("QR code scan error: ", errorMessage);
                         }
                     ).catch(err => {
                         console.error("Failed to start camera: ", err);
-                        alert("Cannot start camera: " + err);
+                        alert("Cannot start camera.");
                     });
-                    cameraHasStarted = true;
+                } else {
+                    html5QrCode.stop().then(() => {
+                        $("#qr-reader").hide();
+                    }).catch(err => {
+                        console.error("Failed to stop camera: ", err);
+                    });
                 }
             });
-
-            function queryBook(barcode) {
-                $.ajax({
-                    url: "/query", // Update to your actual endpoint
-                    method: "GET",
-                    data: { barcode: barcode },
-                    success: function(data) {
-                        if (data) {
-                            $("#resultsContainer").html(
-                                `<div><strong>Barcode:</strong> ${data.barcode}</div>
-                                <div><strong>Title:</strong> ${data.title}</div>
-                                <div><strong>Location:</strong> ${data.location}</div>`
-                            );
-                        } else {
-                            $("#resultsContainer").html("No details found for barcode: " + barcode);
-                        }
-                    },
-                    error: function() {
-                        alert("Failed to fetch details. Check your network and server.");
-                    },
-                });
-            }
         });
     </script>
 </body>
