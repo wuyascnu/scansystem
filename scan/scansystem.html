@@ -4,50 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>书籍位置查询系统</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
     <style>
-        /* 默认隐藏内容 */
-        #mainContent {
-            display: none;
-        }
-        #pcWarning {
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
             text-align: center;
-            margin-top: 20%;
-            color: red;
+        }
+        h1 {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+        #qr-reader {
+            width: 100%;
+            max-width: 400px;
+            margin: auto;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        input[type="text"], button {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        .results {
+            margin: 20px;
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ccc;
+        }
+        .results div {
+            margin-bottom: 10px;
         }
     </style>
-    <script>
-        // 检测是否为移动设备
-        function isMobileDevice() {
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
-        }
-
-        window.onload = function () {
-            if (isMobileDevice()) {
-                document.getElementById("mainContent").style.display = "block"; // 显示页面内容
-            } else {
-                document.getElementById("pcWarning").style.display = "block"; // 显示警告信息
-            }
-        };
-    </script>
 </head>
 <body>
-    <!-- 警告信息（仅在PC端显示） -->
-    <div id="pcWarning" style="display: none;">
-        <h2>请在手机端浏览器访问！</h2>
-        <p>当前页面仅支持移动设备访问。</p>
+    <h1>书籍位置查询系统</h1>
+
+    <input type="text" id="barcodeInput" placeholder="手动输入条码号" autofocus>
+    <button id="scanBtn">扫描条形码</button>
+
+    <div id="qr-reader" style="display:none;"></div> <!-- 初始隐藏摄像头输出 -->
+
+    <div class="results">
+        <h3>查询结果：</h3>
+        <div id="resultsContainer">请扫描书籍条形码</div>
     </div>
 
-    <!-- 页面内容（仅在移动端显示） -->
-    <div id="mainContent">
-        <h1>书籍位置查询系统</h1>
-        <input type="text" id="barcodeInput" placeholder="扫描条码号或手动输入" autofocus>
-        <button id="scanBtn">扫描条形码</button>
-        <div id="qr-reader"></div>
-        <div class="results">
-            <h3>查询结果：</h3>
-            <div id="resultsContainer">请扫描书籍条形码</div>
-        </div>
-    </div>
+    <script>
+        $(document).ready(function() {
+            var html5QrCode = new Html5Qrcode("qr-reader");
+            var qrCodeRegion = document.getElementById("qr-reader");
+
+            function displayCamera(isDisplay) {
+                qrCodeRegion.style.display = isDisplay ? "block" : "none";
+            }
+
+            $("#scanBtn").click(function() {
+                if (qrCodeRegion.style.display === "block") {
+                    html5QrCode.stop().then(() => {
+                        displayCamera(false);
+                    }).catch(err => {
+                        console.error("Failed to stop camera: ", err);
+                    });
+                } else {
+                    displayCamera(true);
+                    html5QrCode.start(
+                        { facingMode: "environment" },
+                        { fps: 10, qrbox: { width: 250, height: 250 } },
+                        function(decodedText, decodedResult) {
+                            $("#barcodeInput").val(decodedText);
+                            html5QrCode.stop().then(() => {
+                                displayCamera(false);
+                                queryBook(decodedText);
+                            }).catch(err => {
+                                console.error("Failed to stop camera: ", err);
+                            });
+                        },
+                        function(errorMessage) {
+                            console.warn("QR code scan error: ", errorMessage);
+                        }
+                    ).catch(err => {
+                        console.error("Failed to start camera: ", err);
+                        alert("Cannot start camera.");
+                    });
+                }
+            });
+
+            function queryBook(barcode) {
+                $.ajax({
+                    url: "/query", // 后端接口，替换为实际的 API 地址
+                    method: "GET",
+                    data: { barcode: barcode },
+                    success: function(data) {
+                        if (data) {
+                            $("#resultsContainer").html(
+                                `<div><strong>条码号：</strong> ${data.barcode}</div>
+                                <div><strong>书名：</strong> ${data.title}</div>
+                                <div><strong>位置：</strong> ${data.location}</div>`
+                            );
+                        } else {
+                            $("#resultsContainer").html("未找到条码号：" + barcode);
+                        }
+                    },
+                    error: function() {
+                        alert("查询失败，请检查网络或后端服务！");
+                    },
+                });
+            }
+        });
+    </script>
 </body>
 </html>
