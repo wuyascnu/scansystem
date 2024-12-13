@@ -23,6 +23,7 @@
             margin: auto;
             padding: 10px;
             background-color: #f9f9f9;
+            display: none; /* Initially hidden */
         }
         input[type="text"], button {
             width: 90%;
@@ -47,7 +48,7 @@
     <input type="text" id="barcodeInput" placeholder="手动输入条码号" autofocus>
     <button id="scanBtn">扫描条形码</button>
 
-    <div id="qr-reader" style="display:none;"></div> <!-- 初始隐藏摄像头输出 -->
+    <div id="qr-reader"></div> <!-- Scanning output element -->
 
     <div class="results">
         <h3>查询结果：</h3>
@@ -57,61 +58,63 @@
     <script>
         $(document).ready(function() {
             var html5QrCode = new Html5Qrcode("qr-reader");
-            var qrCodeRegion = document.getElementById("qr-reader");
-
-            function displayCamera(isDisplay) {
-                qrCodeRegion.style.display = isDisplay ? "block" : "none";
-            }
+            var cameraHasStarted = false; // To manage the camera state
 
             $("#scanBtn").click(function() {
-                if (qrCodeRegion.style.display === "block") {
+                // Toggle camera on and off
+                if (cameraHasStarted) {
                     html5QrCode.stop().then(() => {
-                        displayCamera(false);
+                        $("#qr-reader").hide(); // Hide scanner
+                        cameraHasStarted = false;
                     }).catch(err => {
                         console.error("Failed to stop camera: ", err);
                     });
                 } else {
-                    displayCamera(true);
+                    $("#qr-reader").show(); // Show scanner
                     html5QrCode.start(
                         { facingMode: "environment" },
                         { fps: 10, qrbox: { width: 250, height: 250 } },
                         function(decodedText, decodedResult) {
+                            // Handle successful scan
                             $("#barcodeInput").val(decodedText);
+                            queryBook(decodedText);
                             html5QrCode.stop().then(() => {
-                                displayCamera(false);
-                                queryBook(decodedText);
+                                $("#qr-reader").hide(); // Hide scanner
+                                cameraHasStarted = false;
                             }).catch(err => {
                                 console.error("Failed to stop camera: ", err);
                             });
                         },
                         function(errorMessage) {
+                            // Handle scanning error
                             console.warn("QR code scan error: ", errorMessage);
                         }
                     ).catch(err => {
                         console.error("Failed to start camera: ", err);
-                        alert("Cannot start camera.");
+                        alert("Cannot start camera: " + err);
                     });
+                    cameraHasStarted = true;
                 }
             });
 
             function queryBook(barcode) {
                 $.ajax({
-                    url: "/query", // 后端接口，替换为实际的 API 地址
+                    url: "/query", // Update to your actual endpoint
                     method: "GET",
                     data: { barcode: barcode },
                     success: function(data) {
                         if (data) {
                             $("#resultsContainer").html(
-                                `<div><strong>条码号：</strong> ${data.barcode}</div>
-                                <div><strong>书名：</strong> ${data.title}</div>
-                                <div><strong>位置：</strong> ${data.location}</div>`
+                                `<div><strong>Barcode:</strong> ${data.barcode}</div>
+                                <div><strong>Title:</strong> ${data.title}</div>
+                                <div><strong>Location:</strong> ${data.location}</div>`
                             );
                         } else {
-                            $("#resultsContainer").html("未找到条码号：" + barcode);
+                            $("#resultsContainer").html("No details found for barcode: " + barcode);
                         }
                     },
                     error: function() {
-                        alert("查询失败，请检查网络或后端服务！");
+                        alert("Failed to fetch details. Check your network and server.");
                     },
                 });
             }
