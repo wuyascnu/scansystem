@@ -40,13 +40,15 @@
                     .then(function (stream) {
                         video.srcObject = stream;
                         video.style.display = "block";
-                        video.onloadedmetadata = () => {
+
+                        // 确保视频数据加载完成
+                        video.onloadeddata = () => {
                             scanning = true;
                             scanQRCode();
                         };
                     })
                     .catch(function (error) {
-                        alert("无法访问摄像头：" + error);
+                        alert("无法访问摄像头：" + error.message);
                     });
             } else {
                 alert("你的浏览器不支持摄像头功能");
@@ -61,9 +63,9 @@
             const scan = () => {
                 if (!scanning) return;
 
-                // 同步画布大小和视频流尺寸
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
+                // 同步 canvas 大小和视频流尺寸
+                canvas.width = video.videoWidth || 640;
+                canvas.height = video.videoHeight || 480;
 
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
