@@ -32,12 +32,6 @@
             display: none;
             margin-top: 10px;
         }
-        @media screen and (max-width: 768px) {
-            input, button {
-                font-size: 14px;
-                padding: 8px;
-            }
-        }
     </style>
     <!-- 引入 ZXing 库 -->
     <script src="https://unpkg.com/@zxing/library@latest"></script>
@@ -61,15 +55,25 @@
         async function startScanning() {
             try {
                 codeReader = new ZXing.BrowserMultiFormatReader();
-                const devices = await codeReader.getVideoInputDevices();
 
-                // 选择后置摄像头
+                // 获取摄像头设备
+                const devices = await codeReader.getVideoInputDevices();
                 const backCamera = devices.find(device => device.label.toLowerCase().includes('back')) || devices[0];
                 if (!backCamera) throw new Error("未找到后置摄像头");
 
                 video.style.display = "block";
 
-                // 启用后置摄像头扫描
+                // 开始解码，指定格式（条形码 + 二维码）
+                const hints = new Map();
+                const formats = [
+                    ZXing.BarcodeFormat.QR_CODE,
+                    ZXing.BarcodeFormat.CODE_128,
+                    ZXing.BarcodeFormat.CODE_39,
+                    ZXing.BarcodeFormat.EAN_13
+                ];
+                hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
+
+                // 启动摄像头解码
                 codeReader.decodeFromInputVideoDevice(backCamera.deviceId, 'video', (result, err) => {
                     if (result) {
                         console.log("扫描到结果：", result.text);
