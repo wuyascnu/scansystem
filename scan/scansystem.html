@@ -29,12 +29,18 @@
             max-width: 400px;
             margin: 20px auto;
         }
+		#logo {
+            width: 120px;
+            margin-top: 10px;
+        }
     </style>
     <!-- 引入本地 html5-qrcode 文件 -->
     <script src="./js/html5-qrcode.min.js"></script>
 </head>
 <body>
-    <h2 style="text-align: center;">书籍位置查询系统</h2>
+ <!-- 学校 Logo -->
+    <img id="logo" src="./img/logo.png" alt="学校 Logo">
+    <h2 style="text-align: center;">铁铮图书馆书籍位置查询系统</h2>
     <div id="controls">
         <input type="text" id="barcodeInput" placeholder="输入条码或扫码">
         <button id="startScanBtn">启动摄像头扫描</button>
