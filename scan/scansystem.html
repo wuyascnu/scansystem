@@ -1,90 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>书籍位置查询系统</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-        }
-        h1 {
-            font-size: 24px;
-            margin-top: 20px;
-        }
-        #qr-reader {
-            width: 100%;
-            max-width: 400px;
-            margin: auto;
-            padding: 10px;
-            background-color: #f9f9f9;
-        }
-        input[type="text"], button {
-            width: 90%;
-            padding: 10px;
-            margin: 10px 0;
-            font-size: 16px;
-        }
-        .results {
-            margin: 20px;
-            padding: 10px;
-            background: #f9f9f9;
-            border: 1px solid #ccc;
-        }
-        .results div {
-            margin-bottom: 10px;
-        }
-    </style>
 </head>
 <body>
-    <h1>书籍位置查询系统</h1>
-    <input type="text" id="barcodeInput" placeholder="手动输入条码号" autofocus>
-    <button id="scanBtn">扫描条形码</button>
-    <div id="qr-reader" style="display:none;"></div>
-    <div class="results">
-        <h3>查询结果：</h3>
-        <div id="resultsContainer">请扫描书籍条形码</div>
-    </div>
-
-    <!-- 确保 jQuery 和 Html5Qrcode 库加载后再加载你的脚本 -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <video id="video" width="640" height="480" autoplay></video>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
     <script>
-        $(document).ready(function() {
-            var html5QrCode = new Html5Qrcode("qr-reader");
-            $("#scanBtn").click(function() {
-                if ($("#qr-reader").css('display') === 'none') {
-                    $("#qr-reader").show();
-                    html5QrCode.start(
-                        { facingMode: "environment" },
-                        { fps: 10, qrbox: { width: 250, height: 250 } },
-                        function(decodedText, decodedResult) {
-                            $("#barcodeInput").val(decodedText);
-                            html5QrCode.stop().then(() => {
-                                $("#qr-reader").hide();
-                            }).catch(err => {
-                                console.error("Failed to stop camera: ", err);
-                            });
-                        },
-                        function(errorMessage) {
-                            console.warn("QR code scan error: ", errorMessage);
-                        }
-                    ).catch(err => {
-                        console.error("Failed to start camera: ", err);
-                        alert("Cannot start camera.");
+        const video = document.getElementById('video');
+
+        // 启动摄像头
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+            .then(function(stream) {
+                video.srcObject = stream;
+                video.addEventListener('play', scanQRCode);
+            }).catch(function(error) {
+                console.error("无法访问摄像头", error);
+            });
+        }
+
+        function scanQRCode() {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+
+            const scan = () => {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
+
+                if (code) {
+                    console.log("扫描到条码：", code.data);
+                    fetch(`/api/books/${code.data}`).then(response => response.json())
+                    .then(data => {
+                        alert(`书名: ${data.title}, 位置: ${data.location}`);
+                        setTimeout(scan, 1000); // 延时再次扫描，防止连续识别同一条码
+                    }).catch(error => {
+                        console.error("查询失败：", error);
                     });
                 } else {
-                    html5QrCode.stop().then(() => {
-                        $("#qr-reader").hide();
-                    }).catch(err => {
-                        console.error("Failed to stop camera: ", err);
-                    });
+                    requestAnimationFrame(scan); // 持续扫描直到识别到条码
                 }
-            });
-        });
+            };
+
+            scan();
+        }
     </script>
 </body>
 </html>
