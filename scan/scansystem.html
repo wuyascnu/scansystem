@@ -17,6 +17,8 @@
             display: none;
         }
     </style>
+    <!-- 加载 zxing-js 库 -->
+    <script src="https://cdn.jsdelivr.net/npm/@zxing/library@latest"></script>
 </head>
 <body>
     <h1>书籍位置查询系统</h1>
@@ -26,72 +28,51 @@
     </div>
     <video id="video" width="640" height="480" autoplay></video>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
     <script>
         const video = document.getElementById('video');
         const input = document.getElementById('barcodeInput');
         const startScanBtn = document.getElementById('startScanBtn');
         let scanning = false;
 
-        // 点击按钮启动摄像头扫描
+        let codeReader;
+
+        // 启动摄像头扫描
         startScanBtn.addEventListener('click', () => {
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-                    .then(function (stream) {
-                        video.srcObject = stream;
-                        video.style.display = "block";
-
-                        // 确保视频数据加载完成
-                        video.onloadeddata = () => {
-                            scanning = true;
-                            scanQRCode();
-                        };
-                    })
-                    .catch(function (error) {
-                        alert("无法访问摄像头：" + error.message);
-                    });
+                startScanning();
             } else {
                 alert("你的浏览器不支持摄像头功能");
             }
         });
 
-        // 扫描条码
-        function scanQRCode() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
+        async function startScanning() {
+            codeReader = new ZXing.BrowserMultiFormatReader();
+            try {
+                const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
+                const cameraId = devices.length > 0 ? devices[0].deviceId : null;
 
-            const scan = () => {
-                if (!scanning) return;
+                if (!cameraId) throw new Error("未找到摄像头设备");
 
-                // 同步 canvas 大小和视频流尺寸
-                canvas.width = video.videoWidth || 640;
-                canvas.height = video.videoHeight || 480;
+                video.style.display = "block";
 
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                    inversionAttempts: "dontInvert",
+                codeReader.decodeFromInputVideoDevice(cameraId, 'video', (result, err) => {
+                    if (result) {
+                        console.log("扫描到结果：", result.text);
+                        input.value = result.text; // 自动写入文本框
+                        searchBook(result.text);
+                        stopScanning();
+                    }
                 });
-
-                if (code) {
-                    console.log("扫描到条码：", code.data);
-                    input.value = code.data; // 将条码号写入文本框
-                    searchBook(code.data);   // 触发查询
-                    stopScanning();          // 停止扫描
-                } else {
-                    requestAnimationFrame(scan); // 持续扫描
-                }
-            };
-
-            scan();
+            } catch (error) {
+                alert("无法访问摄像头：" + error.message);
+            }
         }
 
         // 停止扫描和关闭摄像头
         function stopScanning() {
-            scanning = false;
-            video.style.display = "none";
-            if (video.srcObject) {
-                video.srcObject.getTracks().forEach(track => track.stop());
+            if (codeReader) {
+                codeReader.reset();
+                video.style.display = "none";
             }
         }
 
