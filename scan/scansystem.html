@@ -17,8 +17,8 @@
             display: none;
         }
     </style>
-    <!-- 加载 zxing-js 库 -->
-    <script src="https://cdn.jsdelivr.net/npm/@zxing/library@latest"></script>
+    <!-- 正确引用 ZXing 库 -->
+    <script src="https://unpkg.com/@zxing/library@latest"></script>
 </head>
 <body>
     <h1>书籍位置查询系统</h1>
@@ -33,10 +33,8 @@
         const input = document.getElementById('barcodeInput');
         const startScanBtn = document.getElementById('startScanBtn');
         let scanning = false;
-
         let codeReader;
 
-        // 启动摄像头扫描
         startScanBtn.addEventListener('click', () => {
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 startScanning();
@@ -46,8 +44,8 @@
         });
 
         async function startScanning() {
-            codeReader = new ZXing.BrowserMultiFormatReader();
             try {
+                codeReader = new ZXing.BrowserMultiFormatReader();
                 const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
                 const cameraId = devices.length > 0 ? devices[0].deviceId : null;
 
@@ -65,10 +63,10 @@
                 });
             } catch (error) {
                 alert("无法访问摄像头：" + error.message);
+                console.error(error);
             }
         }
 
-        // 停止扫描和关闭摄像头
         function stopScanning() {
             if (codeReader) {
                 codeReader.reset();
@@ -76,7 +74,6 @@
             }
         }
 
-        // 查询书籍信息
         function searchBook(barcode = null) {
             const queryBarcode = barcode || input.value.trim();
             if (queryBarcode) {
