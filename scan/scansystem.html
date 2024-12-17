@@ -2,31 +2,53 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>书籍位置查询系统</title>
     <style>
-        #controls {
-            margin-top: 10px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
         }
-        #video {
+        #controls {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        input, button {
+            width: 90%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        video {
+            width: 100%;
+            max-width: 640px;
+            height: auto;
             border: 1px solid #ddd;
-            margin-top: 10px;
             display: none;
+            margin-top: 10px;
+        }
+        @media screen and (max-width: 768px) {
+            input, button {
+                font-size: 14px;
+                padding: 8px;
+            }
         }
     </style>
     <!-- 引入 ZXing 库 -->
     <script src="https://unpkg.com/@zxing/library@latest"></script>
 </head>
 <body>
-    <h1>书籍位置查询系统</h1>
+    <h2 style="text-align: center;">书籍位置查询系统</h2>
     <div id="controls">
-        <input type="text" id="barcodeInput" placeholder="输入条码或使用摄像头扫描" oninput="searchBook()">
+        <input type="text" id="barcodeInput" placeholder="输入条码或扫码" oninput="searchBook()">
         <button id="startScanBtn">启动摄像头扫描</button>
     </div>
-    <video id="video" width="640" height="480" autoplay></video>
+    <video id="video" autoplay></video>
 
     <script>
         const video = document.getElementById('video');
@@ -37,33 +59,34 @@
         startScanBtn.addEventListener('click', startScanning);
 
         async function startScanning() {
-            codeReader = new ZXing.BrowserMultiFormatReader();
             try {
-                // 获取摄像头设备列表
-                const videoInputDevices = await codeReader.getVideoInputDevices();
-                if (videoInputDevices.length === 0) throw new Error("未找到摄像头设备");
+                codeReader = new ZXing.BrowserMultiFormatReader();
+                const devices = await codeReader.getVideoInputDevices();
 
-                const cameraId = videoInputDevices[0].deviceId; // 默认使用第一个摄像头
+                // 选择后置摄像头
+                const backCamera = devices.find(device => device.label.toLowerCase().includes('back')) || devices[0];
+                if (!backCamera) throw new Error("未找到后置摄像头");
+
                 video.style.display = "block";
 
-                // 开始解码视频流中的条码
-                codeReader.decodeFromInputVideoDevice(cameraId, 'video', (result, err) => {
+                // 启用后置摄像头扫描
+                codeReader.decodeFromInputVideoDevice(backCamera.deviceId, 'video', (result, err) => {
                     if (result) {
                         console.log("扫描到结果：", result.text);
-                        input.value = result.text; // 自动写入文本框
+                        input.value = result.text; // 自动填入文本框
                         searchBook(result.text);
-                        stopScanning(); // 停止摄像头
+                        stopScanning();
                     }
                 });
             } catch (error) {
-                alert("无法访问摄像头：" + error.message);
+                alert("摄像头错误：" + error.message);
                 console.error(error);
             }
         }
 
         function stopScanning() {
             if (codeReader) {
-                codeReader.reset(); // 停止摄像头
+                codeReader.reset();
                 video.style.display = "none";
             }
         }
