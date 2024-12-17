@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>书籍位置查询系统</title>
     <style>
         body {
@@ -11,7 +11,7 @@
             background-color: #f4f4f4;
         }
         #controls {
-            padding: 10px;
+            margin-top: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -24,81 +24,64 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        video {
+        #reader {
             width: 100%;
-            max-width: 640px;
-            height: auto;
-            border: 1px solid #ddd;
-            display: none;
-            margin-top: 10px;
+            max-width: 400px;
+            margin: 20px auto;
         }
     </style>
-    <!-- 引入 ZXing 库 -->
-    <script src="https://unpkg.com/@zxing/library@latest"></script>
+    <!-- 引入 html5-qrcode 库 -->
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
 </head>
 <body>
     <h2 style="text-align: center;">书籍位置查询系统</h2>
     <div id="controls">
-        <input type="text" id="barcodeInput" placeholder="输入条码或扫码" oninput="searchBook()">
+        <input type="text" id="barcodeInput" placeholder="输入条码或扫码">
         <button id="startScanBtn">启动摄像头扫描</button>
     </div>
-    <video id="video" autoplay></video>
+    <div id="reader"></div> <!-- 扫描框显示位置 -->
 
     <script>
-        const video = document.getElementById('video');
         const input = document.getElementById('barcodeInput');
         const startScanBtn = document.getElementById('startScanBtn');
-        let codeReader;
+        const readerDiv = document.getElementById('reader');
+        let html5QrCode;
 
-        startScanBtn.addEventListener('click', startScanning);
-
-        async function startScanning() {
-            try {
-                codeReader = new ZXing.BrowserMultiFormatReader();
-
-                // 获取摄像头设备
-                const devices = await codeReader.getVideoInputDevices();
-                const backCamera = devices.find(device => device.label.toLowerCase().includes('back')) || devices[0];
-                if (!backCamera) throw new Error("未找到后置摄像头");
-
-                video.style.display = "block";
-
-                // 开始解码，指定格式（条形码 + 二维码）
-                const hints = new Map();
-                const formats = [
-                    ZXing.BarcodeFormat.QR_CODE,
-                    ZXing.BarcodeFormat.CODE_128,
-                    ZXing.BarcodeFormat.CODE_39,
-                    ZXing.BarcodeFormat.EAN_13
-                ];
-                hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
-
-                // 启动摄像头解码
-                codeReader.decodeFromInputVideoDevice(backCamera.deviceId, 'video', (result, err) => {
-                    if (result) {
-                        console.log("扫描到结果：", result.text);
-                        input.value = result.text; // 自动填入文本框
-                        searchBook(result.text);
-                        stopScanning();
-                    }
-                });
-            } catch (error) {
-                alert("摄像头错误：" + error.message);
-                console.error(error);
+        startScanBtn.addEventListener('click', () => {
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
             }
-        }
+            
+            Html5Qrcode.getCameras().then(devices => {
+                if (devices && devices.length) {
+                    const cameraId = devices[0].id; // 默认使用第一个摄像头
+                    html5QrCode.start(
+                        cameraId,
+                        {
+                            fps: 10,       // 每秒扫描次数
+                            qrbox: { width: 250, height: 250 } // 扫描区域大小
+                        },
+                        (decodedText, decodedResult) => {
+                            console.log("扫描到结果：", decodedText);
+                            input.value = decodedText; // 将扫描结果写入输入框
+                            searchBook(decodedText);   // 查询书籍信息
+                            html5QrCode.stop();        // 停止扫描
+                        },
+                        errorMessage => {
+                            console.log("扫描中...", errorMessage);
+                        })
+                        .catch(err => {
+                            alert("无法启动摄像头：" + err);
+                        });
+                }
+            }).catch(err => {
+                alert("未检测到摄像头：" + err);
+            });
+        });
 
-        function stopScanning() {
-            if (codeReader) {
-                codeReader.reset();
-                video.style.display = "none";
-            }
-        }
-
-        function searchBook(barcode = null) {
-            const queryBarcode = barcode || input.value.trim();
-            if (queryBarcode) {
-                fetch(`/api/books/${queryBarcode}`)
+        function searchBook(barcode) {
+            if (barcode) {
+                fetch(`/api/books/${barcode}`)
                     .then(response => response.json())
                     .then(data => {
                         alert(`书名: ${data.title}\n位置: ${data.location}`);
