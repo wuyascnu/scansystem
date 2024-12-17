@@ -10,6 +10,21 @@
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
         }
+        /* 上部分背景图样式 */
+        #header {
+            position: relative;
+            height: 150px; /* 上部分高度 */
+            background: url('./img/logo.png') no-repeat center center;
+            background-size: 120px; /* 控制背景大小 */
+            opacity: 0.15; /* 设置高透明度 */
+        }
+        h2 {
+            position: relative;
+            text-align: center;
+            margin: 0;
+            padding: 10px;
+            z-index: 1; /* 保证文字显示在背景图之上 */
+        }
         #controls {
             margin-top: 10px;
             display: flex;
@@ -29,18 +44,15 @@
             max-width: 400px;
             margin: 20px auto;
         }
-		#logo {
-            width: 120px;
-            margin-top: 10px;
-        }
     </style>
     <!-- 引入本地 html5-qrcode 文件 -->
     <script src="./js/html5-qrcode.min.js"></script>
 </head>
 <body>
- <!-- 学校 Logo -->
-    <img id="logo" src="./img/logo.png" alt="学校 Logo">
-    <h2 style="text-align: center;">铁铮图书馆书籍位置查询系统</h2>
+    <!-- 上部分背景图 -->
+    <div id="header"></div>
+    <h2>铁铮图书馆书籍位置查询系统</h2>
+
     <div id="controls">
         <input type="text" id="barcodeInput" placeholder="输入条码或扫码">
         <button id="startScanBtn">启动摄像头扫描</button>
