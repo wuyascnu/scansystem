@@ -13,17 +13,16 @@
         /* 上部分背景图样式 */
         #header {
             position: relative;
-            height: 50px; /* 上部分高度 */
-            background: url('./img/logo.png') no-repeat center center;
-            background-size: 50px; /* 控制背景大小 */
-            opacity: 0.15; /* 设置高透明度 */
+            height: 100px; /* 控制高度，使背景图靠上 */
+            background: url('./img/logo.png') no-repeat center top;
+            background-size: 80px; /* 控制背景图大小 */
+            background-position: center top; /* 靠近页面最顶端 */
+            opacity: 0.2; /* 设置高透明度 */
         }
-        h2 {
-            position: relative;
+        h3 {
             text-align: center;
-            margin: 0;
-            padding: 5px;
-            z-index: 1; /* 保证文字显示在背景图之上 */
+            margin: 5px 0; /* 减少标题与背景之间的间距 */
+            font-size: 18px;
         }
         #controls {
             margin-top: 10px;
@@ -42,7 +41,7 @@
         #reader {
             width: 100%;
             max-width: 400px;
-            margin: 20px auto;
+            margin: 10px auto;
         }
     </style>
     <!-- 引入本地 html5-qrcode 文件 -->
@@ -51,7 +50,8 @@
 <body>
     <!-- 上部分背景图 -->
     <div id="header"></div>
-    <h2>铁铮图书馆书籍位置查询系统</h2>
+    <!-- 标题 -->
+    <h3>铁铮图书馆书籍位置查询系统</h3>
 
     <div id="controls">
         <input type="text" id="barcodeInput" placeholder="输入条码或扫码">
@@ -70,17 +70,16 @@
                 html5QrCode = new Html5Qrcode("reader");
             }
 
-            // 强制使用后置摄像头
             const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
             html5QrCode.start(
-                { facingMode: "environment" }, // 强制后置摄像头
+                { facingMode: "environment" },
                 config,
                 (decodedText, decodedResult) => {
                     console.log("扫描到结果：", decodedText);
-                    input.value = decodedText; // 将扫描结果写入输入框
-                    searchBook(decodedText);   // 查询书籍信息
-                    html5QrCode.stop();        // 停止扫描
+                    input.value = decodedText;
+                    searchBook(decodedText);
+                    html5QrCode.stop();
                 },
                 (errorMessage) => {
                     console.log("扫描中...", errorMessage);
