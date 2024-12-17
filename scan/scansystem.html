@@ -4,22 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>书籍位置查询系统</title>
+    <style>
+        #controls { margin-top: 10px; }
+    </style>
 </head>
 <body>
-    <video id="video" width="640" height="480" autoplay></video>
+    <video id="video" width="640" height="480" autoplay hidden></video>
+    <div id="controls">
+        <input type="text" id="barcodeInput" placeholder="输入条码或使用摄像头扫描" oninput="searchBook()">
+        <button onclick="startScanning()">启动摄像头</button>
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
     <script>
         const video = document.getElementById('video');
+        const input = document.getElementById('barcodeInput');
+        let scanning = false;
 
         // 启动摄像头
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-            .then(function(stream) {
-                video.srcObject = stream;
-                video.addEventListener('play', scanQRCode);
-            }).catch(function(error) {
-                console.error("无法访问摄像头", error);
-            });
+        function startScanning() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                .then(function(stream) {
+                    video.srcObject = stream;
+                    video.hidden = false;
+                    scanning = true;
+                    scanQRCode();
+                }).catch(function(error) {
+                    console.error("无法访问摄像头", error);
+                });
+            } else {
+                alert("你的浏览器不支持访问摄像头");
+            }
         }
 
         function scanQRCode() {
@@ -29,6 +44,7 @@
             const ctx = canvas.getContext('2d');
 
             const scan = () => {
+                if (!scanning) return;
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 const code = jsQR(imageData.data, imageData.width, imageData.height, {
@@ -36,20 +52,32 @@
                 });
 
                 if (code) {
-                    console.log("扫描到条码：", code.data);
-                    fetch(`/api/books/${code.data}`).then(response => response.json())
-                    .then(data => {
-                        alert(`书名: ${data.title}, 位置: ${data.location}`);
-                        setTimeout(scan, 1000); // 延时再次扫描，防止连续识别同一条码
-                    }).catch(error => {
-                        console.error("查询失败：", error);
-                    });
+                    input.value = code.data;
+                    searchBook();
+                    scanning = false; // 停止扫描
+                    video.hidden = true; // 隐藏视频
+                    video.srcObject.getTracks().forEach(track => track.stop()); // 关闭摄像头
                 } else {
-                    requestAnimationFrame(scan); // 持续扫描直到识别到条码
+                    requestAnimationFrame(scan);
                 }
             };
 
             scan();
+        }
+
+        function searchBook() {
+            const barcode = input.value.trim();
+            if (barcode) {
+                // 调用后端API查询书籍信息
+                fetch(`/api/books/${barcode}`)
+                .then(response => response.json())
+                .then(data => {
+                    alert(`书名: ${data.title}, 位置: ${data.location}`);
+                })
+                .catch(error => {
+                    console.error("查询失败：", error);
+                });
+            }
         }
     </script>
 </body>
