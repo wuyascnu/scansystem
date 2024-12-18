@@ -79,6 +79,7 @@
             });
         });
 
+        /*
         function searchBook(barcode) {
             if (barcode) {
                 fetch(`https://tiezheng.natapp4.cc/api/${barcode}`)
@@ -92,7 +93,43 @@
                     });
             }
         }
-
+        */
+		
+		function searchBook(barcode) {
+           if (barcode) {
+             fetch(`https://tiezheng.natapp4.cc/api/${barcode}`)
+            .then(response => {
+                // 首先检查响应的状态
+                if (!response.ok) {
+                    // 如果服务器响应不是2xx, 抛出异常将控制权转移到catch块
+                    throw response;
+                }
+                return response.json(); // 这里假设成功的响应总是返回JSON
+            })
+            .then(data => {
+                // 处理成功得到的数据
+                alert(`书名: ${data.title}\n位置: ${data.shelfName}\n条码号: ${data.barcode}`);
+            })
+            .catch(error => {
+                // 检查error是否是因为fetch抛出的响应对象
+                if (error instanceof Response) {
+                    // 从响应中获取JSON数据，进一步处理错误信息
+                    error.json().then(errData => {
+                        if (errData.error) {
+                            alert(errData.error);
+                        } else {
+                            alert("未知错误");
+                        }
+                    });
+                } else {
+                    // 处理其他错误，如网络问题或无法联系服务器
+                    console.error("查询失败：", error);
+                    alert("查询失败，无法连接到服务");
+                }
+            });
+    }
+}
+		
         function triggerSearch() {
             searchBook(input.value);
         }
