@@ -81,7 +81,7 @@
 
         function searchBook(barcode) {
             if (barcode) {
-                fetch(`http://tiezheng.natapp1.cc/api/${barcode}`)
+                fetch(`https://tiezheng.natapp1.cc/api/${barcode}`)
                     .then(response => response.json())
                     .then(data => {
                         alert(`书名: ${data.title}\n位置: ${data.location}`);
