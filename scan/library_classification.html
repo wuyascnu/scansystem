@@ -15,7 +15,6 @@
         <!-- 操作按钮 -->
         <div class="d-flex justify-content-end mb-2">
             <button class="btn btn-success me-2" id="addBtn">新增</button>
-            <button class="btn btn-primary" id="saveBtn">保存修改</button>
         </div>
 
         <!-- Bootstrap Table -->
@@ -43,59 +42,82 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.21.3/dist/bootstrap-table.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.21.3/dist/extensions/editable/bootstrap-table-editable.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.21.3/dist/extensions/toolbar/bootstrap-table-toolbar.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap3-editable@1.5.1/js/bootstrap-editable.min.js"></script>
 
     <script>
-        // 初始化 Bootstrap Table
+        // 全局定义操作事件
+        window.operateEvents = {
+            // 删除按钮
+            'click .delete': function (e, value, row, index) {
+                if (confirm('确定要删除这条记录吗？')) {
+                    fetch(`https://tiezheng.natapp4.cc/api/library-classification/${row.classification_id}`, {
+                        method: 'DELETE',
+                    }).then(response => {
+                        if (response.ok) {
+                            alert('删除成功');
+                            $('#table').bootstrapTable('refresh'); // 刷新表格
+                        } else {
+                            alert('删除失败，请重试');
+                        }
+                    });
+                }
+            },
+            // 修改按钮
+            'click .edit': function (e, value, row, index) {
+                const updatedRow = {
+                    ...row,
+                    classification_name: prompt("修改分类名称:", row.classification_name) || row.classification_name,
+                    classification_letter: prompt("修改分类字母:", row.classification_letter) || row.classification_letter,
+                    classification_description: prompt("修改分类名称:", row.classification_description) || row.classification_description,
+                    shelf_number: prompt("修改书架号:", row.shelf_number) || row.shelf_number
+                };
+
+                fetch(`https://tiezheng.natapp4.cc/api/library-classification/${row.classification_id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedRow)
+                }).then(response => {
+                    if (response.ok) {
+                        alert('修改成功');
+                        $('#table').bootstrapTable('refresh');
+                    } else {
+                        alert('修改失败，请重试');
+                    }
+                });
+            }
+        };
+
+        // 格式化操作列
+        function actionFormatter(value, row, index) {
+            return [
+                '<button class="btn btn-primary btn-sm edit me-2">修改</button>',
+                '<button class="btn btn-danger btn-sm delete">删除</button>'
+            ].join('');
+        }
+
         $(document).ready(function () {
             const $table = $('#table');
 
-            // 格式化操作列
-            window.operateEvents = {
-                'click .delete': function (e, value, row, index) {
-                    if (confirm('确定要删除这条记录吗？')) {
-                        // 发送删除请求
-                        fetch(`https://tiezheng.natapp4.cc/api/library-classification/${row.classification_id}`, {
-                            method: 'DELETE',
-                        }).then(() => {
-                            alert('删除成功');
-                            $table.bootstrapTable('refresh'); // 刷新表格
-                        });
-                    }
-                }
-            };
-
-            function actionFormatter(value, row, index) {
-                return [
-                    '<button class="btn btn-danger btn-sm delete">删除</button>'
-                ].join('');
-            }
-
             // 新增按钮点击事件
             $('#addBtn').click(function () {
-                $table.bootstrapTable('append', {
+                const newRow = {
                     classification_id: null,
-                    classification_name: '',
-                    classification_letter: '',
-                    classification_description: '',
-                    shelf_number: ''
-                });
-            });
+                    classification_name: prompt("输入分类名称:") || '',
+                    classification_letter: prompt("输入分类字母:") || '',
+                    classification_description: prompt("输入中图法分类名称:") || '',
+                    shelf_number: prompt("输入书架号:") || ''
+                };
 
-            // 保存修改按钮点击事件
-            $('#saveBtn').click(function () {
-                const data = $table.bootstrapTable('getData'); // 获取表格数据
                 fetch('https://tiezheng.natapp4.cc/api/library-classification', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(newRow)
                 }).then(response => {
                     if (response.ok) {
-                        alert('保存成功');
+                        alert('新增成功');
                         $table.bootstrapTable('refresh');
                     } else {
-                        alert('保存失败');
+                        alert('新增失败，请重试');
                     }
                 });
             });
