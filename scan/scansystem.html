@@ -84,7 +84,7 @@
                 fetch(`https://tiezheng.natapp4.cc/api/${barcode}`)
                     .then(response => response.json())
                     .then(data => {
-                        alert(`书名: ${data.title}\n位置: ${data.location}`);
+                        alert(`书名: ${data.title}\n位置: ${data.shelfName}}\n条码号: ${data.barcode}`);`);
                     })
                     .catch(error => {
                         console.error("查询失败：", error);
