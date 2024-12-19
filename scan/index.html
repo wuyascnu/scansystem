@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>铁铮图书馆信息管理平台</title>
+    <!-- 引入 Bootstrap 样式 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background: url('https://via.placeholder.com/1920x1080?text=Library+Background') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .overlay {
+            background-color: rgba(0, 0, 0, 0.7);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            color: #fff;
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .container h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景遮罩 -->
+    <div class="overlay"></div>
+
+    <!-- 内容容器 -->
+    <div class="container">
+        <h1>铁铮图书馆信息管理平台</h1>
+        <p class="mb-5">选择以下功能模块进入操作系统</p>
+
+        <div class="row justify-content-center">
+            <!-- 书籍位置查询系统 -->
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">书籍位置查询系统</h5>
+                        <a href="scansystem.html" class="btn btn-primary btn-block">进入系统</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 图书分类层架信息表 -->
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">铁铮图书分类层架信息表</h5>
+                        <a href="library_classification.html" class="btn btn-primary btn-block">进入系统</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 位置码打印系统 -->
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">位置码打印系统</h5>
+                        <a href="location_code_printing.html" class="btn btn-primary btn-block">进入系统</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 书籍位置分配系统 -->
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">书籍位置分配系统</h5>
+                        <a href="book_position_allocation.html" class="btn btn-primary btn-block">进入系统</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 读者大数据平台 -->
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">铁铮读者大数据平台</h5>
+                        <a href="reader_bigdata_platform.html" class="btn btn-primary btn-block">进入系统</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入 Bootstrap 脚本 -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
