@@ -11,9 +11,10 @@
 <body>
     <div class="container mt-4">
         <h3 class="text-center">铁铮图书馆图书层架信息系统</h3>
-        <!-- 静态数据表格 -->
+        <!-- 动态数据表格 -->
         <table id="table"
                data-toggle="table"
+               data-url="https://tiezheng.natapp4.cc/api/library-classification" <!-- 动态数据 API -->
                data-search="true"
                data-pagination="true"
                data-click-to-select="true"
@@ -21,31 +22,13 @@
             <thead>
                 <tr>
                     <th data-checkbox="true"></th>
-                    <th data-field="classification_id">分类ID</th>
-                    <th data-field="classification_name">分类名称</th>
-                    <th data-field="classification_letter">中图法分类字母</th>
-                    <th data-field="classification_description">中图法分类名称</th>
-                    <th data-field="shelf_number">书架号</th>
+                    <th data-field="classificationId">分类ID</th>
+                    <th data-field="classificationName">分类名称</th>
+                    <th data-field="classificationLetter">中图法分类字母</th>
+                    <th data-field="classificationDescription">中图法分类名称</th>
+                    <th data-field="shelfNumber">书架号</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td></td>
-                    <td>1</td>
-                    <td>文学</td>
-                    <td>A</td>
-                    <td>文学理论</td>
-                    <td>001</td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td>2</td>
-                    <td>历史</td>
-                    <td>B</td>
-                    <td>世界历史</td>
-                    <td>002</td>
-                </tr>
-            </tbody>
         </table>
     </div>
     <!-- 引入脚本 -->
@@ -55,7 +38,14 @@
     <script>
         $(document).ready(function() {
             // 初始化表格
-            $('#table').bootstrapTable();
+            $('#table').bootstrapTable({
+                onLoadSuccess: function(data) {
+                    console.log('Table loaded successfully', data);
+                },
+                onLoadError: function(status, jqXHR) {
+                    console.error('Failed to load table data:', status, jqXHR);
+                }
+            });
         });
     </script>
 </body>
