@@ -21,7 +21,8 @@
                data-pagination="true"
                data-click-to-select="true"
                data-single-select="true"
-               data-toolbar="#toolbar">
+               data-toolbar="#toolbar"
+               data-editable="true">
             <thead>
                 <tr>
                     <th data-checkbox="true"></th>
@@ -38,14 +39,20 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.21.3/dist/bootstrap-table.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap4-editable/js/bootstrap-editable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.21.3/dist/extensions/editable/bootstrap-table-editable.min.js"></script>
     <script>
         $(document).ready(function () {
+            // 初始化 X-editable
+            $.fn.editable.defaults.mode = 'inline';
+
+            // 初始化 Bootstrap Table
             $('#table').bootstrapTable({
                 onEditableInit: function() {
                     console.log('Editable initialized');
                 }
             });
 
+            // 编辑按钮点击事件
             $('#editBtn').click(function() {
                 const selections = $('#table').bootstrapTable('getSelections');
                 if (selections.length === 1) {
