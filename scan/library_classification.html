@@ -61,10 +61,10 @@
             $('#addBtn').click(function () {
                 const newData = {
                     classificationId: null, // 新增数据 ID 可由后端生成
-                    classificationName: prompt('请输入分类名称：'),
-                    classificationLetter: prompt('请输入中图法分类字母：'),
-                    classificationDescription: prompt('请输入中图法分类名称：'),
-                    shelfNumber: prompt('请输入书架号：')
+                    classificationName: prompt('请输入分类名称【汉字，长度小于5】：'),
+                    classificationLetter: prompt('请输入中图法分类字母【大写英文，长度小于1】：'),
+                    classificationDescription: prompt('请输入中图法分类名称【汉字 ，长度小于30】：'),
+                    shelfNumber: prompt('请输入书架号【整数】：')
                 };
 
                 if (newData.classificationName && newData.classificationLetter && newData.classificationDescription && newData.shelfNumber) {
