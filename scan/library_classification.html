@@ -25,7 +25,8 @@
                data-search="true"
                data-pagination="true"
                data-click-to-select="true"
-               data-single-select="true">
+               data-single-select="true"
+               data-id-field="classificationId">
             <thead>
                 <tr>
                     <th data-checkbox="true"></th>
@@ -57,19 +58,30 @@
 
             // 新增功能
             $('#addBtn').click(function () {
-                // 弹出新增表单
                 const newData = {
-                    classificationId: prompt('请输入分类ID：'),
+                    classificationId: null, // 新增数据 ID 可由后端生成
                     classificationName: prompt('请输入分类名称：'),
                     classificationLetter: prompt('请输入中图法分类字母：'),
                     classificationDescription: prompt('请输入中图法分类名称：'),
                     shelfNumber: prompt('请输入书架号：')
                 };
 
-                if (newData.classificationId && newData.classificationName && newData.classificationLetter && newData.classificationDescription && newData.shelfNumber) {
-                    // 添加数据到表格
-                    $('#table').bootstrapTable('append', newData);
-                    alert('新增成功！');
+                if (newData.classificationName && newData.classificationLetter && newData.classificationDescription && newData.shelfNumber) {
+                    // 调用后端 API 保存数据
+                    $.ajax({
+                        url: 'https://tiezheng.natapp4.cc/api/library-classification',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify([newData]), // 发送列表形式数据
+                        success: function (response) {
+                            alert('新增成功！');
+                            $('#table').bootstrapTable('refresh'); // 刷新表格数据
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('新增失败', error);
+                            alert('新增失败，请检查数据是否正确！');
+                        }
+                    });
                 } else {
                     alert('新增失败，请填写完整信息！');
                 }
@@ -79,23 +91,31 @@
             $('#editBtn').click(function () {
                 const selected = $('#table').bootstrapTable('getSelections');
                 if (selected.length === 1) {
-                    // 获取选中行数据
                     const row = selected[0];
-                    const newData = {
-                        classificationId: row.classificationId,
+                    const updatedData = {
+                        classificationId: row.classificationId, // 必须带上 ID 用于更新记录
                         classificationName: prompt('修改分类名称：', row.classificationName),
                         classificationLetter: prompt('修改中图法分类字母：', row.classificationLetter),
                         classificationDescription: prompt('修改中图法分类名称：', row.classificationDescription),
                         shelfNumber: prompt('修改书架号：', row.shelfNumber)
                     };
 
-                    // 更新表格数据
-                    if (newData.classificationName && newData.classificationLetter && newData.classificationDescription && newData.shelfNumber) {
-                        $('#table').bootstrapTable('updateByUniqueId', {
-                            id: row.classificationId,
-                            row: newData
+                    if (updatedData.classificationName && updatedData.classificationLetter && updatedData.classificationDescription && updatedData.shelfNumber) {
+                        // 调用后端 API 更新数据
+                        $.ajax({
+                            url: 'https://tiezheng.natapp4.cc/api/library-classification',
+                            method: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify([updatedData]), // 发送列表形式数据
+                            success: function (response) {
+                                alert('编辑成功！');
+                                $('#table').bootstrapTable('refresh'); // 刷新表格数据
+                            },
+                            error: function (xhr, status, error) {
+                                console.error('编辑失败', error);
+                                alert('编辑失败，请检查数据是否正确！');
+                            }
                         });
-                        alert('编辑成功！');
                     } else {
                         alert('编辑失败，请填写完整信息！');
                     }
