@@ -17,6 +17,7 @@
             <button id="addBtn" class="btn btn-success">新增</button>
             <button id="editBtn" class="btn btn-primary">编辑</button>
             <button id="deleteBtn" class="btn btn-danger">删除</button>
+            <button id="exportBtn" class="btn btn-info">导出</button>
         </div>
 
         <!-- 动态数据表格 -->
@@ -45,6 +46,7 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.20.2/dist/bootstrap-table.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin/tableExport.min.js"></script>
     <script>
         $(document).ready(function () {
             // 初始化表格
@@ -61,10 +63,10 @@
             $('#addBtn').click(function () {
                 const newData = {
                     classificationId: null, // 新增数据 ID 可由后端生成
-                    classificationName: prompt('请输入分类名称【汉字，长度小于5】：'),
-                    classificationLetter: prompt('请输入中图法分类字母【大写英文，长度小于1】：'),
-                    classificationDescription: prompt('请输入中图法分类名称【汉字 ，长度小于30】：'),
-                    shelfNumber: prompt('请输入书架号【整数】：')
+                    classificationName: prompt('请输入分类名称：'),
+                    classificationLetter: prompt('请输入中图法分类字母：'),
+                    classificationDescription: prompt('请输入中图法分类名称：'),
+                    shelfNumber: prompt('请输入书架号：')
                 };
 
                 if (newData.classificationName && newData.classificationLetter && newData.classificationDescription && newData.shelfNumber) {
@@ -148,6 +150,15 @@
                 } else {
                     alert('请选择一条记录进行删除！');
                 }
+            });
+
+            // 导出功能
+            $('#exportBtn').click(function () {
+                $('#table').tableExport({
+                    type: 'excel', // 导出类型，可选 'csv', 'txt', 'excel'
+                    fileName: '图书分类管理导出', // 导出的文件名
+                    exportDataType: 'all' // 导出所有数据，可选 'basic', 'all', 'selected'
+                });
             });
         });
     </script>
