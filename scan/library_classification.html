@@ -79,12 +79,100 @@
                 }
             });
 
+            // 新增功能
+            $('#addBtn').click(function () {
+                const newData = {
+                    classificationId: null, // 让后端生成 ID
+                    classificationName: prompt('请输入分类名称：'),
+                    classificationLetter: prompt('请输入中图法分类字母：'),
+                    classificationDescription: prompt('请输入中图法分类名称：'),
+                    shelfNumber: prompt('请输入书架号：')
+                };
+
+                if (newData.classificationName && newData.classificationLetter && newData.classificationDescription && newData.shelfNumber) {
+                    // 调用后端保存 API
+                    $.ajax({
+                        url: 'https://tiezheng.natapp4.cc/api/library-classification',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify([newData]),
+                        success: function () {
+                            alert('新增成功！');
+                            $('#table').bootstrapTable('refresh');
+                        },
+                        error: function () {
+                            alert('新增失败，请检查数据是否正确！');
+                        }
+                    });
+                } else {
+                    alert('新增失败，请填写完整信息！');
+                }
+            });
+
+            // 编辑功能
+            $('#editBtn').click(function () {
+                const selected = $('#table').bootstrapTable('getSelections');
+                if (selected.length === 1) {
+                    const row = selected[0];
+                    const updatedData = {
+                        classificationId: row.classificationId,
+                        classificationName: prompt('修改分类名称：', row.classificationName),
+                        classificationLetter: prompt('修改中图法分类字母：', row.classificationLetter),
+                        classificationDescription: prompt('修改中图法分类名称：', row.classificationDescription),
+                        shelfNumber: prompt('修改书架号：', row.shelfNumber)
+                    };
+
+                    if (updatedData.classificationName && updatedData.classificationLetter && updatedData.classificationDescription && updatedData.shelfNumber) {
+                        $.ajax({
+                            url: 'https://tiezheng.natapp4.cc/api/library-classification',
+                            method: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify([updatedData]),
+                            success: function () {
+                                alert('编辑成功！');
+                                $('#table').bootstrapTable('refresh');
+                            },
+                            error: function () {
+                                alert('编辑失败，请检查数据是否正确！');
+                            }
+                        });
+                    } else {
+                        alert('编辑失败，请填写完整信息！');
+                    }
+                } else {
+                    alert('请选择一条记录进行编辑！');
+                }
+            });
+
+            // 删除功能
+            $('#deleteBtn').click(function () {
+                const selected = $('#table').bootstrapTable('getSelections');
+                if (selected.length === 1) {
+                    const row = selected[0];
+                    if (confirm(`确定要删除分类 "${row.classificationName}" 吗？`)) {
+                        $.ajax({
+                            url: `https://tiezheng.natapp4.cc/api/library-classification/${row.classificationId}`,
+                            method: 'DELETE',
+                            success: function () {
+                                alert('删除成功！');
+                                $('#table').bootstrapTable('refresh');
+                            },
+                            error: function () {
+                                alert('删除失败，请检查数据是否正确！');
+                            }
+                        });
+                    }
+                } else {
+                    alert('请选择一条记录进行删除！');
+                }
+            });
+
             // 导出功能
             $('#exportBtn').click(function () {
                 $('#table').tableExport({
-                    type: 'excel', // 导出为 Excel 文件
-                    fileName: '图书分类层架信息表', // 文件名
-                    exportDataType: 'all' // 导出所有数据
+                    type: 'excel',
+                    fileName: '图书分类层架信息表',
+                    exportDataType: 'all'
                 });
             });
 
@@ -103,7 +191,6 @@
                         const sheet = workbook.Sheets[sheetName];
                         const jsonData = XLSX.utils.sheet_to_json(sheet);
 
-                        // 字段名映射
                         const fieldMapping = {
                             "分类ID": "classificationId",
                             "分类名称": "classificationName",
@@ -112,7 +199,6 @@
                             "书架号": "shelfNumber"
                         };
 
-                        // 转换字段名
                         const mappedData = jsonData.map(row => {
                             const mappedRow = {};
                             for (const key in row) {
@@ -123,20 +209,16 @@
                             return mappedRow;
                         });
 
-                        console.log("转换后的数据：", mappedData);
-
-                        // 调用后端 API 批量保存导入数据
                         $.ajax({
                             url: 'https://tiezheng.natapp4.cc/api/library-classification',
                             method: 'POST',
                             contentType: 'application/json',
                             data: JSON.stringify(mappedData),
-                            success: function (response) {
+                            success: function () {
                                 alert('导入成功！');
                                 $('#table').bootstrapTable('refresh');
                             },
-                            error: function (xhr, status, error) {
-                                console.error('导入失败', error);
+                            error: function () {
                                 alert('导入失败，请检查数据格式！');
                             }
                         });
