@@ -34,9 +34,22 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.21.3/dist/bootstrap-table.min.js"></script>
     <script>
-        $(document).ready(function () {
-            $('#table').bootstrapTable();
-        });
-    </script>
+$(document).ready(function() {
+    // 确保 X-editable 先被初始化
+    if ($.fn.editable) {
+        $.fn.editable.defaults.mode = 'inline';  // 设置 X-editable 的默认模式
+    } else {
+        console.error('X-editable is not loaded properly.');
+    }
+
+    // 初始化 Bootstrap Table
+    $('#table').bootstrapTable({
+        onEditableInit: function() {
+            console.log('Editable initialized');
+        }
+    });
+});
+</script>
+
 </body>
 </html>
