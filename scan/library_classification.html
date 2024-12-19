@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>铁铮图书馆图书分类管理</title>
-    <!-- 引入 Bootstrap CSS -->
+    <!-- 引入 Bootstrap 和 Bootstrap Table 样式 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
-    <!-- 引入 Bootstrap Table CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.21.3/dist/bootstrap-table.min.css">
-    <!-- 引入 X-editable CSS (适用于Bootstrap 4) -->
+    <!-- 引入 X-editable 样式（适用于 Bootstrap 4） -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap4-editable/css/bootstrap-editable.css">
 </head>
 <body>
@@ -20,13 +19,12 @@
         <!-- Bootstrap Table -->
         <table id="table"
                data-toggle="table"
+               data-url="https://example.com/api/library-classification"
                data-search="true"
                data-pagination="true"
                data-click-to-select="true"
                data-single-select="true"
-               data-toolbar="#toolbar"
-               data-url="https://example.com/api/library-classification"
-               data-editable="true">
+               data-toolbar="#toolbar">
             <thead>
                 <tr>
                     <th data-checkbox="true"></th>
@@ -39,30 +37,34 @@
             </thead>
         </table>
     </div>
-    <!-- 引入 jQuery -->
+    <!-- 引入 jQuery 和 Bootstrap 脚本 -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <!-- 引入 Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- 引入 Bootstrap Table JS -->
+    <!-- 引入 Bootstrap Table 和 X-editable 脚本 -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.21.3/dist/bootstrap-table.min.js"></script>
-    <!-- 引入 X-editable JS (适用于Bootstrap 4) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap4-editable/js/bootstrap-editable.min.js"></script>
-    <!-- 引入 Bootstrap Table Editable Extension JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.21.3/dist/extensions/editable/bootstrap-table-editable.min.js"></script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             // 初始化 X-editable
             $.fn.editable.defaults.mode = 'inline';
-            $('#table').bootstrapTable({
-                onEditableInit: function() {
-                    console.log('Editable Init');
-                }
-            });
+            $('#table').editable();
 
-            $('#editBtn').click(function() {
-                const selections = $('#table').bootstrapTable('getSelections');
+            const $table = $('#table');
+
+            // 初始化 Bootstrap Table
+            $table.bootstrapTable();
+
+            // 编辑按钮点击事件
+            $('#editBtn').click(function () {
+                const selections = $table.bootstrapTable('getSelections');
                 if (selections.length === 1) {
-                    alert('选择了一行：' + JSON.stringify(selections[0]));
+                    // 激活编辑模式
+                    $.each(selections, function(index, value) {
+                        $table.bootstrapTable('updateRow', {
+                            index: index,
+                            row: value
+                        });
+                    });
                 } else {
                     alert("请选择一行进行编辑");
                 }
