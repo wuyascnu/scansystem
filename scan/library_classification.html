@@ -25,7 +25,7 @@
                data-toggle="table"
                data-url="https://tiezheng.natapp4.cc/api/library-classification"
                data-search="true"
-               data-pagination="false" <!-- 前端分页关闭 -->
+               data-pagination="false"
                data-click-to-select="true"
                data-single-select="true"
                data-id-field="classificationId">
@@ -57,108 +57,6 @@
                 onLoadError: function (status, jqXHR) {
                     console.error('Failed to load table data:', status, jqXHR);
                 }
-            });
-
-            // 新增功能
-            $('#addBtn').click(function () {
-                const newData = {
-                    classificationId: null, // 新增数据 ID 可由后端生成
-                    classificationName: prompt('请输入分类名称：'),
-                    classificationLetter: prompt('请输入中图法分类字母：'),
-                    classificationDescription: prompt('请输入中图法分类名称：'),
-                    shelfNumber: prompt('请输入书架号：')
-                };
-
-                if (newData.classificationName && newData.classificationLetter && newData.classificationDescription && newData.shelfNumber) {
-                    // 调用后端 API 保存数据
-                    $.ajax({
-                        url: 'https://tiezheng.natapp4.cc/api/library-classification',
-                        method: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify([newData]), // 发送列表形式数据
-                        success: function (response) {
-                            alert('新增成功！');
-                            $('#table').bootstrapTable('refresh'); // 刷新表格数据
-                        },
-                        error: function (xhr, status, error) {
-                            console.error('新增失败', error);
-                            alert('新增失败，请检查数据是否正确！');
-                        }
-                    });
-                } else {
-                    alert('新增失败，请填写完整信息！');
-                }
-            });
-
-            // 编辑功能
-            $('#editBtn').click(function () {
-                const selected = $('#table').bootstrapTable('getSelections');
-                if (selected.length === 1) {
-                    const row = selected[0];
-                    const updatedData = {
-                        classificationId: row.classificationId, // 必须带上 ID 用于更新记录
-                        classificationName: prompt('修改分类名称：', row.classificationName),
-                        classificationLetter: prompt('修改中图法分类字母：', row.classificationLetter),
-                        classificationDescription: prompt('修改中图法分类名称：', row.classificationDescription),
-                        shelfNumber: prompt('修改书架号：', row.shelfNumber)
-                    };
-
-                    if (updatedData.classificationName && updatedData.classificationLetter && updatedData.classificationDescription && updatedData.shelfNumber) {
-                        // 调用后端 API 更新数据
-                        $.ajax({
-                            url: 'https://tiezheng.natapp4.cc/api/library-classification',
-                            method: 'POST',
-                            contentType: 'application/json',
-                            data: JSON.stringify([updatedData]), // 发送列表形式数据
-                            success: function (response) {
-                                alert('编辑成功！');
-                                $('#table').bootstrapTable('refresh'); // 刷新表格数据
-                            },
-                            error: function (xhr, status, error) {
-                                console.error('编辑失败', error);
-                                alert('编辑失败，请检查数据是否正确！');
-                            }
-                        });
-                    } else {
-                        alert('编辑失败，请填写完整信息！');
-                    }
-                } else {
-                    alert('请选择一条记录进行编辑！');
-                }
-            });
-
-            // 删除功能
-            $('#deleteBtn').click(function () {
-                const selected = $('#table').bootstrapTable('getSelections');
-                if (selected.length === 1) {
-                    const row = selected[0];
-                    if (confirm(`确定要删除分类 "${row.classificationName}" 吗？`)) {
-                        // 调用后端 API 删除数据
-                        $.ajax({
-                            url: `https://tiezheng.natapp4.cc/api/library-classification/${row.classificationId}`,
-                            method: 'DELETE',
-                            success: function (response) {
-                                alert('删除成功！');
-                                $('#table').bootstrapTable('refresh'); // 刷新表格数据
-                            },
-                            error: function (xhr, status, error) {
-                                console.error('删除失败', error);
-                                alert('删除失败，请检查数据是否正确！');
-                            }
-                        });
-                    }
-                } else {
-                    alert('请选择一条记录进行删除！');
-                }
-            });
-
-            // 导出功能
-            $('#exportBtn').click(function () {
-                $('#table').tableExport({
-                    type: 'excel', // 导出类型，可选 'csv', 'txt', 'excel'
-                    fileName: '图书分类层架信息表', // 导出的文件名
-                    exportDataType: 'all' // 导出所有数据
-                });
             });
         });
     </script>
