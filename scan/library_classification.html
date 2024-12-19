@@ -102,15 +102,35 @@
                         const sheetName = workbook.SheetNames[0];
                         const sheet = workbook.Sheets[sheetName];
                         const jsonData = XLSX.utils.sheet_to_json(sheet);
-						console.log("导入的数据：", jsonData);
 
+                        // 字段名映射
+                        const fieldMapping = {
+                            "分类ID": "classificationId",
+                            "分类名称": "classificationName",
+                            "中图法分类字母": "classificationLetter",
+                            "中图法分类名称": "classificationDescription",
+                            "书架号": "shelfNumber"
+                        };
+
+                        // 转换字段名
+                        const mappedData = jsonData.map(row => {
+                            const mappedRow = {};
+                            for (const key in row) {
+                                if (fieldMapping[key]) {
+                                    mappedRow[fieldMapping[key]] = row[key];
+                                }
+                            }
+                            return mappedRow;
+                        });
+
+                        console.log("转换后的数据：", mappedData);
 
                         // 调用后端 API 批量保存导入数据
                         $.ajax({
                             url: 'https://tiezheng.natapp4.cc/api/library-classification',
                             method: 'POST',
                             contentType: 'application/json',
-                            data: JSON.stringify(jsonData),
+                            data: JSON.stringify(mappedData),
                             success: function (response) {
                                 alert('导入成功！');
                                 $('#table').bootstrapTable('refresh');
