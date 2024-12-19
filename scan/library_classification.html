@@ -16,6 +16,7 @@
         <div class="mb-3">
             <button id="addBtn" class="btn btn-success">新增</button>
             <button id="editBtn" class="btn btn-primary">编辑</button>
+            <button id="deleteBtn" class="btn btn-danger">删除</button>
         </div>
 
         <!-- 动态数据表格 -->
@@ -121,6 +122,31 @@
                     }
                 } else {
                     alert('请选择一条记录进行编辑！');
+                }
+            });
+
+            // 删除功能
+            $('#deleteBtn').click(function () {
+                const selected = $('#table').bootstrapTable('getSelections');
+                if (selected.length === 1) {
+                    const row = selected[0];
+                    if (confirm(`确定要删除分类 "${row.classificationName}" 吗？`)) {
+                        // 调用后端 API 删除数据
+                        $.ajax({
+                            url: `https://tiezheng.natapp4.cc/api/library-classification/${row.classificationId}`,
+                            method: 'DELETE',
+                            success: function (response) {
+                                alert('删除成功！');
+                                $('#table').bootstrapTable('refresh'); // 刷新表格数据
+                            },
+                            error: function (xhr, status, error) {
+                                console.error('删除失败', error);
+                                alert('删除失败，请检查数据是否正确！');
+                            }
+                        });
+                    }
+                } else {
+                    alert('请选择一条记录进行删除！');
                 }
             });
         });
