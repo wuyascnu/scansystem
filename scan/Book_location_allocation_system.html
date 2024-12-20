@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>书籍位置分配系统</title>
+    <!-- 引入 Bootstrap 和相关样式 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            margin-top: 20px;
+        }
+
+        .table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .spinner-border {
+            display: none;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center">书籍位置分配系统</h2>
+
+        <!-- 上传功能 -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>上传书籍清单</h5>
+            </div>
+            <div class="card-body">
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label for="bookFile">选择书籍清单文件（支持 Excel 文件）</label>
+                        <input type="file" id="bookFile" class="form-control-file" accept=".xlsx" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">上传并分配</button>
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">处理中...</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 分配结果展示 -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>分配结果</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table id="resultTable" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>条码号</th>
+                                <th>索书号</th>
+                                <th>层架编码</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 动态填充分配结果 -->
+                        </tbody>
+                    </table>
+                </div>
+                <button id="exportBtn" class="btn btn-success mt-3">导出分配结果</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 脚本逻辑 -->
+    <script>
+        // 上传书籍清单
+        $('#uploadForm').on('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData();
+            const fileInput = $('#bookFile')[0].files[0];
+            formData.append('file', fileInput);
+
+            $('.spinner-border').show(); // 显示加载动画
+
+            $.ajax({
+                url: '/books/upload', // 后端上传接口
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    alert('书籍分配完成！');
+                    $('.spinner-border').hide();
+                    loadResults(); // 加载分配结果
+                },
+                error: function(err) {
+                    alert('上传失败：' + err.responseText);
+                    $('.spinner-border').hide();
+                }
+            });
+        });
+
+        // 加载分配结果
+        function loadResults() {
+            $.ajax({
+                url: '/books/results', // 后端获取分配结果接口
+                type: 'GET',
+                success: function(data) {
+                    const resultTable = $('#resultTable tbody');
+                    resultTable.empty(); // 清空之前的数据
+
+                    data.forEach(book => {
+                        resultTable.append(`
+                            <tr>
+                                <td>${book.barcode}</td>
+                                <td>${book.callNumber}</td>
+                                <td>${book.shelfCode}</td>
+                            </tr>
+                        `);
+                    });
+                },
+                error: function(err) {
+                    alert('获取分配结果失败：' + err.responseText);
+                }
+            });
+        }
+
+        // 导出分配结果为 Excel
+        $('#exportBtn').on('click', function() {
+            const table = document.getElementById('resultTable');
+            const workbook = XLSX.utils.table_to_book(table, { sheet: "分配结果" });
+            XLSX.writeFile(workbook, '书籍分配结果.xlsx');
+        });
+    </script>
+</body>
+</html>
