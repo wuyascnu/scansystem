@@ -116,6 +116,8 @@
     <!-- 引入 tableExport 插件 -->
     <script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin/tableExport.min.js"></script>
 	<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+	<!-- Import SweetAlert2 for better dialog -->
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
    <script>
     $(document).ready(function () {
         // 初始化表格
@@ -312,34 +314,35 @@
     });
 
     // Edit shelf
-    $('#editShelfBtn').click(function () {
-        const selected = $('#shelfTable').bootstrapTable('getSelections');
-        if (selected.length === 1) {
-            const shelf = selected[0];
-            shelf.shelfCode = prompt('修改层架号编码：', shelf.shelfCode);
-            shelf.shelfName = prompt('修改层架名：', shelf.shelfName);
+$('#editShelfBtn').click(function () {
+    const selected = $('#shelfTable').bootstrapTable('getSelections');
+    if (selected.length === 1) {
+        const shelf = selected[0];
+        shelf.shelfCode = prompt('修改层架号编码：', shelf.shelfCode);
+        shelf.shelfName = prompt('修改层架名：', shelf.shelfName);
 
-            if (shelf.shelfCode && shelf.shelfName) {
-                $.ajax({
-                    url: `https://tiezheng.natapp4.cc/api/shelves/${shelf.id}`,
-                    method: 'POST', // This should ideally be a PUT request for updates.
-                    contentType: 'application/json',
-                    data: JSON.stringify(shelf),
-                    success: function () {
-                        alert('编辑成功！');
-                        $('#shelfTable').bootstrapTable('refresh');
-                    },
-                    error: function () {
-                        alert('编辑失败，请检查数据是否正确！');
-                    }
-                });
-            } else {
-                alert('编辑失败，请填写完整信息！');
-            }
+        if (shelf.shelfCode && shelf.shelfName) {
+            $.ajax({
+                url: `https://tiezheng.natapp4.cc/api/shelves/${shelf.id}/update`, // 调整路径以反映操作
+                method: 'POST', // 使用 POST
+                contentType: 'application/json',
+                data: JSON.stringify(shelf),
+                success: function () {
+                    alert('编辑成功！');
+                    $('#shelfTable').bootstrapTable('refresh');
+                },
+                error: function () {
+                    alert('编辑失败，请检查数据是否正确！');
+                }
+            });
         } else {
-            alert('请选择一条记录进行编辑！');
+            alert('编辑失败，请填写完整信息！');
         }
-    });
+    } else {
+        alert('请选择一条记录进行编辑！');
+    }
+});
+
 
     // Delete shelf
     $('#deleteShelfBtn').click(function () {
