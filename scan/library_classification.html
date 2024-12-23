@@ -307,7 +307,7 @@
                 shelf.shelfCode = prompt('修改层架号编码：', shelf.shelfCode);
                 shelf.shelfName = prompt('修改层架名：', shelf.shelfName);
                 if (shelf.shelfCode && shelf.shelfName) {
-                    ajaxRequest('PUT', `https://tiezheng.natapp4.cc/api/shelves/${shelf.id}`, shelf, '编辑成功！', '编辑失败，请检查数据是否正确！');
+                    ajaxRequest('POST', `https://tiezheng.natapp4.cc/api/shelves/${shelf.id}`, shelf, '编辑成功！', '编辑失败，请检查数据是否正确！');
                 } else {
                     alert('编辑失败，请填写完整信息！');
                 }
