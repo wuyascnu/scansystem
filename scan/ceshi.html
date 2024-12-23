@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图书书架及层架维护系统</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.20.2/dist/bootstrap-table.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            max-width: 100%;
+            padding: 15px;
+        }
+        .table-container {
+            margin-top: 40px;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+        .mb-3 {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h3 class="text-center">图书书架及层架维护系统</h3>
+        <ul class="nav nav-tabs" id="tabMenu" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="classification-tab" data-toggle="tab" href="#classification" role="tab" aria-controls="classification" aria-selected="true">图书书架信息</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="shelf-tab" data-toggle="tab" href="#shelf" role="tab" aria-controls="shelf" aria-selected="false">图书层架信息</a>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="tabContent">
+            <div class="tab-pane fade show active" id="classification" role="tabpanel" aria-labelledby="classification-tab">
+                <div class="mb-3 text-center">
+                    <button id="addBtn" class="btn btn-success">新增</button>
+                    <button id="editBtn" class="btn btn-primary">编辑</button>
+                    <button id="deleteBtn" class="btn btn-danger">删除</button>
+                    <button id="exportBtn" class="btn btn-info">导出</button>
+                    <button id="importBtn" class="btn btn-warning">导入</button>
+                    <a href="template.xlsx" download="导入模板.xlsx" class="btn btn-secondary">模板下载</a>
+                </div>
+                <div class="table-container">
+                    <table id="classificationTable"
+                           data-toggle="table"
+                           data-url="https://tiezheng.natapp4.cc/api/library-classification"
+                           data-search="true"
+                           data-pagination="false"
+                           data-click-to-select="true"
+                           data-single-select="true"
+                           data-id-field="classificationId">
+                        <thead>
+                            <tr>
+                                <th data-checkbox="true"></th>
+                                <th data-field="classificationId">分类ID</th>
+                                <th data-field="classificationName">分类名称</th>
+                                <th data-field="classificationLetter">中图法分类字母</th>
+                                <th data-field="classificationDescription">分类描述</th>
+                                <th data-field="shelfNumber">书架号</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="shelf" role="tabpanel" aria-labelledby="shelf-tab">
+                <div class="mb-3 text-center">
+                    <button id="addShelfBtn" class="btn btn-success">新增</button>
+                    <button id="editShelfBtn" class="btn btn-primary">编辑</button>
+                    <button id="deleteShelfBtn" class="btn btn-danger">删除</button>
+                    <button id="exportShelfBtn" class="btn btn-info">导出</button>
+                    <button id="importShelfBtn" class="btn btn-warning">导入</button>
+                </div>
+                <div class="table-container">
+                    <table id="shelfTable"
+                           data-toggle="table"
+                           data-url="https://tiezheng.natapp4.cc/api/shelves"
+                           data-search="true"
+                           data-pagination="true"
+                           data-click-to-select="true"
+                           data-id-field="id">
+                        <thead>
+                            <tr>
+                                <th data-checkbox="true"></th>
+                                <th data-field="id">序号</th>
+                                <th data-field="shelfCode">层架号编码</th>
+                                <th data-field="shelfName">层架名</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.20.2/dist/bootstrap-table.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin/tableExport.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Initialize tables
+            $('#classificationTable, #shelfTable').bootstrapTable({
+                onLoadSuccess: function (data) {
+                    console.log(this.id + ' loaded successfully', data);
+                },
+                onLoadError: function (status, jqXHR) {
+                    console.error(this.id + ' failed to load:', status, jqXHR);
+                }
+            });
+
+            // Event handling for classification table
+            $('#addBtn, #editBtn, #deleteBtn, #exportBtn, #importBtn').on('click', function () {
+                handleTableActions($(this).attr('id'), '#classificationTable');
+            });
+
+            // Event handling for shelf table
+            $('#addShelfBtn, #editShelfBtn, #deleteShelfBtn, #exportShelfBtn, #importShelfBtn').on('click', function () {
+                handleTableActions($(this).attr('id'), '#shelfTable');
+            });
+
+            function handleTableActions(actionId, tableId) {
+                var selectedData = $(tableId).bootstrapTable('getSelections');
+                alert('Action: ' + actionId + ' on ' + selectedData.length + ' selected rows');
+                // Implement specific logic for each action
+            }
+        });
+    </script>
+</body>
+</html>
