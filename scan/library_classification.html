@@ -300,14 +300,43 @@
         });
 
         // Edit shelf
-        $('#editShelfBtn').click(function () {
+        //$('#editShelfBtn').click(function () {
+        //    const selected = $('#shelfTable').bootstrapTable('getSelections');
+        //    if (selected.length === 1) {
+        //        const shelf = selected[0];
+        //        shelf.shelfCode = prompt('修改层架号编码：', shelf.shelfCode);
+        //        shelf.shelfName = prompt('修改层架名：', shelf.shelfName);
+        //        if (shelf.shelfCode && shelf.shelfName) {
+        //            ajaxRequest('POST', `https://tiezheng.natapp4.cc/api/shelves/${shelf.id}`, shelf, '编辑成功！', '编辑失败，请检查数据是否正确！');
+        //        } else {
+        //            alert('编辑失败，请填写完整信息！');
+        //        }
+        //    } else {
+        //        alert('请选择一条记录进行编辑！');
+        //    }
+        //});
+		
+		$('#editShelfBtn').click(function () {
             const selected = $('#shelfTable').bootstrapTable('getSelections');
             if (selected.length === 1) {
                 const shelf = selected[0];
-                shelf.shelfCode = prompt('修改层架号编码：', shelf.shelfCode);
-                shelf.shelfName = prompt('修改层架名：', shelf.shelfName);
+                   shelf.shelfCode = prompt('修改层架号编码：', shelf.shelfCode);
+                   shelf.shelfName = prompt('修改层架名：', shelf.shelfName);
+
                 if (shelf.shelfCode && shelf.shelfName) {
-                    ajaxRequest('POST', `https://tiezheng.natapp4.cc/api/shelves/${shelf.id}`, shelf, '编辑成功！', '编辑失败，请检查数据是否正确！');
+                    $.ajax({
+                        url: 'https://tiezheng.natapp4.cc/api/shelves/${shelf.id}',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify([updatedData]),
+                        success: function () {
+                            alert('编辑成功！');
+                            $('#classificationTable').bootstrapTable('refresh');
+                        },
+                        error: function () {
+                            alert('编辑失败，请检查数据是否正确！');
+                        }
+                    });
                 } else {
                     alert('编辑失败，请填写完整信息！');
                 }
