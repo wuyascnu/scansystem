@@ -104,22 +104,54 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.20.2/dist/bootstrap-table.min.js"></script>
     <script>
         $(document).ready(function () {
-            $('#classificationTable').bootstrapTable();
-            $('#shelfTable').bootstrapTable();
+            $('#classificationTable').bootstrapTable({
+                onLoadSuccess: function (data) {
+                    console.log('分类表格加载成功', data);
+                },
+                onLoadError: function (status, jqXHR) {
+                    console.error('分类表格加载失败:', status, jqXHR);
+                }
+            });
 
+            $('#shelfTable').bootstrapTable({
+                onLoadSuccess: function (data) {
+                    console.log('层架表格加载成功', data);
+                },
+                onLoadError: function (status, jqXHR) {
+                    console.error('层架表格加载失败:', status, jqXHR);
+                }
+            });
+
+            // Here the same event handlers are used, assuming that the logic for each button
+            // is the same for both tables or is dynamically adjusted based on which tab is active.
+
+            // 新增功能
             $('#addBtn').click(function () {
+                // 逻辑根据活动的表格进行调整
                 alert('新增功能待实现');
             });
+
+            // 编辑功能
             $('#editBtn').click(function () {
+                // 逻辑根据活动的表格进行调整
                 alert('编辑功能待实现');
             });
+
+            // 删除功能
             $('#deleteBtn').click(function () {
+                // 逻辑根据活动的表格进行调整
                 alert('删除功能待实现');
             });
+
+            // 导出功能
             $('#exportBtn').click(function () {
+                // 逻辑根据活动的表格进行调整
                 alert('导出功能待实现');
             });
+
+            // 导入功能
             $('#importBtn').click(function () {
+                // 逻辑根据活动的表格进行调整
                 alert('导入功能待实现');
             });
         });
