@@ -322,17 +322,22 @@ $('#editShelfBtn').click(function () {
         shelf.shelfName = prompt('修改层架名：', shelf.shelfName);
 
         if (shelf.shelfCode && shelf.shelfName) {
+            let apiUrl = 'https://tiezheng.natapp4.cc/api/shelves'; // 默认为创建新层架
+            if (shelf.id && shelf.id > 0) {
+                apiUrl += `/${shelf.id}`; // 如果存在ID，则更新现有层架
+            }
+
             $.ajax({
-                url: `https://tiezheng.natapp4.cc/api/shelves/${shelf.id}/update`, // 调整路径以反映操作
-                method: 'POST', // 使用 POST
+                url: apiUrl,
+                method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(shelf),
                 success: function () {
-                    alert('编辑成功！');
+                    alert('操作成功！');
                     $('#shelfTable').bootstrapTable('refresh');
                 },
                 error: function () {
-                    alert('编辑失败，请检查数据是否正确！');
+                    alert('操作失败，请检查数据是否正确！');
                 }
             });
         } else {
@@ -343,29 +348,38 @@ $('#editShelfBtn').click(function () {
     }
 });
 
-
     // Delete shelf
-    $('#deleteShelfBtn').click(function () {
-        const selected = $('#shelfTable').bootstrapTable('getSelections');
-        if (selected.length === 1) {
-            const shelfId = selected[0].id;
-            if (confirm('确定要删除这条记录吗？')) {
+$('#deleteShelfBtn').click(function () {
+    const selected = $('#shelfTable').bootstrapTable('getSelections');
+    if (selected.length === 1) {
+        const shelfId = selected[0].id;
+        Swal.fire({
+            title: '确定要删除这条记录吗？',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: '是的，删除它！'
+        }).then((result) => {
+            if (result.isConfirmed) {
                 $.ajax({
                     url: `https://tiezheng.natapp4.cc/api/shelves/${shelfId}`,
                     method: 'DELETE',
                     success: function () {
-                        alert('删除成功！');
+                        Swal.fire('已删除!', '记录已被删除。', 'success');
                         $('#shelfTable').bootstrapTable('refresh');
                     },
                     error: function () {
-                        alert('删除失败，请检查数据是否正确！');
+                        Swal.fire('失败!', '删除失败，请检查数据是否正确。', 'error');
                     }
                 });
             }
-        } else {
-            alert('请选择一条记录进行删除！');
-        }
-    });
+        });
+    } else {
+        Swal.fire('错误!', '请选择一条记录进行删除。', 'error');
+    }
+});
+
 
     // Export shelf data
     $('#exportShelfBtn').click(function () {
@@ -376,39 +390,39 @@ $('#editShelfBtn').click(function () {
         });
     });
 
-    // Import shelf data
-    $('#importShelfBtn').click(function () {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.xlsx, .xls';
-        input.onchange = function (e) {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const sheetName = workbook.SheetNames[0];
-                const sheet = workbook.Sheets[sheetName];
-                const jsonData = XLSX.utils.sheet_to_json(sheet);
-
-                $.ajax({
-                    url: 'https://tiezheng.natapp4.cc/api/shelves/import',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(jsonData),
-                    success: function () {
-                        alert('导入成功！');
-                        $('#shelfTable').bootstrapTable('refresh');
-                    },
-                    error: function () {
-                        alert('导入失败，请检查数据格式！');
-                    }
-                });
-            };
-            reader.readAsArrayBuffer(file);
+// 导入功能
+$('#importShelfBtn').click(function () {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.xlsx, .xls';
+    input.onchange = function (e) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(sheet);
+            $.ajax({
+                url: 'https://tiezheng.natapp4.cc/api/shelves/import', // 使用新的导入端点
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(jsonData),
+                success: function () {
+                    Swal.fire('导入成功！', '', 'success');
+                    $('#shelfTable').bootstrapTable('refresh');
+                },
+                error: function () {
+                    Swal.fire('导入失败，请检查数据格式！', '', 'error');
+                }
+            });
         };
-        input.click();
-    });
+        reader.readAsArrayBuffer(file);
+    };
+    input.click();
+});
+
 		//==================================shelfTable============================================
     });
 </script>
