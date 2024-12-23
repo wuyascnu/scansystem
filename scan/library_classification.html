@@ -295,19 +295,21 @@
         const shelfName = prompt('请输入层架名：');
         if (shelfCode && shelfName) {
             const newData = { shelfCode: shelfCode, shelfName: shelfName };
-            $.ajax({
-                url: 'https://tiezheng.natapp4.cc/api/shelves',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(newData),
-                success: function () {
-                    alert('新增成功！');
-                    $('#shelfTable').bootstrapTable('refresh');
-                },
-                error: function () {
-                    alert('新增失败，请检查数据是否正确！');
-                }
-            });
+           $.ajax({
+    url: 'https://tiezheng.natapp4.cc/api/shelves',
+    method: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify(newData),
+    success: function () {
+        alert('新增成功！');
+        $('#shelfTable').bootstrapTable('refresh');
+    },
+    error: function (xhr, status, error) {
+        console.error('新增失败:', xhr.responseText);
+        alert('新增失败，请检查数据是否正确！');
+    }
+});
+
         } else {
             alert('新增失败，请填写完整信息！');
         }
