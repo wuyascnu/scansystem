@@ -150,27 +150,28 @@
             });
 
             // 删除功能
-            $('#deleteBtn').click(function () {
-                const selected = $('#table').bootstrapTable('getSelections');
-                if (selected.length === 1) {
-                    const row = selected[0];
-                    if (confirm(确定要删除分类 "${row.classificationName}" 吗？)) {
-                        $.ajax({
-                            url: https://tiezheng.natapp4.cc/api/library-classification/${row.classificationId},
-                            method: 'DELETE',
-                            success: function () {
-                                alert('删除成功！');
-                                $('#table').bootstrapTable('refresh');
-                            },
-                            error: function () {
-                                alert('删除失败，请检查数据是否正确！');
-                            }
-                        });
-                    }
-                } else {
-                    alert('请选择一条记录进行删除！');
+$('#deleteBtn').click(function () {
+    const selected = $('#table').bootstrapTable('getSelections');
+    if (selected.length === 1) {
+        const row = selected[0];
+        if (confirm(`确定要删除分类 "${row.classificationName}" 吗？`)) {
+            $.ajax({
+                url: `https://tiezheng.natapp4.cc/api/library-classification/${row.classificationId}`,
+                method: 'DELETE',
+                success: function () {
+                    alert('删除成功！');
+                    $('#table').bootstrapTable('refresh');
+                },
+                error: function () {
+                    alert('删除失败，请检查数据是否正确！');
                 }
             });
+        }
+    } else {
+        alert('请选择一条记录进行删除！');
+    }
+});
+
 
             // 导出功能
             $('#exportBtn').click(function () {
