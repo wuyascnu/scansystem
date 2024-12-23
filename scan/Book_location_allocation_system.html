@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>书籍位置分配系统</title>
+    <title>铁铮书籍位置分配系统</title>
     <!-- 引入 Bootstrap 和相关样式 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
@@ -32,7 +32,7 @@
 </head>
 <body>
     <div class="container">
-        <h2 class="text-center">书籍位置分配系统</h2>
+        <h2 class="text-center">铁铮书籍位置分配系统</h2>
 
         <!-- 上传功能 -->
         <div class="card mt-4">
@@ -64,8 +64,8 @@
                         <thead>
                             <tr>
                                 <th>条码号</th>
-                                <th>索书号</th>
-                                <th>层架编码</th>
+                                <th>层架号编码</th>
+                                <th>层架名</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -120,8 +120,8 @@
                         resultTable.append(`
                             <tr>
                                 <td>${book.barcode}</td>
-                                <td>${book.callNumber}</td>
                                 <td>${book.shelfCode}</td>
+                                <td>${book.shelfName}</td>
                             </tr>
                         `);
                     });
@@ -133,11 +133,29 @@
         }
 
         // 导出分配结果为 Excel
-        $('#exportBtn').on('click', function() {
-            const table = document.getElementById('resultTable');
-            const workbook = XLSX.utils.table_to_book(table, { sheet: "分配结果" });
+        $('#exportBtn').on('click', function () {
+            // 获取表格数据
+            const tableData = [];
+            $('#resultTable tbody tr').each(function () {
+                const row = {
+                    条码号: $(this).find('td:nth-child(1)').text(), // 第1列：条码号
+                    层架号编码: $(this).find('td:nth-child(2)').text(), // 第2列：层架号编码
+                    层架名: $(this).find('td:nth-child(3)').text() // 第3列：层架名
+                };
+                tableData.push(row);
+            });
+
+            // 使用 SheetJS 将数据转换为 Excel
+            const worksheet = XLSX.utils.json_to_sheet(tableData); // 将 JSON 转换为表格
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, '分配结果');
+
+            // 导出 Excel 文件
             XLSX.writeFile(workbook, '书籍分配结果.xlsx');
         });
+
+        // 初始化页面时加载分配结果
+        loadResults();
     </script>
 </body>
 </html>
