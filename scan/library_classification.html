@@ -106,6 +106,8 @@
                                 <th data-field="id">序号</th>
                                 <th data-field="shelfCode">层架号编码</th>
                                 <th data-field="shelfName">层架名</th>
+    							  <th data-field="capacity">最大存放容量</th>
+                                <th data-field="usedCapacity">已用容量</th>
                             </tr>
                         </thead>
                     </table>
@@ -297,20 +299,28 @@
 		 // Add new shelf
 // Unified function for adding or editing shelves
 function handleShelfOperation(shelf = {}) {
-    let shelfCode, shelfName;
+    let shelfCode, shelfName, capacity;
     if (shelf.id) {
         // Edit operation
         shelfCode = prompt('修改层架号编码：', shelf.shelfCode);
         shelfName = prompt('修改层架名：', shelf.shelfName);
+        capacity = prompt('修改最大存放容量：', shelf.capacity);
     } else {
         // Add operation
         shelfCode = prompt('请输入层架号编码：');
         shelfName = prompt('请输入层架名：');
+        capacity = prompt('请输入最大存放容量：');
     }
 
-    if (shelfCode && shelfName) {
+    // 检查输入有效性
+    if (shelfCode && shelfName && capacity && !isNaN(capacity) && capacity > 0) {
         shelf.shelfCode = shelfCode;
         shelf.shelfName = shelfName;
+        shelf.capacity = parseInt(capacity, 10); // 确保容量是整数
+        if (!shelf.id) {
+            shelf.usedCapacity = 0; // 新增时默认已用容量为0
+        }
+
         let apiUrl = 'https://tiezheng.natapp4.cc/api/shelves';
         if (shelf.id) {
             apiUrl += `/${shelf.id}`; // Update if id exists
@@ -330,7 +340,7 @@ function handleShelfOperation(shelf = {}) {
             }
         });
     } else {
-        alert('操作失败，请填写完整信息！');
+        alert('操作失败，请填写完整信息，并确保容量为正整数！');
     }
 }
 
@@ -347,6 +357,7 @@ $('#editShelfBtn').click(function () {
         alert('请选择一条记录进行编辑！');
     }
 });
+
 
 
     // Delete shelf
