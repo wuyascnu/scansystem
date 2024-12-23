@@ -18,7 +18,7 @@
                 <button type="submit" class="btn btn-primary btn-block">上传并分配</button>
             </form>
         </div>
-        <div id="resultTable" class="mt-4">
+        <div id="resultTable" class="mt-4" style="display: none;">
             <h5>分配结果</h5>
             <table class="table table-bordered" id="exportableTable">
                 <thead>
@@ -53,7 +53,7 @@
                         response.forEach(function (book) {
                             $('#resultBody').append(
                                 `<tr>
-                                    <td>${book['条码号']}</td>
+                                    <td>'${book['条码号']}'</td>
                                     <td>${book['层架号编码']}</td>
                                     <td>${book['层架名']}</td>
                                 </tr>`
@@ -68,7 +68,10 @@
             });
 
             $('#exportBtn').click(function() {
-                let wb = XLSX.utils.table_to_book(document.getElementById('exportableTable'), {sheet:"Sheet 1"});
+                let wb = XLSX.utils.table_to_book(document.getElementById('exportableTable'), {
+                    sheet: "Sheet 1",
+                    raw: true // This tells SheetJS to create strings from the HTML
+                });
                 XLSX.writeFile(wb, 'Book_Allocation_Result.xlsx');
             });
 
