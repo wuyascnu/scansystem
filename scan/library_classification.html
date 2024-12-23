@@ -79,10 +79,17 @@
 
             <!-- 层架信息 -->
             <div class="tab-pane fade" id="shelf" role="tabpanel" aria-labelledby="shelf-tab">
+			<div class="mb-3 text-center">
+                    <button id="addShelfBtn" class="btn btn-success">新增</button>
+                    <button id="editShelfBtn" class="btn btn-primary">编辑</button>
+                    <button id="deleteShelfBtn" class="btn btn-danger">删除</button>
+                    <button id="exportShelfBtn" class="btn btn-info">导出</button>
+                    <button id="importShelfBtn" class="btn btn-warning">导入</button>
+            </div>
                 <div class="table-container">
                     <table id="shelfTable"
                            data-toggle="table"
-                           data-url="https://tiezheng.natapp4.cc/api/shelf-info"
+                           data-url="https://tiezheng.natapp4.cc/api/shelves"
                            data-search="true"
                            data-pagination="true"
                            data-click-to-select="true"
@@ -90,7 +97,6 @@
                         <thead>
                             <tr>
                                 <th data-field="id">序号</th>
-                                <th data-field="barcode">条码号</th>
                                 <th data-field="shelfCode">层架号编码</th>
                                 <th data-field="shelfName">层架名</th>
                             </tr>
@@ -206,15 +212,6 @@
                 alert('请选择一条记录进行删除！');
             }
         });
-		
-		// 导出功能
-        //$('#exportBtn').click(function () {
-          //  $('#classificationTable').tableExport({
-          //      formats: ['xlsx'], // 导出格式
-          //      fileName: '图书分类层架信息表', // 文件名
-          //      exportDataType: 'all', // 导出所有数据
-          //  });
-        //});
 		
 		 // 导出功能
             $('#exportBtn').click(function () {
