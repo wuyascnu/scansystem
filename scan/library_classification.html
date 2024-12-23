@@ -205,13 +205,13 @@
                 alert('请选择一条记录进行删除！');
             }
         });
-
-        // 导出功能
+		
+		// 导出功能
         $('#exportBtn').click(function () {
             $('#classificationTable').tableExport({
-                type: 'excel',
-                fileName: '图书分类层架信息表',
-                exportDataType: 'all'
+                formats: ['xlsx'], // 导出格式
+                fileName: '图书分类层架信息表', // 文件名
+                exportDataType: 'all', // 导出所有数据
             });
         });
 
