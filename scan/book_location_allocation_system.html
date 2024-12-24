@@ -62,7 +62,8 @@
                         $('#resultTable').show();
                     },
                     error: function (xhr) {
-                        alert('分配失败: ' + xhr.responseText);
+					    let errorMessage = xhr.responseText ? xhr.responseText : '分配失败，请检查文件格式或后端服务';
+                        alert(errorMessage);
                     }
                 });
             });
