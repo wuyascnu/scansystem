@@ -47,35 +47,83 @@
 
     <script>
         $(document).ready(function () {
+            let taskId = null; // 当前任务 ID
+
             $('#uploadForm').on('submit', function (e) {
                 e.preventDefault();
 
                 // 显示进度条
                 $('#progressBarContainer').show();
-                $('#progressBar').css('width', '0%').text('0%');
+                $('#progressBar').css('width', '0%').text('文件上传中...');
 
                 let formData = new FormData();
                 formData.append('file', $('#fileInput')[0].files[0]);
 
+                // 提交文件并获取任务 ID
                 $.ajax({
                     url: 'https://tiezheng.natapp4.cc/api/books/upload',
                     method: 'POST',
                     data: formData,
                     processData: false,
                     contentType: false,
-                    xhr: function () {
-                        let xhr = new XMLHttpRequest();
-                        xhr.upload.addEventListener('progress', function (e) {
-                            if (e.lengthComputable) {
-                                let percentComplete = Math.round((e.loaded / e.total) * 100);
-                                $('#progressBar').css('width', percentComplete + '%').text(percentComplete + '%');
-                            }
-                        });
-                        return xhr;
-                    },
                     success: function (response) {
-                        // 处理成功的分配结果
+                        taskId = response.taskId; // 获取任务 ID
+                        $('#progressBar').css('width', '20%').text('任务已提交...');
+                        pollTaskStatus(); // 开始轮询任务状态
+                    },
+                    error: function (xhr) {
+                        $('#progressBar').css('width', '100%').addClass('bg-danger').text('任务提交失败');
+                        alert('上传失败：' + (xhr.responseText || '请检查后端服务'));
+                    }
+                });
+            });
+
+            // 轮询任务状态
+            function pollTaskStatus() {
+                const interval = setInterval(() => {
+                    if (!taskId) {
+                        clearInterval(interval);
+                        return;
+                    }
+
+                    $.ajax({
+                        url: `https://tiezheng.natapp4.cc/api/books/status/${taskId}`,
+                        method: 'GET',
+                        success: function (response) {
+                            const { status, total, completed } = response;
+
+                            // 更新进度条
+                            const progress = Math.round((completed / total) * 100);
+                            $('#progressBar').css('width', progress + '%').text(`任务进度：${completed}/${total}`);
+
+                            if (status === '已完成') {
+                                clearInterval(interval); // 停止轮询
+                                fetchTaskResult(); // 获取任务结果
+                            } else if (status.startsWith('失败')) {
+                                clearInterval(interval); // 停止轮询
+                                $('#progressBar').css('width', '100%').addClass('bg-danger').text('任务失败');
+                                alert('任务失败：' + status);
+                            }
+                        },
+                        error: function (xhr) {
+                            clearInterval(interval);
+                            $('#progressBar').css('width', '100%').addClass('bg-danger').text('任务状态查询失败');
+                            alert('状态查询失败：' + (xhr.responseText || '请检查后端服务'));
+                        }
+                    });
+                }, 2000); // 每隔 2 秒查询一次
+            }
+
+            // 获取任务结果
+            function fetchTaskResult() {
+                $.ajax({
+                    url: `https://tiezheng.natapp4.cc/api/books/result/${taskId}`,
+                    method: 'GET',
+                    success: function (response) {
+                        $('#progressBar').css('width', '100%').removeClass('bg-danger').addClass('bg-success').text('任务完成');
                         $('#resultBody').empty();
+
+                        // 显示分配结果
                         response.forEach(function (book) {
                             $('#resultBody').append(`
                                 <tr>
@@ -86,40 +134,31 @@
                             `);
                         });
 
-                        // 显示结果表格和操作按钮
                         $('#resultTable').show();
                         $('#exportBtn').show();
                         $('#clearBtn').show();
                     },
                     error: function (xhr) {
-                        // 显示详细的错误信息
-                        let errorMessage = xhr.responseText ? xhr.responseText : '分配失败，请检查文件格式或后端服务';
-                        alert('错误信息：' + errorMessage);
-                    },
-                    complete: function () {
-                        // 隐藏进度条
-                        $('#progressBarContainer').hide();
+                        $('#progressBar').css('width', '100%').addClass('bg-danger').text('任务结果获取失败');
+                        alert('任务结果获取失败：' + (xhr.responseText || '请检查后端服务'));
                     }
                 });
-            });
+            }
 
             // 导出结果
             $('#exportBtn').click(function () {
-                // 获取当前时间戳
                 const timestamp = new Date().toISOString().replace(/[-:T]/g, '').split('.')[0];
-
-                // 使用 SheetJS 导出表格
                 let wb = XLSX.utils.table_to_book(document.querySelector('table'), {
                     sheet: "分配结果",
-                    raw: true, // 保留原始数据
+                    raw: true,
                 });
 
-                // 避免条码号变成数字
+                // 保留条码号格式
                 const ws = wb.Sheets["分配结果"];
                 for (let cell in ws) {
-                    if (cell.startsWith('A') && ws[cell].t === 'n') { // A 列且是数字
-                        ws[cell].t = 's'; // 转为字符串
-                        ws[cell].v = ws[cell].v.toString().padStart(7, '0'); // 补充前导零
+                    if (cell.startsWith('A') && ws[cell].t === 'n') {
+                        ws[cell].t = 's';
+                        ws[cell].v = ws[cell].v.toString().padStart(7, '0');
                     }
                 }
 
@@ -129,12 +168,4 @@
             // 清除上传
             $('#clearBtn').click(function () {
                 $('#resultBody').empty();
-                $('#resultTable').hide();
-                $('#exportBtn').hide();
-                $('#clearBtn').hide();
-                $('#fileInput').val('');
-            });
-        });
-    </script>
-</body>
-</html>
+    
