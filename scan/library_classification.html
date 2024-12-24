@@ -65,6 +65,10 @@
                     <button id="importBtn" class="btn btn-warning">导入</button>
                     <a href="template.xlsx" download="导入模板.xlsx" class="btn btn-secondary">模板下载</a>
                 </div>
+				<div class="mb-3 text-center">
+                      <!-- Refresh Button for Classification Table -->
+                    <button id="refreshClassificationBtn" class="btn btn-secondary">刷新</button>
+                </div>
                 <div class="table-container">
                     <table id="classificationTable"
                            data-toggle="table"
@@ -97,6 +101,10 @@
                     <button id="exportShelfBtn" class="btn btn-info">导出</button>
                     <button id="importShelfBtn" class="btn btn-warning">导入</button>
             </div>
+			<!-- Refresh Button for Shelf Table -->
+             <div class="mb-3 text-center">
+               <button id="refreshShelfBtn" class="btn btn-secondary">刷新</button>
+             </div>
                 <div class="table-container">
                     <table id="shelfTable"
                            data-toggle="table"
@@ -152,6 +160,15 @@
                     console.error('Failed to load shelf table:', status, jqXHR);
                 }
             });
+		 // Refresh Classification Table
+    $('#refreshClassificationBtn').click(function () {
+        $('#classificationTable').bootstrapTable('refresh');
+    });
+
+    // Refresh Shelf Table
+    $('#refreshShelfBtn').click(function () {
+        $('#shelfTable').bootstrapTable('refresh');
+    });	
         //==================================classificationTable============================================
         // 新增功能
         $('#addBtn').click(function () {
