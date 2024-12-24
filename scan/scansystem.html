@@ -35,32 +35,10 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        #readerContainer {
-            position: relative;
-            width: 100%;
-            max-width: 400px;
-            margin: 20px auto;
-        }
         #reader {
             width: 100%;
-            height: 250px;
-            background-color: #000;
-            position: relative;
-        }
-        #closeBtn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: red;
-            color: #fff;
-            border: none;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            font-size: 16px;
-            display: none; /* 初始隐藏关闭按钮 */
-            cursor: pointer;
-            z-index: 10;
+            max-width: 400px;
+            margin: 10px auto;
         }
     </style>
 </head>
@@ -71,26 +49,19 @@
         <input type="text" id="barcodeInput" placeholder="输入条码或扫码" onblur="triggerSearch()" onkeyup="handleKeyUp(event)">
         <button id="startScanBtn">启动摄像头扫描</button>
     </div>
-    <div id="readerContainer">
-        <button id="closeBtn">X</button> <!-- 关闭按钮 -->
-        <div id="reader"></div> <!-- 扫描框显示位置 -->
-    </div>
+    <div id="reader"></div> <!-- 扫描框显示位置 -->
 
     <script src="./js/html5-qrcode.min.js"></script>
     <script>
         const input = document.getElementById('barcodeInput');
         const startScanBtn = document.getElementById('startScanBtn');
-        const closeBtn = document.getElementById('closeBtn');
-        const readerContainer = document.getElementById('readerContainer');
         let html5QrCode;
 
-        // 启动扫码功能
         startScanBtn.addEventListener('click', function() {
             if (!html5QrCode) {
                 html5QrCode = new Html5Qrcode("reader");
             }
             const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-            
             html5QrCode.start(
                 { facingMode: "environment" },
                 config,
@@ -98,7 +69,7 @@
                     console.log("扫描到结果：", decodedText);
                     input.value = decodedText;
                     searchBook(decodedText);
-                    stopScanning(); // 停止扫描
+                    html5QrCode.stop();
                 },
                 function(errorMessage) {
                     console.log("扫描中...", errorMessage);
@@ -106,56 +77,59 @@
             ).catch(err => {
                 alert("无法启动摄像头：" + err);
             });
-
-            // 显示关闭按钮
-            closeBtn.style.display = 'block';
         });
 
-        // 停止扫码功能
-        closeBtn.addEventListener('click', stopScanning);
-
-        function stopScanning() {
-            if (html5QrCode) {
-                html5QrCode.stop().then(() => {
-                    html5QrCode.clear(); // 清除扫码区域
-                }).catch(err => {
-                    console.error("停止摄像头失败：", err);
-                });
-            }
-            // 隐藏关闭按钮
-            closeBtn.style.display = 'none';
-        }
-
-        // 查询书籍位置
+        /*
         function searchBook(barcode) {
             if (barcode) {
                 fetch(`https://tiezheng.natapp4.cc/api/${barcode}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw response;
-                        }
-                        return response.json();
-                    })
+                    .then(response => response.json())
                     .then(data => {
-                        alert(`位置编码: ${data.shelfCode}\n位置名称: ${data.shelfName}\n书条码号: ${data.barcode}`);
+                        alert(`书名: ${data.title}\n位置: ${data.shelfName}\n条码号: ${data.barcode}`);
                     })
                     .catch(error => {
-                        if (error instanceof Response) {
-                            error.json().then(errData => {
-                                if (errData.error) {
-                                    alert(errData.error);
-                                } else {
-                                    alert("未知错误");
-                                }
-                            });
-                        } else {
-                            console.error("查询失败：", error);
-                            alert("查询失败，无法连接到服务");
-                        }
+                        console.error("查询失败：", error);
+                        alert("未找到匹配的书籍信息");
                     });
             }
         }
-
+        */
+		
+		function searchBook(barcode) {
+           if (barcode) {
+             fetch(`https://tiezheng.natapp4.cc/api/${barcode}`)
+            .then(response => {
+                // 首先检查响应的状态
+                if (!response.ok) {
+                    // 如果服务器响应不是2xx, 抛出异常将控制权转移到catch块
+                    throw response;
+                }
+                return response.json(); // 这里假设成功的响应总是返回JSON
+            })
+            .then(data => {
+                // 处理成功得到的数据
+                alert(`位置编码: ${data.shelfCode}\n位置名称: ${data.shelfName}\n书条码号: ${data.barcode}`);
+            })
+            .catch(error => {
+                // 检查error是否是因为fetch抛出的响应对象
+                if (error instanceof Response) {
+                    // 从响应中获取JSON数据，进一步处理错误信息
+                    error.json().then(errData => {
+                        if (errData.error) {
+                            alert(errData.error);
+                        } else {
+                            alert("未知错误");
+                        }
+                    });
+                } else {
+                    // 处理其他错误，如网络问题或无法联系服务器
+                    console.error("查询失败：", error);
+                    alert("查询失败，无法连接到服务");
+                }
+            });
+    }
+}
+		
         function triggerSearch() {
             searchBook(input.value);
         }
