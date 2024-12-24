@@ -56,22 +56,31 @@
                 $('#progressBarContainer').show();
                 $('#progressBar').css('width', '0%').text('文件上传中...');
 
+                let file = $('#fileInput')[0].files[0];
+                if (!file) {
+                    alert('请先选择文件');
+                    return;
+                }
+                console.log('准备上传文件: ', file.name);
+
                 let formData = new FormData();
-                formData.append('file', $('#fileInput')[0].files[0]);
+                formData.append('file', file);
 
                 // 提交文件并获取任务 ID
                 $.ajax({
-                    url: 'https://tiezheng.natapp4.cc/api/books/upload',
+                    url: 'https://tiezheng.natapp4.cc/api/books/upload', // 修改为后端实际接口地址
                     method: 'POST',
                     data: formData,
                     processData: false,
                     contentType: false,
                     success: function (response) {
-                        taskId = response.taskId; // 获取任务 ID
+                        console.log('成功获取任务 ID: ', response.taskId);
+                        taskId = response.taskId;
                         $('#progressBar').css('width', '20%').text('任务已提交...');
                         pollTaskStatus(); // 开始轮询任务状态
                     },
                     error: function (xhr) {
+                        console.error('上传失败: ', xhr);
                         $('#progressBar').css('width', '100%').addClass('bg-danger').text('任务提交失败');
                         alert('上传失败：' + (xhr.responseText || '请检查后端服务'));
                     }
@@ -80,6 +89,7 @@
 
             // 轮询任务状态
             function pollTaskStatus() {
+                console.log('开始轮询任务状态...');
                 const interval = setInterval(() => {
                     if (!taskId) {
                         clearInterval(interval);
@@ -90,6 +100,7 @@
                         url: `https://tiezheng.natapp4.cc/api/books/status/${taskId}`,
                         method: 'GET',
                         success: function (response) {
+                            console.log('任务状态: ', response);
                             const { status, total, completed } = response;
 
                             // 更新进度条
@@ -106,6 +117,7 @@
                             }
                         },
                         error: function (xhr) {
+                            console.error('轮询任务状态失败: ', xhr);
                             clearInterval(interval);
                             $('#progressBar').css('width', '100%').addClass('bg-danger').text('任务状态查询失败');
                             alert('状态查询失败：' + (xhr.responseText || '请检查后端服务'));
@@ -116,14 +128,15 @@
 
             // 获取任务结果
             function fetchTaskResult() {
+                console.log('开始获取任务结果...');
                 $.ajax({
                     url: `https://tiezheng.natapp4.cc/api/books/result/${taskId}`,
                     method: 'GET',
                     success: function (response) {
+                        console.log('任务完成，结果: ', response);
                         $('#progressBar').css('width', '100%').removeClass('bg-danger').addClass('bg-success').text('任务完成');
                         $('#resultBody').empty();
 
-                        // 显示分配结果
                         response.forEach(function (book) {
                             $('#resultBody').append(`
                                 <tr>
@@ -139,6 +152,7 @@
                         $('#clearBtn').show();
                     },
                     error: function (xhr) {
+                        console.error('获取任务结果失败: ', xhr);
                         $('#progressBar').css('width', '100%').addClass('bg-danger').text('任务结果获取失败');
                         alert('任务结果获取失败：' + (xhr.responseText || '请检查后端服务'));
                     }
@@ -168,4 +182,14 @@
             // 清除上传
             $('#clearBtn').click(function () {
                 $('#resultBody').empty();
-    
+                $('#resultTable').hide();
+                $('#exportBtn').hide();
+                $('#clearBtn').hide();
+                $('#fileInput').val('');
+                $('#progressBarContainer').hide();
+                taskId = null; // 重置任务 ID
+            });
+        });
+    </script>
+</body>
+</html>
