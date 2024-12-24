@@ -6,7 +6,7 @@
     <title>书籍位置分配系统</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <!-- 引入 SheetJS js-xlsx 库 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
 <body>
@@ -18,9 +18,15 @@
                 <button type="submit" class="btn btn-primary btn-block">上传并分配</button>
             </form>
         </div>
-        <div id="resultTable" class="mt-4">
+
+        <!-- 进度条 -->
+        <div class="progress mt-4" style="height: 20px; display: none;" id="progressBarContainer">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar" role="progressbar" style="width: 0%;">0%</div>
+        </div>
+
+        <div id="resultTable" class="mt-4" style="display: none;">
             <h5>分配结果</h5>
-            <table class="table table-bordered" id="exportableTable">
+            <table class="table table-bordered">
                 <thead>
                     <tr>
                         <th>条码号</th>
@@ -30,8 +36,8 @@
                 </thead>
                 <tbody id="resultBody"></tbody>
             </table>
-            <button class="btn btn-success" id="exportBtn">导出结果</button>
-            <button class="btn btn-secondary" id="clearBtn">清除此次上传</button>
+            <button class="btn btn-success" id="exportBtn" style="display: none;">导出结果</button>
+            <button class="btn btn-secondary" id="clearBtn" style="display: none;">清除此次上传</button>
         </div>
     </div>
 
@@ -39,6 +45,11 @@
         $(document).ready(function () {
             $('#uploadForm').on('submit', function (e) {
                 e.preventDefault();
+
+                // 显示进度条
+                $('#progressBarContainer').show();
+                $('#progressBar').css('width', '0%').text('0%');
+
                 let formData = new FormData();
                 formData.append('file', $('#fileInput')[0].files[0]);
 
@@ -48,38 +59,59 @@
                     data: formData,
                     processData: false,
                     contentType: false,
+                    xhr: function () {
+                        let xhr = new XMLHttpRequest();
+                        xhr.upload.addEventListener('progress', function (e) {
+                            if (e.lengthComputable) {
+                                let percentComplete = Math.round((e.loaded / e.total) * 100);
+                                $('#progressBar').css('width', percentComplete + '%').text(percentComplete + '%');
+                            }
+                        });
+                        return xhr;
+                    },
                     success: function (response) {
+                        // 处理成功的分配结果
                         $('#resultBody').empty();
                         response.forEach(function (book) {
-                            $('#resultBody').append(
-                                `<tr>
-                                    <td>'${book['条码号']}'</td>
+                            $('#resultBody').append(`
+                                <tr>
+                                    <td>${book['条码号']}</td>
                                     <td>${book['层架号编码']}</td>
                                     <td>${book['层架名']}</td>
-                                </tr>`
-                            );
+                                </tr>
+                            `);
                         });
+
+                        // 显示结果表格和操作按钮
                         $('#resultTable').show();
+                        $('#exportBtn').show();
+                        $('#clearBtn').show();
                     },
                     error: function (xhr) {
-					    let errorMessage = xhr.responseText ? xhr.responseText : '分配失败，请检查文件格式或后端服务';
-                        alert(errorMessage);
+                        // 显示详细的错误信息
+                        let errorMessage = xhr.responseText ? xhr.responseText : '分配失败，请检查文件格式或后端服务';
+                        alert('错误信息：' + errorMessage);
+                    },
+                    complete: function () {
+                        // 隐藏进度条
+                        $('#progressBarContainer').hide();
                     }
                 });
             });
 
-            $('#exportBtn').click(function() {
-                let wb = XLSX.utils.table_to_book(document.getElementById('exportableTable'), {
-                    sheet: "Sheet 1",
-                    raw: true // This tells SheetJS to create strings from the HTML
-                });
+            // 导出结果
+            $('#exportBtn').click(function () {
+                let wb = XLSX.utils.table_to_book(document.getElementById('resultTable'), { sheet: "Sheet 1" });
                 XLSX.writeFile(wb, 'Book_Allocation_Result.xlsx');
             });
 
-            $('#clearBtn').click(function() {
+            // 清除上传
+            $('#clearBtn').click(function () {
                 $('#resultBody').empty();
                 $('#resultTable').hide();
-                $('#fileInput').val(''); // Clear the input for next file selection
+                $('#exportBtn').hide();
+                $('#clearBtn').hide();
+                $('#fileInput').val('');
             });
         });
     </script>
