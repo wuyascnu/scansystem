@@ -128,36 +128,44 @@
 
             // 获取任务结果
             function fetchTaskResult() {
-                console.log('开始获取任务结果...');
-                $.ajax({
-                    url: `https://tiezheng.natapp4.cc/api/books/result/${taskId}`,
-                    method: 'GET',
-                    success: function (response) {
-                        console.log('任务完成，结果: ', response);
-                        $('#progressBar').css('width', '100%').removeClass('bg-danger').addClass('bg-success').text('任务完成');
-                        $('#resultBody').empty();
+    console.log('开始获取任务结果...');
+    $.ajax({
+        url: `https://tiezheng.natapp4.cc/api/books/result/${taskId}`,
+        method: 'GET',
+        success: function (response) {
+            console.log('任务完成，结果: ', response);
 
-                        response.forEach(function (book) {
-                            $('#resultBody').append(`
-                                <tr>
-                                    <td>${book['条码号']}</td>
-                                    <td>${book['层架号编码']}</td>
-                                    <td>${book['层架名']}</td>
-                                </tr>
-                            `);
-                        });
-
-                        $('#resultTable').show();
-                        $('#exportBtn').show();
-                        $('#clearBtn').show();
-                    },
-                    error: function (xhr) {
-                        console.error('获取任务结果失败: ', xhr);
-                        $('#progressBar').css('width', '100%').addClass('bg-danger').text('任务结果获取失败');
-                        alert('任务结果获取失败：' + (xhr.responseText || '请检查后端服务'));
-                    }
-                });
+            if (!Array.isArray(response)) {
+                alert('任务结果格式错误，无法解析！');
+                console.error('任务结果不是数组:', response);
+                return;
             }
+
+            $('#progressBar').css('width', '100%').removeClass('bg-danger').addClass('bg-success').text('任务完成');
+            $('#resultBody').empty();
+
+            response.forEach(function (book) {
+                $('#resultBody').append(`
+                    <tr>
+                        <td>${book['条码号']}</td>
+                        <td>${book['层架号编码']}</td>
+                        <td>${book['层架名']}</td>
+                    </tr>
+                `);
+            });
+
+            $('#resultTable').show();
+            $('#exportBtn').show();
+            $('#clearBtn').show();
+        },
+        error: function (xhr) {
+            console.error('获取任务结果失败: ', xhr);
+            $('#progressBar').css('width', '100%').addClass('bg-danger').text('任务结果获取失败');
+            alert('任务结果获取失败：' + (xhr.responseText || '请检查后端服务'));
+        }
+    });
+}
+
 
             // 导出结果
             $('#exportBtn').click(function () {
