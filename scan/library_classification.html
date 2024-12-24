@@ -26,6 +26,12 @@
         .mb-3 {
             margin-top: 20px; /* 增加按钮的上边距 */
         }
+		thead th {
+            position: sticky;
+            top: 0;
+            background-color: #fff; /* 确保背景不透明 */
+            z-index: 10; /* 高层次以确保滚动内容不会覆盖表头 */
+        }
     </style>
 </head>
 <body>
