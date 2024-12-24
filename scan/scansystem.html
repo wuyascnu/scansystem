@@ -108,7 +108,7 @@
             })
             .then(data => {
                 // 处理成功得到的数据
-                alert(`书名: ${data.title}\n位置: ${data.shelfName}\n条码号: ${data.barcode}`);
+                alert(`书名: ${data.shelfCode}\n位置: ${data.shelfName}\n条码号: ${data.barcode}`);
             })
             .catch(error => {
                 // 检查error是否是因为fetch抛出的响应对象
