@@ -25,8 +25,14 @@
         </div>
 
         <div id="resultTable" class="mt-4" style="display: none;">
-            <h5>分配结果</h5>
-            <table class="table table-bordered">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5>分配结果</h5>
+                <div>
+                    <button class="btn btn-success btn-sm" id="exportBtn" style="display: none;">导出结果</button>
+                    <button class="btn btn-secondary btn-sm" id="clearBtn" style="display: none;">清除此次上传</button>
+                </div>
+            </div>
+            <table class="table table-bordered mt-3">
                 <thead>
                     <tr>
                         <th>条码号</th>
@@ -36,8 +42,6 @@
                 </thead>
                 <tbody id="resultBody"></tbody>
             </table>
-            <button class="btn btn-success" id="exportBtn" style="display: none;">导出结果</button>
-            <button class="btn btn-secondary" id="clearBtn" style="display: none;">清除此次上传</button>
         </div>
     </div>
 
@@ -101,8 +105,25 @@
 
             // 导出结果
             $('#exportBtn').click(function () {
-                let wb = XLSX.utils.table_to_book(document.getElementById('resultTable'), { sheet: "Sheet 1" });
-                XLSX.writeFile(wb, 'Book_Allocation_Result.xlsx');
+                // 获取当前时间戳
+                const timestamp = new Date().toISOString().replace(/[-:T]/g, '').split('.')[0];
+
+                // 使用 SheetJS 导出表格
+                let wb = XLSX.utils.table_to_book(document.querySelector('table'), {
+                    sheet: "分配结果",
+                    raw: true, // 保留原始数据
+                });
+
+                // 避免条码号变成数字
+                const ws = wb.Sheets["分配结果"];
+                for (let cell in ws) {
+                    if (cell.startsWith('A') && ws[cell].t === 'n') { // A 列且是数字
+                        ws[cell].t = 's'; // 转为字符串
+                        ws[cell].v = ws[cell].v.toString().padStart(7, '0'); // 补充前导零
+                    }
+                }
+
+                XLSX.writeFile(wb, `Book_Allocation_Result_${timestamp}.xlsx`);
             });
 
             // 清除上传
