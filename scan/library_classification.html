@@ -599,15 +599,14 @@ $('#addBookAllocationBtn').click(function () {
 });
 
 // 编辑功能
-$('#editBookAllocationBtn').click(function () {
+$('#editAllocationBtn').click(function () {
     const selected = $('#bookAllocationTable').bootstrapTable('getSelections');
     if (selected.length === 1) {
         const row = selected[0];
         const updatedData = {
-            id: row.id,
-            barcode: prompt('修改条码号：', row.barcode),
-            shelfCode: prompt('修改层架号编码：', row.shelfCode),
-            shelfName: prompt('修改层架名：', row.shelfName)
+            barcode: prompt('请输入新的条码号：', row.barcode),
+            shelfCode: prompt('请输入新的层架号编码：', row.shelfCode),
+            shelfName: prompt('请输入新的层架名：', row.shelfName)
         };
 
         if (updatedData.barcode && updatedData.shelfCode && updatedData.shelfName) {
