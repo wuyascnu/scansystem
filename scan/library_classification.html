@@ -82,7 +82,7 @@
                         <thead>
                             <tr>
                                 <th data-checkbox="true"></th>
-                                <th data-field="classificationId">分类ID</th>
+                                <th data-field="classificationId">ID</th>
                                 <th data-field="classificationName">分类名称</th>
                                 <th data-field="classificationLetter">中图法分类字母</th>
                                 <th data-field="classificationDescription">分类描述</th>
@@ -126,6 +126,37 @@
                     </table>
                 </div>
             </div>
+			
+			        <!-- 图书位置分配信息 -->
+        <div class="tab-pane fade show active" id="book-allocation" role="tabpanel" aria-labelledby="book-allocation-tab">
+            <div class="mb-3">
+                <select id="filterTime" class="form-control w-auto d-inline-block">
+                    <option value="">全部分配时间</option>
+                </select>
+                <button class="btn btn-danger" id="clearByTimeBtn">清除当前分配时间数据</button>
+            </div>
+            <div class="table-container">
+                <table id="bookAllocationTable"
+                       data-toggle="table"
+                       data-pagination="true"
+                       data-search="true"
+                       data-url="/api/scanandprintsystem"
+                       data-side-pagination="server"
+                       data-id-field="id"
+                       data-method="GET">
+                    <thead>
+                    <tr>
+                        <th data-field="id">ID</th>
+                        <th data-field="barcode">条码号</th>
+                        <th data-field="shelfCode">层架号编码</th>
+                        <th data-field="shelfName">层架名</th>
+                        <th data-field="timestamp">分配时间</th>
+                        <th data-formatter="actionFormatter" data-events="actionEvents">操作</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
         </div>
     </div>
 
