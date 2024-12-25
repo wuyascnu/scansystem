@@ -126,6 +126,35 @@
                     </table>
                 </div>
             </div>
+			 <!-- 图书位置分配信息 -->
+           <div class="tab-pane fade" id="book-allocation" role="tabpanel" aria-labelledby="book-allocation-tab">
+               <div class="mb-3 text-center">
+                   <select id="allocationDateFilter" class="form-control" style="width: 200px; display: inline-block;">
+                       <option value="">选择分配时间</option>
+                   </select>
+                   <button id="clearDateBtn" class="btn btn-danger">清除某分配时间</button>
+                   <button id="refreshBookAllocationBtn" class="btn btn-secondary">刷新</button>
+               </div>
+               <div class="table-container">
+                   <table id="bookAllocationTable"
+                          data-toggle="table"
+                          data-url="https://tiezheng.natapp4.cc/api/book-allocation"
+                          data-search="true"
+                          data-pagination="true"
+                          data-click-to-select="true"
+                          data-id-field="id">
+                       <thead>
+                           <tr>
+                               <th data-field="id">ID</th>
+                               <th data-field="barcode">条码号</th>
+                               <th data-field="shelfCode">层架号编码</th>
+                               <th data-field="shelfName">层架名</th>
+                               <!--<th data-field="timestamp">分配时间</th>-->
+                           </tr>
+                       </thead>
+                   </table>
+               </div>
+           </div>
         </div>
     </div>
 
@@ -159,16 +188,30 @@
                     console.error('Failed to load shelf table:', status, jqXHR);
                 }
             });
+		
+		// Initialize shelf table
+            $('#bookAllocationTable').bootstrapTable({
+                onLoadSuccess: function (data) {
+                    console.log('Shelf table loaded successfully', data);
+                },
+                onLoadError: function (status, jqXHR) {
+                    console.error('Failed to load shelf table:', status, jqXHR);
+                }
+            });	
+			
+	     
+		
+		
 		 // Refresh Classification Table
-    $('#refreshClassificationBtn').click(function () {
-        $('#classificationTable').bootstrapTable('refresh');
-    });
+    $('#refreshClassificationBtn').click(function () {$('#classificationTable').bootstrapTable('refresh');});
 
-    // Refresh Shelf Table
-    $('#refreshShelfBtn').click(function () {
-        $('#shelfTable').bootstrapTable('refresh');
-    });	
-        //==================================classificationTable============================================
+        // Refresh Shelf Table
+    $('#refreshShelfBtn').click(function () {$('#shelfTable').bootstrapTable('refresh');});	
+
+        // Refresh BookAllocation Table
+    $('#refreshBookAllocationBtn').click(function () {$('#bookAllocationTable').bootstrapTable('refresh');});	
+    
+    //==================================classificationTable============================================
         // 新增功能
         $('#addBtn').click(function () {
             const newData = {
@@ -458,8 +501,45 @@ $('#importShelfBtn').click(function () {
 });
 
 		//==================================shelfTable============================================
-    });
-</script>
+		//================================bookAllocationTable===========================================
+	  // 日期过滤功能
+            $('#allocationDateFilter').change(function () {
+                const date = $(this).val();
+                const url = date ? `https://tiezheng.natapp4.cc/api/book-allocation?date=${date}` : 'https://tiezheng.natapp4.cc/api/book-allocation';
+                $('#bookAllocationTable').bootstrapTable('refresh', {url: url});
+            });
 
+      // 清除特定日期分配数据
+            $('#clearDateBtn').click(function () {
+                const date = $('#allocationDateFilter').val();
+                if (!date) {
+                    Swal.fire('请选择分配时间', '', 'warning');
+                    return;
+                }
+                Swal.fire({
+                    title: `确认清除${date}的数据？`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: `https://tiezheng.natapp4.cc/api/book-allocation/delete?date=${date}`,
+                            method: 'DELETE',
+                            success: function () {
+                                Swal.fire('删除成功', '', 'success');
+                                $('#bookAllocationTable').bootstrapTable('refresh');
+                            },
+                            error: function () {
+                                Swal.fire('删除失败', '', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+		//================================bookAllocationTable===========================================
+});
+</script>
 </body>
 </html>
