@@ -169,15 +169,16 @@
 	<!-- Import SweetAlert2 for better dialog -->
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
    <script>
-   function loadAllocationTimes() {
-    $.get('https://tiezheng.natapp4.cc/api/books/allocation_times', function(data) {
+   
+    function loadAllocationTimes() {
+    $.get('https://tiezheng.natapp4.cc/api/books/allocation_times', function (data) {
         const select = $('#allocationDateFilter');
-        select.empty(); // 清除旧的选项
+        select.empty(); // 清除旧选项
         select.append($('<option>', { value: '', text: '选择分配时间' }));
-        data.forEach(function(time) {
+        data.forEach(function (time) {
             select.append($('<option>', {
-                value: time,
-                text: new Date(time).toLocaleString() // 格式化时间
+                value: time, // 保留原始时间格式 (ISO 8601)
+                text: new Date(time).toLocaleString() // 显示为用户友好的本地时间格式
             }));
         });
     });
@@ -518,14 +519,24 @@ $('#importShelfBtn').click(function () {
     input.click();
 });
 
-		//==================================shelfTable============================================
-		//================================bookAllocationTable===========================================
-	  // 日期过滤功能
-            //$('#allocationDateFilter').change(function () {
-            //    const date = $(this).val();
-            //    const url = date ? `https://tiezheng.natapp4.cc/api/books/book-allocation?date=${date}` : 'https://tiezheng.natapp4.cc/api/books/book-allocation';
-            //    $('#bookAllocationTable').bootstrapTable('refresh', {url: url});
-            //});
+		 //==================================shelfTable============================================
+	    //================================bookAllocationTable===========================================
+	  // 监听分配时间选择事件
+   $('#allocationDateFilter').change(function () {
+       const selectedDate = $(this).val(); // 获取选中的时间值
+         if (selectedDate) {
+            // 构造筛选 API 的请求 URL
+           const url = `https://tiezheng.natapp4.cc/api/books/filter?timestamp=${selectedDate}`;
+        
+           // 刷新表格数据
+          $('#bookAllocationTable').bootstrapTable('refresh', { url: url });
+            } else {
+           // 如果未选择时间，刷新到原始数据
+          $('#bookAllocationTable').bootstrapTable('refresh', { url: 'https://tiezheng.natapp4.cc/api/books' });
+       }
+});
+
+	  
 
       // 清除特定日期分配数据
             $('#clearDateBtn').click(function () {
