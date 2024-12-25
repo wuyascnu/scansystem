@@ -570,6 +570,90 @@ $('#importShelfBtn').click(function () {
                     }
                 });
             });
+			
+// 新增功能
+$('#addBookAllocationBtn').click(function () {
+    const newData = {
+        barcode: prompt('请输入条码号：'),
+        shelfCode: prompt('请输入层架号编码：'),
+        shelfName: prompt('请输入层架名：')
+    };
+
+    if (newData.barcode && newData.shelfCode && newData.shelfName) {
+        $.ajax({
+            url: 'https://tiezheng.natapp4.cc/api/books',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(newData),
+            success: function () {
+                alert('新增成功！');
+                $('#bookAllocationTable').bootstrapTable('refresh');
+            },
+            error: function () {
+                alert('新增失败，请检查数据是否正确！');
+            }
+        });
+    } else {
+        alert('新增失败，请填写完整信息！');
+    }
+});
+
+// 编辑功能
+$('#editBookAllocationBtn').click(function () {
+    const selected = $('#bookAllocationTable').bootstrapTable('getSelections');
+    if (selected.length === 1) {
+        const row = selected[0];
+        const updatedData = {
+            id: row.id,
+            barcode: prompt('修改条码号：', row.barcode),
+            shelfCode: prompt('修改层架号编码：', row.shelfCode),
+            shelfName: prompt('修改层架名：', row.shelfName)
+        };
+
+        if (updatedData.barcode && updatedData.shelfCode && updatedData.shelfName) {
+            $.ajax({
+                url: `https://tiezheng.natapp4.cc/api/books/${row.id}`,
+                method: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(updatedData),
+                success: function () {
+                    alert('编辑成功！');
+                    $('#bookAllocationTable').bootstrapTable('refresh');
+                },
+                error: function () {
+                    alert('编辑失败，请检查数据是否正确！');
+                }
+            });
+        } else {
+            alert('编辑失败，请填写完整信息！');
+        }
+    } else {
+        alert('请选择一条记录进行编辑！');
+    }
+});
+
+// 删除功能
+$('#deleteBookAllocationBtn').click(function () {
+    const selected = $('#bookAllocationTable').bootstrapTable('getSelections');
+    if (selected.length === 1) {
+        const row = selected[0];
+        if (confirm(`确定要删除条码号为 "${row.barcode}" 的记录吗？`)) {
+            $.ajax({
+                url: `https://tiezheng.natapp4.cc/api/books/${row.id}`,
+                method: 'DELETE',
+                success: function () {
+                    alert('删除成功！');
+                    $('#bookAllocationTable').bootstrapTable('refresh');
+                },
+                error: function () {
+                    alert('删除失败，请检查数据是否正确！');
+                }
+            });
+        }
+    } else {
+        alert('请选择一条记录进行删除！');
+    }
+});
 		//================================bookAllocationTable===========================================
 });
 </script>
