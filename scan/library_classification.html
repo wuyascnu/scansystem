@@ -111,7 +111,7 @@
                            data-search="true"
                            data-pagination="true"
                            data-click-to-select="true"
-						   data-single-select="true"
+						   <!--data-single-select="true"-->
                            data-id-field="id">
                         <thead>
                             <tr>
@@ -438,10 +438,13 @@ $('#addShelfBtn').click(function () {
 
 $('#editShelfBtn').click(function () {
     const selected = $('#shelfTable').bootstrapTable('getSelections');
+	
     if (selected.length === 1) {
         handleShelfOperation(selected[0]); // Pass selected shelf for editing
+    } else if (selected.length === 0) {
+        Swal.fire('错误!', '请选择一条记录进行编辑。', 'error');
     } else {
-        alert('请选择一条记录进行编辑！');
+        Swal.fire('错误!', '只能选择一条记录进行编辑！', 'error');
     }
 });
 
