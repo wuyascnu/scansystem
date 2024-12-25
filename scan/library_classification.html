@@ -129,11 +129,14 @@
 			 <!-- 图书位置分配信息 -->
            <div class="tab-pane fade" id="book-allocation" role="tabpanel" aria-labelledby="book-allocation-tab">
                <div class="mb-3 text-center">
-                   <select id="allocationDateFilter" class="form-control" style="width: 200px; display: inline-block;">
-                       <option value="">选择分配时间</option>
-                   </select>
-                   <button id="clearDateBtn" class="btn btn-danger">清除某分配时间</button>
-                   <button id="refreshBookAllocationBtn" class="btn btn-secondary">刷新</button>
+                  <select id="allocationDateFilter" class="form-control" style="width: 200px; display: inline-block;">
+                         <option value="">选择分配时间</option>
+                  </select>
+                  <button id="addBookAllocationBtn" class="btn btn-success">新增</button>
+                  <button id="editBookAllocationBtn" class="btn btn-primary">编辑</button>
+                  <button id="deleteBookAllocationBtn" class="btn btn-danger">删除</button>
+                  <button id="clearDateBtn" class="btn btn-danger">清除某分配时间</button>
+                  <button id="refreshBookAllocationBtn" class="btn btn-secondary">刷新</button>
                </div>
                <div class="table-container">
                    <table id="bookAllocationTable"
