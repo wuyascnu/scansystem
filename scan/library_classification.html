@@ -505,7 +505,7 @@ $('#importShelfBtn').click(function () {
 	  // 日期过滤功能
             $('#allocationDateFilter').change(function () {
                 const date = $(this).val();
-                const url = date ? `https://tiezheng.natapp4.cc/api/book-allocation?date=${date}` : 'https://tiezheng.natapp4.cc/api/book-allocation';
+                const url = date ? `https://tiezheng.natapp4.cc/api/books/book-allocation?date=${date}` : 'https://tiezheng.natapp4.cc/api/books/book-allocation';
                 $('#bookAllocationTable').bootstrapTable('refresh', {url: url});
             });
 
@@ -525,7 +525,7 @@ $('#importShelfBtn').click(function () {
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: `https://tiezheng.natapp4.cc/api/book-allocation/delete?date=${date}`,
+                            url: `https://tiezheng.natapp4.cc/api/books/book-allocation/delete?date=${date}`,
                             method: 'DELETE',
                             success: function () {
                                 Swal.fire('删除成功', '', 'success');
