@@ -557,7 +557,7 @@ $('#importShelfBtn').click(function () {
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: `https://tiezheng.natapp4.cc/api/books/book-allocation/delete?date=${date}`,
+                            url: `https://tiezheng.natapp4.cc/api/books/delete?date=${date}`,
                             method: 'DELETE',
                             success: function () {
                                 Swal.fire('删除成功', '', 'success');
