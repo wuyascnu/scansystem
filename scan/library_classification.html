@@ -253,8 +253,12 @@
                         alert('新增成功！');
                         $('#classificationTable').bootstrapTable('refresh');
                     },
-                    error: function () {
-                        alert('新增失败，请检查数据是否正确！');
+                    error: function (xhr) {
+					if (xhr.status === 403) { // 捕获 403 状态码
+							 alert('访问被拒绝", xhr.responseText || "您无权访问该资源！');
+                             } else {
+                          alert('新增失败，请检查数据是否正确！');
+                          }
                     }
                 });
             } else {
