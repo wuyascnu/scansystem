@@ -40,6 +40,11 @@
             max-width: 400px;
             margin: 10px auto;
         }
+        #status {
+            text-align: center;
+            margin-top: 10px;
+            color: #555;
+        }
     </style>
 </head>
 <body>
@@ -48,95 +53,116 @@
     <div id="controls">
         <input type="text" id="barcodeInput" placeholder="输入条码或扫码" onblur="triggerSearch()" onkeyup="handleKeyUp(event)">
         <button id="startScanBtn">启动摄像头扫描</button>
+        <button id="stopScanBtn" style="display:none;">停止扫描</button>
     </div>
-    <div id="reader"></div> <!-- 扫描框显示位置 -->
+    <div id="reader"></div>
+    <div id="status"></div>
 
     <script src="./js/html5-qrcode.min.js"></script>
     <script>
-       const input = document.getElementById('barcodeInput');
-const startScanBtn = document.getElementById('startScanBtn');
-let html5QrCode;
-let isFetching = false; // 防止重复请求
-let debounceTimer;
+        const input = document.getElementById('barcodeInput');
+        const startScanBtn = document.getElementById('startScanBtn');
+        const stopScanBtn = document.getElementById('stopScanBtn');
+        const status = document.getElementById('status');
+        let html5QrCode;
+        let isFetching = false; // 防止重复请求
+        let debounceTimer;
 
-function debounceSearch(callback, delay = 500) {
-    return function(...args) {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            callback(...args);
-        }, delay);
-    };
-}
+        function debounceSearch(callback, delay = 500) {
+            return function(...args) {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    callback(...args);
+                }, delay);
+            };
+        }
 
-function searchBook(barcode) {
-    if (!barcode) return;
-    if (isFetching) return;
+        function searchBook(barcode) {
+            if (!barcode) return;
+            if (isFetching) return;
 
-    isFetching = true;
-    fetch(`https://tiezheng.natapp4.cc/api/${barcode}`)
-        .then(response => {
-            isFetching = false;
-            if (!response.ok) {
-                throw response;
-            }
-            return response.json();
-        })
-        .then(data => {
-            alert(`位置编码: ${data.shelfCode}\n位置名称: ${data.shelfName}\n书条码号: ${data.barcode}`);
-        })
-        .catch(error => {
-            isFetching = false;
-            if (error instanceof Response) {
-                error.json().then(errData => {
-                    alert(errData.error || "未知错误");
+            isFetching = true;
+            fetch(`https://tiezheng.natapp4.cc/api/${barcode}`)
+                .then(response => {
+                    isFetching = false;
+                    if (!response.ok) {
+                        throw response;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(`位置编码: ${data.shelfCode}\n位置名称: ${data.shelfName}\n书条码号: ${data.barcode}`);
+                })
+                .catch(error => {
+                    isFetching = false;
+                    if (error instanceof Response) {
+                        error.json().then(errData => {
+                            alert(errData.error || "未知错误");
+                        });
+                    } else {
+                        console.error("查询失败：", error);
+                        alert("查询失败，无法连接到服务");
+                    }
                 });
-            } else {
-                console.error("查询失败：", error);
-                alert("查询失败，无法连接到服务");
+        }
+
+        function triggerSearch() {
+            const value = input.value.trim();
+            if (value) {
+                searchBook(value);
+            }
+        }
+
+        const debouncedTriggerSearch = debounceSearch(triggerSearch, 500);
+
+        function handleKeyUp(event) {
+            if (event.key === 'Enter') {
+                debouncedTriggerSearch();
+            }
+        }
+
+        input.addEventListener('keyup', handleKeyUp);
+        input.addEventListener('blur', debouncedTriggerSearch);
+
+        startScanBtn.addEventListener('click', function() {
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            html5QrCode.start(
+                { facingMode: "environment" },
+                config,
+                function(decodedText, decodedResult) {
+                    console.log("扫描到结果：", decodedText);
+                    input.value = decodedText;
+                    searchBook(decodedText);
+                    status.innerHTML = '扫描成功，正在查询书籍...';
+                },
+                function(errorMessage) {
+                    status.innerHTML = '扫描中...';
+                    console.log("扫描中...", errorMessage);
+                }
+            ).catch(err => {
+                alert("无法启动摄像头：" + err);
+            });
+
+            // 隐藏开始按钮，显示停止按钮
+            startScanBtn.style.display = 'none';
+            stopScanBtn.style.display = 'inline';
+        });
+
+        stopScanBtn.addEventListener('click', function() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    console.log('摄像头已停止');
+                    status.innerHTML = '摄像头已停止';
+                    startScanBtn.style.display = 'inline';
+                    stopScanBtn.style.display = 'none';
+                }).catch(err => {
+                    console.error("停止摄像头失败：", err);
+                });
             }
         });
-}
-
-function triggerSearch() {
-    const value = input.value.trim();
-    if (value) {
-        searchBook(value);
-    }
-}
-
-const debouncedTriggerSearch = debounceSearch(triggerSearch, 500);
-
-function handleKeyUp(event) {
-    if (event.key === 'Enter') {
-        debouncedTriggerSearch();
-    }
-}
-
-input.addEventListener('keyup', handleKeyUp);
-input.addEventListener('blur', debouncedTriggerSearch);
-
-startScanBtn.addEventListener('click', function() {
-    if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("reader");
-    }
-    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-    html5QrCode.start(
-        { facingMode: "environment" },
-        config,
-        function(decodedText, decodedResult) {
-            console.log("扫描到结果：", decodedText);
-            input.value = decodedText;
-            searchBook(decodedText);
-            html5QrCode.stop();
-        },
-        function(errorMessage) {
-            console.log("扫描中...", errorMessage);
-        }
-    ).catch(err => {
-        alert("无法启动摄像头：" + err);
-    });
-});
-
     </script>
 </body>
 </html>
