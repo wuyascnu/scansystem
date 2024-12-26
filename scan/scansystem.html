@@ -53,92 +53,90 @@
 
     <script src="./js/html5-qrcode.min.js"></script>
     <script>
-        const input = document.getElementById('barcodeInput');
-        const startScanBtn = document.getElementById('startScanBtn');
-        let html5QrCode;
+       const input = document.getElementById('barcodeInput');
+const startScanBtn = document.getElementById('startScanBtn');
+let html5QrCode;
+let isFetching = false; // 防止重复请求
+let debounceTimer;
 
-        startScanBtn.addEventListener('click', function() {
-            if (!html5QrCode) {
-                html5QrCode = new Html5Qrcode("reader");
+function debounceSearch(callback, delay = 500) {
+    return function(...args) {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            callback(...args);
+        }, delay);
+    };
+}
+
+function searchBook(barcode) {
+    if (!barcode) return;
+    if (isFetching) return;
+
+    isFetching = true;
+    fetch(`https://tiezheng.natapp4.cc/api/${barcode}`)
+        .then(response => {
+            isFetching = false;
+            if (!response.ok) {
+                throw response;
             }
-            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-            html5QrCode.start(
-                { facingMode: "environment" },
-                config,
-                function(decodedText, decodedResult) {
-                    console.log("扫描到结果：", decodedText);
-                    input.value = decodedText;
-                    searchBook(decodedText);
-                    html5QrCode.stop();
-                },
-                function(errorMessage) {
-                    console.log("扫描中...", errorMessage);
-                }
-            ).catch(err => {
-                alert("无法启动摄像头：" + err);
-            });
+            return response.json();
+        })
+        .then(data => {
+            alert(`位置编码: ${data.shelfCode}\n位置名称: ${data.shelfName}\n书条码号: ${data.barcode}`);
+        })
+        .catch(error => {
+            isFetching = false;
+            if (error instanceof Response) {
+                error.json().then(errData => {
+                    alert(errData.error || "未知错误");
+                });
+            } else {
+                console.error("查询失败：", error);
+                alert("查询失败，无法连接到服务");
+            }
         });
+}
 
-        /*
-        function searchBook(barcode) {
-            if (barcode) {
-                fetch(`https://tiezheng.natapp4.cc/api/${barcode}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        alert(`书名: ${data.title}\n位置: ${data.shelfName}\n条码号: ${data.barcode}`);
-                    })
-                    .catch(error => {
-                        console.error("查询失败：", error);
-                        alert("未找到匹配的书籍信息");
-                    });
-            }
-        }
-        */
-		
-		function searchBook(barcode) {
-           if (barcode) {
-             fetch(`https://tiezheng.natapp4.cc/api/${barcode}`)
-            .then(response => {
-                // 首先检查响应的状态
-                if (!response.ok) {
-                    // 如果服务器响应不是2xx, 抛出异常将控制权转移到catch块
-                    throw response;
-                }
-                return response.json(); // 这里假设成功的响应总是返回JSON
-            })
-            .then(data => {
-                // 处理成功得到的数据
-                alert(`位置编码: ${data.shelfCode}\n位置名称: ${data.shelfName}\n书条码号: ${data.barcode}`);
-            })
-            .catch(error => {
-                // 检查error是否是因为fetch抛出的响应对象
-                if (error instanceof Response) {
-                    // 从响应中获取JSON数据，进一步处理错误信息
-                    error.json().then(errData => {
-                        if (errData.error) {
-                            alert(errData.error);
-                        } else {
-                            alert("未知错误");
-                        }
-                    });
-                } else {
-                    // 处理其他错误，如网络问题或无法联系服务器
-                    console.error("查询失败：", error);
-                    alert("查询失败，无法连接到服务");
-                }
-            });
+function triggerSearch() {
+    const value = input.value.trim();
+    if (value) {
+        searchBook(value);
     }
 }
-		
-        function triggerSearch() {
-            searchBook(input.value);
-        }
 
-        function handleKeyUp(event) {
-            if (event.key === 'Enter') {
-                searchBook(input.value);
-            }
+const debouncedTriggerSearch = debounceSearch(triggerSearch, 500);
+
+function handleKeyUp(event) {
+    if (event.key === 'Enter') {
+        debouncedTriggerSearch();
+    }
+}
+
+input.addEventListener('keyup', handleKeyUp);
+input.addEventListener('blur', debouncedTriggerSearch);
+
+startScanBtn.addEventListener('click', function() {
+    if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("reader");
+    }
+    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+    html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        function(decodedText, decodedResult) {
+            console.log("扫描到结果：", decodedText);
+            input.value = decodedText;
+            searchBook(decodedText);
+            html5QrCode.stop();
+        },
+        function(errorMessage) {
+            console.log("扫描中...", errorMessage);
         }
+    ).catch(err => {
+        alert("无法启动摄像头：" + err);
+    });
+});
+
     </script>
 </body>
 </html>
