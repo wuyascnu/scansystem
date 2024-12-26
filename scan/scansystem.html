@@ -45,6 +45,20 @@
             margin-top: 10px;
             color: #555;
         }
+        /* 自定义弹出框样式 */
+        #alertBox {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            display: none;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -57,6 +71,7 @@
     </div>
     <div id="reader"></div>
     <div id="status"></div>
+    <div id="alertBox"></div> <!-- 自定义alert框 -->
 
     <script src="./js/html5-qrcode.min.js"></script>
     <script>
@@ -64,9 +79,15 @@
         const startScanBtn = document.getElementById('startScanBtn');
         const stopScanBtn = document.getElementById('stopScanBtn');
         const status = document.getElementById('status');
+        const alertBox = document.getElementById('alertBox'); // 自定义弹框
         let html5QrCode;
         let isFetching = false; // 防止重复请求
         let debounceTimer;
+
+        // 页面加载后自动聚焦文本框
+        window.onload = function() {
+            input.focus();
+        };
 
         function debounceSearch(callback, delay = 500) {
             return function(...args) {
@@ -91,17 +112,17 @@
                     return response.json();
                 })
                 .then(data => {
-                    alert(`位置编码: ${data.shelfCode}\n位置名称: ${data.shelfName}\n书条码号: ${data.barcode}`);
+                    showAlert(`位置编码: ${data.shelfCode}\n位置名称: ${data.shelfName}\n书条码号: ${data.barcode}`);
                 })
                 .catch(error => {
                     isFetching = false;
                     if (error instanceof Response) {
                         error.json().then(errData => {
-                            alert(errData.error || "未知错误");
+                            showAlert(errData.error || "未知错误");
                         });
                     } else {
                         console.error("查询失败：", error);
-                        alert("查询失败，无法连接到服务");
+                        showAlert("查询失败，无法连接到服务");
                     }
                 });
         }
@@ -163,6 +184,17 @@
                 });
             }
         });
+
+        // 显示自定义弹框并自动关闭
+        function showAlert(message) {
+            alertBox.textContent = message;
+            alertBox.style.display = 'block';
+
+            // 5秒后自动关闭
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
     </script>
 </body>
 </html>
