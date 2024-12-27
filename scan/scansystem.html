@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>图书馆书籍位置查询系统</title>
+    <title>书籍位置查询系统</title>
     <style>
         body {
             margin: 0;
@@ -61,12 +61,14 @@
             z-index: 1000;
             min-width: 300px; /* 增加弹框宽度 */
             text-align: center;
+            white-space: pre-wrap; /* 允许换行 */
+            word-wrap: break-word; /* 长词换行 */
         }
     </style>
 </head>
 <body>
     <div id="header"></div>
-    <h3>图书馆书籍位置查询系统</h3>
+    <h3>铁铮图书馆书籍位置查询系统</h3>
     <div id="controls">
         <input type="text" id="barcodeInput" placeholder="输入条码或扫码" onblur="triggerSearch()" onkeyup="handleKeyUp(event)">
         <button id="startScanBtn">启动摄像头扫描</button>
