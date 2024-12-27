@@ -53,16 +53,27 @@
             transform: translateX(-50%);
             background-color: #f8d7da;
             color: #721c24;
-            padding: 30px;  /* 增加内边距 */
-            font-size: 24px;  /* 增加字体大小 */
+            padding: 20px;
+            font-size: 24px;
             border: 1px solid #f5c6cb;
             border-radius: 10px;
             display: none;
             z-index: 1000;
-            min-width: 400px;  /* 增加弹框宽度 */
-            text-align: left;  /* 左对齐 */
-            white-space: pre-wrap;  /* 允许换行 */
-            word-wrap: break-word;  /* 长词换行 */
+            max-width: 90%; /* 自适应宽度，最多占屏幕的90% */
+            width: 400px;  /* 默认宽度 */
+            text-align: left;
+            white-space: pre-wrap; /* 允许换行 */
+            word-wrap: break-word; /* 长词换行 */
+        }
+
+        /* 自适应移动端 */
+        @media (max-width: 600px) {
+            #alertBox {
+                font-size: 18px;  /* 调整移动端字体大小 */
+                padding: 15px;    /* 调整内边距 */
+                width: 90%;       /* 使宽度占据90%屏幕 */
+                max-width: 90%;   /* 限制最大宽度为90% */
+            }
         }
     </style>
 </head>
