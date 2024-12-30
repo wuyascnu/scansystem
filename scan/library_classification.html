@@ -188,21 +188,23 @@
 
 
    //统一的密钥验证函数
-   function verifySecretKey(callback) {
+   // 统一的密钥验证函数
+function verifySecretKey(callback) {
     Swal.fire({
         title: '请输入操作密钥',
         input: 'password',
         inputLabel: '密钥',
         inputPlaceholder: '请输入密钥',
         inputAttributes: {
-            autocapitalize: 'off'
+            autocapitalize: 'off',
         },
         showCancelButton: true,
         confirmButtonText: '确认',
         cancelButtonText: '取消',
         showLoaderOnConfirm: true,
         preConfirm: (key) => {
-            return fetch('https://tiezheng.natapp4.cc/api/verify-key', { // 替换为后端验证密钥的接口地址
+            return fetch('https://tiezheng.natapp4.cc/api/verify-key', {
+                // 替换为后端验证密钥的接口地址
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -228,13 +230,25 @@
                     return false;
                 });
         },
-        allowOutsideClick: () => !Swal.isLoading()
+        allowOutsideClick: () => !Swal.isLoading(),
     }).then((result) => {
         if (result.isConfirmed && result.value) {
-            callback(); // 执行通过验证后的操作
+            // 显示成功提示框并自动关闭
+            Swal.fire({
+                title: '密钥验证成功！',
+                icon: 'success',
+                timer: 3000, // 3 秒后自动关闭
+                showConfirmButton: false, // 不显示确认按钮
+            });
+
+            // 等待提示框关闭后再执行回调
+            setTimeout(() => {
+                callback(); // 执行通过验证后的操作
+            }, 3000);
         }
     });
 }
+
    
     //初始化  
    $(document).ready(function () {
