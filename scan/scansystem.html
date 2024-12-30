@@ -164,6 +164,7 @@
         // 每次扫码时清空输入框，确保是覆盖输入
         function clearInputOnFocus() {
             input.value = ''; // 当输入框获取焦点时清空内容
+            input.setSelectionRange(0, 0); // 重置光标到输入框开头
         }
 
         startScanBtn.addEventListener('click', function() {
@@ -177,6 +178,7 @@
                 function(decodedText, decodedResult) {
                     console.log("扫描到结果：", decodedText);
                     input.value = decodedText; // 扫描到条码时直接覆盖输入框内容
+                    input.setSelectionRange(0, 0); // 扫描后将光标移到输入框开头
                     searchBook(decodedText);
                     status.innerHTML = '扫描成功，正在查询书籍...';
                 },
