@@ -187,8 +187,7 @@
 }
 
 
-   //统一的密钥验证函数
-   // 统一的密钥验证函数
+ // 统一的密钥验证函数
 function verifySecretKey(callback) {
     Swal.fire({
         title: '请输入操作密钥',
@@ -204,7 +203,6 @@ function verifySecretKey(callback) {
         showLoaderOnConfirm: true,
         preConfirm: (key) => {
             return fetch('https://tiezheng.natapp4.cc/api/verify-key', {
-                // 替换为后端验证密钥的接口地址
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -233,18 +231,17 @@ function verifySecretKey(callback) {
         allowOutsideClick: () => !Swal.isLoading(),
     }).then((result) => {
         if (result.isConfirmed && result.value) {
-            // 显示成功提示框并自动关闭
+            // 显示验证成功的提示框
             Swal.fire({
                 title: '密钥验证成功！',
                 icon: 'success',
                 timer: 3000, // 3 秒后自动关闭
-                showConfirmButton: false, // 不显示确认按钮
+                showConfirmButton: false,
+                willClose: () => {
+                    // 提示框关闭后执行回调操作
+                    callback();
+                },
             });
-
-            // 等待提示框关闭后再执行回调
-            setTimeout(() => {
-                callback(); // 执行通过验证后的操作
-            }, 3000);
         }
     });
 }
@@ -332,14 +329,15 @@ function verifySecretKey(callback) {
             }
         });
 */
-        $('#addBtn').click(function () {
+  // 新增按钮点击事件
+$('#addBtn').click(function () {
     verifySecretKey(() => {
         // 在这里执行新增操作
         const newData = {
             classificationName: prompt('请输入分类名称：'),
             classificationLetter: prompt('请输入中图法分类字母：'),
             classificationDescription: prompt('请输入分类描述：'),
-            shelfNumber: prompt('请输入书架号：')
+            shelfNumber: prompt('请输入书架号：'),
         };
 
         if (newData.classificationName && newData.classificationLetter && newData.classificationDescription && newData.shelfNumber) {
@@ -349,15 +347,15 @@ function verifySecretKey(callback) {
                 contentType: 'application/json',
                 data: JSON.stringify(newData),
                 success: function () {
-                    alert('新增成功！');
+                    Swal.fire('新增成功！', '', 'success');
                     $('#classificationTable').bootstrapTable('refresh');
                 },
                 error: function () {
-                    alert('新增失败，请检查数据是否正确！');
-                }
+                    Swal.fire('新增失败，请检查数据是否正确！', '', 'error');
+                },
             });
         } else {
-            alert('新增失败，请填写完整信息！');
+            Swal.fire('新增失败，请填写完整信息！', '', 'error');
         }
     });
 });
