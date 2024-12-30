@@ -161,7 +161,7 @@
         input.addEventListener('keyup', handleKeyUp);
         input.addEventListener('blur', debouncedTriggerSearch);
 
-        // 每次扫码时清空输入框
+        // 每次扫码时清空输入框，确保是覆盖输入
         function clearInputOnFocus() {
             input.value = ''; // 当输入框获取焦点时清空内容
         }
