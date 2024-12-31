@@ -177,12 +177,17 @@
                 config,
                 function(decodedText, decodedResult) {
                     console.log("扫描到结果：", decodedText);
+
+                    // 处理扫码枪输入的条码覆盖问题
                     input.value = decodedText; // 扫描到条码时直接覆盖输入框内容
                     input.setSelectionRange(0, 0); // 扫描后将光标移到输入框开头
                     searchBook(decodedText);
                     status.innerHTML = '扫描成功，正在查询书籍...';
-                    // 清除上一本书条码号
-                    input.value = '';  // 确保扫码后清除输入框，避免上一条码号残留
+
+                    // 清除输入框内容并确保光标回到最前面
+                    input.value = '';  // 清空条码号
+                    input.focus(); // 确保光标在输入框
+                    input.setSelectionRange(0, 0); // 设置光标位置为开头
                 },
                 function(errorMessage) {
                     status.innerHTML = '扫描中...';
