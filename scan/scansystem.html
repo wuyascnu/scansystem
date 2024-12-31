@@ -118,6 +118,9 @@
             if (!barcode) return;
             if (isFetching) return;
 
+            // 清空输入框
+            input.value = ''; 
+
             isFetching = true;
             fetch(`https://tiezheng.natapp4.cc/api/${barcode}`)
                 .then(response => {
@@ -128,8 +131,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    // 先清空输入框再弹出结果框
-                    input.value = ''; // 清空输入框
+                    // 如果查询成功，显示结果框
                     showAlert(`位置编码: ${data.shelfCode}\n位置名称: ${data.shelfName}\n书条码号: ${data.barcode}`);
                 })
                 .catch(error => {
@@ -140,7 +142,8 @@
                         });
                     } else {
                         console.error("查询失败：", error);
-                        showAlert("查询失败，无法连接到服务");
+                        // 如果查询失败，弹出错误框并清空文本框
+                        showAlert("未找到匹配的书籍信息");
                     }
                 });
         }
