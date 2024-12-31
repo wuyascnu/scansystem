@@ -181,6 +181,8 @@
                     input.setSelectionRange(0, 0); // 扫描后将光标移到输入框开头
                     searchBook(decodedText);
                     status.innerHTML = '扫描成功，正在查询书籍...';
+                    // 清除上一本书条码号
+                    input.value = '';  // 确保扫码后清除输入框，避免上一条码号残留
                 },
                 function(errorMessage) {
                     status.innerHTML = '扫描中...';
