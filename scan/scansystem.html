@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>书籍位置查询系统</title>
+    <title>书籍信息采集系统</title>
     <style>
         body {
             margin: 0;
@@ -26,7 +26,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
         }
         input, button {
             width: 90%;
@@ -34,6 +34,11 @@
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            background-color: #fff;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #f1f1f1;
         }
         #reader {
             width: 100%;
@@ -45,63 +50,62 @@
             margin-top: 10px;
             color: #555;
         }
-        /* 自定义弹出框样式 */
         #alertBox {
             position: fixed;
-            top: 20%; /* 距离顶部20% */
+            top: 20%;
             left: 50%;
-            transform: translateX(-50%); /* 确保居中 */
+            transform: translateX(-50%);
             background-color: #f8d7da;
             color: #721c24;
-            padding: 30px; /* 适当调整内边距 */
-            font-size: 24px; /* 调整字体大小 */
+            padding: 30px;
+            font-size: 24px;
             font-weight: bold;
             border: 2px solid #f5c6cb;
             border-radius: 15px;
             display: none;
             z-index: 1000;
-            width: 50%; /* 弹框宽度占屏幕的50% */
-            min-width: 280px; /* 最小宽度设为280px */
-            max-width: 500px; /* 最大宽度设为500px */
+            width: 50%;
+            min-width: 280px;
+            max-width: 500px;
             text-align: left;
-            white-space: pre-wrap; /* 允许换行 */
-            word-wrap: break-word; /* 长词换行 */
-            margin: 0 auto; /* 使用auto左右居中 */
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0 auto;
         }
-
-        /* 自适应移动端 */
         @media (max-width: 600px) {
             #alertBox {
-                font-size: 18px;  /* 调整移动端字体大小 */
-                padding: 20px;    /* 调整内边距 */
-                width: 80%;       /* 使宽度占据屏幕80% */
-                max-width: 90%;   /* 限制最大宽度为90% */
-                top: 30%;         /* 使弹框距顶部30% */
+                font-size: 18px;
+                padding: 20px;
+                width: 80%;
+                max-width: 90%;
+                top: 30%;
             }
         }
     </style>
 </head>
 <body>
     <div id="header"></div>
-    <h3>铁铮图书馆书籍位置查询系统</h3>
+    <h3>书籍信息采集系统</h3>
     <div id="controls">
-        <input type="text" id="barcodeInput" placeholder="输入条码或扫码" onfocus="clearInputOnFocus()" onblur="triggerSearch()" onkeyup="handleKeyUp(event)">
+        <input type="text" id="isbnInput" placeholder="请输入ISBN" onfocus="clearInputOnFocus()" onblur="triggerSearch()" onkeyup="handleKeyUp(event)">
         <button id="startScanBtn">启动摄像头扫描</button>
         <button id="stopScanBtn" style="display:none;">停止扫描</button>
+        <button id="exportBtn">导出今日采集数据</button>
     </div>
     <div id="reader"></div>
     <div id="status"></div>
-    <div id="alertBox"></div> <!-- 自定义弹框 -->
+    <div id="alertBox"></div>
 
-    <script src="./js/html5-qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
     <script>
-        const input = document.getElementById('barcodeInput');
+        const input = document.getElementById('isbnInput');
         const startScanBtn = document.getElementById('startScanBtn');
         const stopScanBtn = document.getElementById('stopScanBtn');
+        const exportBtn = document.getElementById('exportBtn');
         const status = document.getElementById('status');
-        const alertBox = document.getElementById('alertBox'); // 自定义弹框
+        const alertBox = document.getElementById('alertBox');
         let html5QrCode;
-        let isFetching = false; // 防止重复请求
+        let isFetching = false;
         let debounceTimer;
 
         // 页面加载后自动聚焦文本框
@@ -118,38 +122,54 @@
             };
         }
 
-        function searchBook(barcode) {
-            if (!barcode) return;
+        function searchBook(isbn) {
+            if (!isbn) return;
             if (isFetching) return;
 
-            // 清空输入框
-            input.value = ''; 
-
+            input.value = ''; // 清空输入框
             isFetching = true;
-            fetch(`https://tiezheng.natapp4.cc/api/${barcode}`)
-                .then(response => {
-                    isFetching = false;
-                    if (!response.ok) {
-                        throw response;
-                    }
-                    return response.json();
+            fetch(`https://lib.nuotu.net/api/catalogue/queryIsbn`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bookIsbn: isbn, graspNetworkImg: true, getGroupLibCatalogue: false })
+            })
+            .then(response => response.json())
+            .then(data => {
+                isFetching = false;
+                if (data.rtcode === '000') {
+                    const book = data.data.z39list[0];
+                    showAlert(`书名: ${book.bookName}\n价格: ${book.bookPrice}\n出版社: ${book.publishingCompany}\n出版时间: ${book.publishTime}`);
+                    saveBookInfo(book);
+                } else {
+                    showAlert("未找到书籍信息");
+                }
+            })
+            .catch(error => {
+                isFetching = false;
+                showAlert("查询失败");
+            });
+        }
+
+        function saveBookInfo(book) {
+            fetch('/api/saveBookInfo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    isbn: book.bookIsbn,
+                    title: book.bookName,
+                    price: book.bookPrice,
+                    publisher: book.publishingCompany,
+                    publishTime: book.publishTime,
+                    pages: book.bookPages,
+                    timestamp: new Date().toISOString()
                 })
-                .then(data => {
-                    // 如果查询成功，显示结果框
-                    showAlert(`位置编码: ${data.shelfCode}\n位置名称: ${data.shelfName}\n书条码号: ${data.barcode}`);
-                })
-                .catch(error => {
-                    isFetching = false;
-                    if (error instanceof Response) {
-                        error.json().then(errData => {
-                            showAlert(errData.error || "未知错误");
-                        });
-                    } else {
-                        console.error("查询失败：", error);
-                        // 如果查询失败，弹出错误框并清空文本框
-                        showAlert("未找到匹配的书籍信息");
-                    }
-                });
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+                input.focus();
+            })
+            .catch(err => alert("保存失败"));
         }
 
         function triggerSearch() {
@@ -170,10 +190,9 @@
         input.addEventListener('keyup', handleKeyUp);
         input.addEventListener('blur', debouncedTriggerSearch);
 
-        // 每次扫码时清空输入框，确保是覆盖输入
         function clearInputOnFocus() {
-            input.value = ''; // 当输入框获取焦点时清空内容
-            input.setSelectionRange(0, 0); // 重置光标到输入框开头
+            input.value = '';
+            input.setSelectionRange(0, 0);
         }
 
         startScanBtn.addEventListener('click', function() {
@@ -184,17 +203,11 @@
             html5QrCode.start(
                 { facingMode: "environment" },
                 config,
-                function(decodedText, decodedResult) {
-                    console.log("扫描到结果：", decodedText);
-
-                    // 扫描到条码时清空输入框内容并聚焦
-                    input.value = ''; // 清空条码框
-                    input.focus();    // 聚焦输入框
-
-                    // 显示弹出框并查询
+                function(decodedText) {
+                    input.value = '';
+                    input.focus();
                     showAlert(`扫描到条码：${decodedText}`);
-                    searchBook(decodedText);  // 调用查询书籍信息
-
+                    searchBook(decodedText);
                     status.innerHTML = '扫描成功，正在查询书籍...';
                 },
                 function(errorMessage) {
@@ -205,7 +218,6 @@
                 alert("无法启动摄像头：" + err);
             });
 
-            // 隐藏开始按钮，显示停止按钮
             startScanBtn.style.display = 'none';
             stopScanBtn.style.display = 'inline';
         });
@@ -223,16 +235,29 @@
             }
         });
 
-        // 显示自定义弹框并自动关闭
         function showAlert(message) {
             alertBox.textContent = message;
             alertBox.style.display = 'block';
-
-            // 5秒后自动关闭
             setTimeout(() => {
                 alertBox.style.display = 'none';
             }, 5000);
         }
+
+        // 导出今日采集数据
+        exportBtn.addEventListener('click', function() {
+            fetch('/api/exportCollectedData', {
+                method: 'GET',
+            })
+            .then(response => response.blob())
+            .then(data => {
+                const url = window.URL.createObjectURL(data);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'collected_books_data.xlsx';
+                link.click();
+            })
+            .catch(err => alert("导出失败"));
+        });
     </script>
 </body>
 </html>
