@@ -60,7 +60,7 @@
     <div id="status"></div>
 
     <script src="./js/html5-qrcode.min.js"></script>
-  <script>
+ <script>
     const textarea = document.getElementById('barcodeTextarea');
     const startScanBtn = document.getElementById('startScanBtn');
     const stopScanBtn = document.getElementById('stopScanBtn');
@@ -76,33 +76,23 @@
         textarea.focus();
     };
 
-    // 格式化文本框内容：将换行符替换为逗号，并去除多余空格和重复逗号
+    // 格式化文本框内容：将换行符替换为逗号，并去除多余空格和重复条码
     function formatTextareaContent() {
         let content = textarea.value.trim();
         // 替换换行符为逗号，去掉多余空格，移除多余的逗号
         content = content.replace(/\n+/g, ',').replace(/,+/g, ',').replace(/(^,|,$)/g, '');
-        textarea.value = content;
-    }
 
-    // 检查并移除重复条码
-    function removeDuplicates() {
-        const content = textarea.value.trim();
-        if (!content) return;
-
-        // 将条码号分隔成数组
-        const barcodes = content.split(/,|\n/).map(item => item.trim()).filter(item => item !== '');
-
-        // 使用 Set 去重
+        // 拆分条码号，去除重复
+        const barcodes = content.split(',').map(item => item.trim()).filter(item => item !== '');
         const uniqueBarcodes = [...new Set(barcodes)];
 
-        // 更新文本框内容
+        // 更新到文本框
         textarea.value = uniqueBarcodes.join(',');
     }
 
-    // 监听文本框输入事件
+    // 监听文本框输入事件（适用于外接扫码枪）
     textarea.addEventListener('input', () => {
-        formatTextareaContent(); // 格式化内容
-        removeDuplicates(); // 移除重复条码
+        formatTextareaContent(); // 实时格式化输入内容
     });
 
     // 启动扫码功能
