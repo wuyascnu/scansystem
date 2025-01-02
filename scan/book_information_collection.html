@@ -1,47 +1,159 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>书籍信息采集</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>书籍信息采集系统</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        #header {
+            position: relative;
+            height: 100px;
+            background: url('./img/logo.png') no-repeat center top;
+            background-size: 80px;
+        }
+        h3 {
+            text-align: center;
+            margin: 5px 0;
+            font-size: 18px;
+        }
+        #controls {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        input, button {
+            width: 90%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #f1f1f1;
+        }
+        #reader {
+            width: 100%;
+            max-width: 400px;
+            margin: 10px auto;
+        }
+        #status {
+            text-align: center;
+            margin-top: 10px;
+            color: #555;
+        }
+        #alertBox {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 30px;
+            font-size: 24px;
+            font-weight: bold;
+            border: 2px solid #f5c6cb;
+            border-radius: 15px;
+            display: none;
+            z-index: 1000;
+            width: 50%;
+            min-width: 280px;
+            max-width: 500px;
+            text-align: left;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0 auto;
+        }
+        @media (max-width: 600px) {
+            #alertBox {
+                font-size: 18px;
+                padding: 20px;
+                width: 80%;
+                max-width: 90%;
+                top: 30%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="header"></div>
+    <h3>书籍信息采集系统</h3>
+    <div id="controls">
+        <input type="text" id="isbnInput" placeholder="请输入ISBN" onfocus="clearInputOnFocus()" onblur="triggerSearch()" onkeyup="handleKeyUp(event)">
+        <button id="startScanBtn">启动摄像头扫描</button>
+        <button id="stopScanBtn" style="display:none;">停止扫描</button>
+        <button id="exportBtn">导出今日采集数据</button>
+    </div>
+    <div id="reader"></div>
+    <div id="status"></div>
+    <div id="alertBox"></div>
+
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
     <script>
-        function fetchBookInfo() {
-            var isbn = document.getElementById("isbnInput").value;
+        const input = document.getElementById('isbnInput');
+        const startScanBtn = document.getElementById('startScanBtn');
+        const stopScanBtn = document.getElementById('stopScanBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const status = document.getElementById('status');
+        const alertBox = document.getElementById('alertBox');
+        let html5QrCode;
+        let isFetching = false;
+        let debounceTimer;
+
+        // 页面加载后自动聚焦文本框
+        window.onload = function() {
+            input.focus();
+        };
+
+        function debounceSearch(callback, delay = 500) {
+            return function(...args) {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    callback(...args);
+                }, delay);
+            };
+        }
+
+        function searchBook(isbn) {
+            if (!isbn) return;
+            if (isFetching) return;
+
+            input.value = ''; // 清空输入框
+            isFetching = true;
             fetch(`https://lib.nuotu.net/api/catalogue/queryIsbn`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    bookIsbn: isbn,
-                    graspNetworkImg: true,
-                    getGroupLibCatalogue: false
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bookIsbn: isbn, graspNetworkImg: true, getGroupLibCatalogue: false })
             })
             .then(response => response.json())
             .then(data => {
+                isFetching = false;
                 if (data.rtcode === '000') {
-                    var book = data.data.z39list[0]; // 获取书籍信息
-                    document.getElementById("bookTitle").innerText = "书名: " + book.bookName;
-                    document.getElementById("bookPrice").innerText = "价格: " + book.bookPrice;
-                    document.getElementById("bookPublisher").innerText = "出版社: " + book.publishingCompany;
-                    document.getElementById("bookPublishTime").innerText = "出版时间: " + book.publishTime;
-                    document.getElementById("bookPages").innerText = "页数: " + book.bookPages;
-                    // 保存书籍信息到后端数据库
+                    const book = data.data.z39list[0];
+                    showAlert(`书名: ${book.bookName}\n价格: ${book.bookPrice}\n出版社: ${book.publishingCompany}\n出版时间: ${book.publishTime}`);
                     saveBookInfo(book);
                 } else {
-                    alert("未找到书籍信息");
+                    showAlert("未找到书籍信息");
                 }
             })
-            .catch(err => alert("查询失败"));
+            .catch(error => {
+                isFetching = false;
+                showAlert("查询失败");
+            });
         }
 
         function saveBookInfo(book) {
             fetch('/api/saveBookInfo', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     isbn: book.bookIsbn,
                     title: book.bookName,
@@ -49,47 +161,103 @@
                     publisher: book.publishingCompany,
                     publishTime: book.publishTime,
                     pages: book.bookPages,
-                    timestamp: new Date().toISOString() // 采集时间戳
+                    timestamp: new Date().toISOString()
                 })
             })
             .then(response => response.text())
             .then(data => {
                 alert(data);
-                document.getElementById("isbnInput").value = ""; // 清空输入框
-                document.getElementById("isbnInput").focus(); // 聚焦输入框
+                input.focus();
             })
             .catch(err => alert("保存失败"));
         }
 
-        function exportData() {
+        function triggerSearch() {
+            const value = input.value.trim();
+            if (value) {
+                searchBook(value);
+            }
+        }
+
+        const debouncedTriggerSearch = debounceSearch(triggerSearch, 500);
+
+        function handleKeyUp(event) {
+            if (event.key === 'Enter') {
+                debouncedTriggerSearch();
+            }
+        }
+
+        input.addEventListener('keyup', handleKeyUp);
+        input.addEventListener('blur', debouncedTriggerSearch);
+
+        function clearInputOnFocus() {
+            input.value = '';
+            input.setSelectionRange(0, 0);
+        }
+
+        startScanBtn.addEventListener('click', function() {
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            html5QrCode.start(
+                { facingMode: "environment" },
+                config,
+                function(decodedText) {
+                    input.value = '';
+                    input.focus();
+                    showAlert(`扫描到条码：${decodedText}`);
+                    searchBook(decodedText);
+                    status.innerHTML = '扫描成功，正在查询书籍...';
+                },
+                function(errorMessage) {
+                    status.innerHTML = '扫描中...';
+                    console.log("扫描中...", errorMessage);
+                }
+            ).catch(err => {
+                alert("无法启动摄像头：" + err);
+            });
+
+            startScanBtn.style.display = 'none';
+            stopScanBtn.style.display = 'inline';
+        });
+
+        stopScanBtn.addEventListener('click', function() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    console.log('摄像头已停止');
+                    status.innerHTML = '摄像头已停止';
+                    startScanBtn.style.display = 'inline';
+                    stopScanBtn.style.display = 'none';
+                }).catch(err => {
+                    console.error("停止摄像头失败：", err);
+                });
+            }
+        });
+
+        function showAlert(message) {
+            alertBox.textContent = message;
+            alertBox.style.display = 'block';
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // 导出今日采集数据
+        exportBtn.addEventListener('click', function() {
             fetch('/api/exportCollectedData', {
                 method: 'GET',
             })
             .then(response => response.blob())
             .then(data => {
-                // 将返回的文件保存为下载文件
                 const url = window.URL.createObjectURL(data);
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = 'collected_books_data.xlsx'; // 自定义文件名
+                link.download = 'collected_books_data.xlsx';
                 link.click();
             })
             .catch(err => alert("导出失败"));
-        }
+        });
     </script>
-</head>
-<body>
-    <h1>书籍信息采集</h1>
-    <input type="text" id="isbnInput" placeholder="请输入ISBN">
-    <button onclick="fetchBookInfo()">查询并保存</button>
-    <button onclick="exportData()">导出今日采集数据</button>
-
-    <div>
-        <h2 id="bookTitle"></h2>
-        <p id="bookPrice"></p>
-        <p id="bookPublisher"></p>
-        <p id="bookPublishTime"></p>
-        <p id="bookPages"></p>
-    </div>
 </body>
 </html>
