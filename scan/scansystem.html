@@ -53,26 +53,29 @@
             transform: translateX(-50%);
             background-color: #f8d7da;
             color: #721c24;
-            padding: 20px;
-            font-size: 24px;
-            border: 1px solid #f5c6cb;
-            border-radius: 10px;
+            padding: 40px; /* 增加内边距，增加视觉效果 */
+            font-size: 32px; /* 增大字体 */
+            font-weight: bold; /* 加粗字体 */
+            border: 2px solid #f5c6cb;
+            border-radius: 15px;
             display: none;
             z-index: 1000;
-            max-width: 90%; /* 自适应宽度，最多占屏幕的90% */
-            width: 400px;  /* 默认宽度 */
+            width: 33%; /* 使弹框占屏幕三分之一 */
+            min-width: 300px; /* 最小宽度设定 */
+            max-width: 600px; /* 最大宽度设定 */
             text-align: left;
             white-space: pre-wrap; /* 允许换行 */
             word-wrap: break-word; /* 长词换行 */
+            margin: 20px; /* 给弹框周围留出空隙 */
         }
 
         /* 自适应移动端 */
         @media (max-width: 600px) {
             #alertBox {
-                font-size: 18px;  /* 调整移动端字体大小 */
-                padding: 15px;    /* 调整内边距 */
-                width: 90%;       /* 使宽度占据90%屏幕 */
-                max-width: 90%;   /* 限制最大宽度为90% */
+                font-size: 20px;  /* 调整移动端字体大小 */
+                padding: 30px;    /* 调整内边距 */
+                width: 80%;       /* 使宽度占据屏幕80% */
+                max-width: 80%;   /* 限制最大宽度为80% */
             }
         }
     </style>
@@ -87,7 +90,7 @@
     </div>
     <div id="reader"></div>
     <div id="status"></div>
-    <div id="alertBox"></div> <!-- 自定义alert框 -->
+    <div id="alertBox"></div> <!-- 自定义弹框 -->
 
     <script src="./js/html5-qrcode.min.js"></script>
     <script>
