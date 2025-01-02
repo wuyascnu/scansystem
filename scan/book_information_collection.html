@@ -140,14 +140,20 @@
             })
             .then(response => response.json())
             .then(data => {
-                isFetching = false;
-                if (data.success) {
-                    const book = data.book;
-                    showAlert(`书名: ${book.title}\n价格: ${book.price}\n出版社: ${book.publisher}\n出版时间: ${book.publishTime}`);
-                } else {
-                    showAlert("未找到书籍信息");
-                }
-            })
+    isFetching = false;
+    console.log(data);  // 查看返回的完整数据
+    if (data) {
+        if (data.success) {
+            const book = data.book;
+            showAlert(`书名: ${book.title}\n价格: ${book.price}\n出版社: ${book.publisher}\n出版时间: ${book.publishTime}`);
+        } else {
+            showAlert("未找到书籍信息");
+        }
+    } else {
+        showAlert("查询失败，请重试");
+    }
+})
+
             .catch(error => {
                 isFetching = false;
                 showAlert("查询失败");
