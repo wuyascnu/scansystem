@@ -48,35 +48,35 @@
         /* 自定义弹出框样式 */
         #alertBox {
             position: fixed;
-            top: 20%; /* 居中显示，离顶部20% */
+            top: 20%; /* 距离顶部20% */
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%); /* 确保居中 */
             background-color: #f8d7da;
             color: #721c24;
-            padding: 40px; /* 增加内边距，增加视觉效果 */
-            font-size: 32px; /* 增大字体 */
-            font-weight: bold; /* 加粗字体 */
+            padding: 30px; /* 适当调整内边距 */
+            font-size: 24px; /* 调整字体大小 */
+            font-weight: bold;
             border: 2px solid #f5c6cb;
             border-radius: 15px;
             display: none;
             z-index: 1000;
-            width: 33%; /* 使弹框占屏幕三分之一 */
-            min-width: 300px; /* 最小宽度设定 */
-            max-width: 600px; /* 最大宽度设定 */
+            width: 50%; /* 弹框宽度占屏幕的50% */
+            min-width: 280px; /* 最小宽度设为280px */
+            max-width: 500px; /* 最大宽度设为500px */
             text-align: left;
             white-space: pre-wrap; /* 允许换行 */
             word-wrap: break-word; /* 长词换行 */
-            margin: 20px; /* 给弹框周围留出空隙 */
+            margin: 10px; /* 给弹框周围留出空隙 */
         }
 
         /* 自适应移动端 */
         @media (max-width: 600px) {
             #alertBox {
-                font-size: 20px;  /* 调整移动端字体大小 */
-                padding: 30px;    /* 调整内边距 */
+                font-size: 18px;  /* 调整移动端字体大小 */
+                padding: 20px;    /* 调整内边距 */
                 width: 80%;       /* 使宽度占据屏幕80% */
                 max-width: 90%;   /* 限制最大宽度为90% */
-                top: 30%;         /* 移动端弹框离顶部的位置稍微增加 */
+                top: 30%;         /* 使弹框距顶部30% */
             }
         }
     </style>
