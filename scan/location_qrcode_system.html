@@ -60,7 +60,7 @@
     <div id="status"></div>
 
     <script src="./js/html5-qrcode.min.js"></script>
- <script>
+<script>
     const textarea = document.getElementById('barcodeTextarea');
     const startScanBtn = document.getElementById('startScanBtn');
     const stopScanBtn = document.getElementById('stopScanBtn');
@@ -90,9 +90,12 @@
         textarea.value = uniqueBarcodes.join(',');
     }
 
-    // 监听文本框输入事件（适用于外接扫码枪）
+    // 实时监听输入事件，处理扫码枪的输入
     textarea.addEventListener('input', () => {
-        formatTextareaContent(); // 实时格式化输入内容
+        // 延迟 50 毫秒格式化，以避免多次输入过快
+        setTimeout(() => {
+            formatTextareaContent(); // 实时格式化内容
+        }, 50);
     });
 
     // 启动扫码功能
