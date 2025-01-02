@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location QR Code Generation System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2>Location QR Code Generation System</h2>
+    <textarea id="barcodeTextarea" placeholder="Scanned barcodes will appear here..."></textarea>
+    <button id="scanBarcodeButton">Start Camera Scan</button>
+    <button id="sendDataButton">Send Data to Backend</button>
+
+    <script>
+        const textarea = document.getElementById("barcodeTextarea");
+        const scanButton = document.getElementById("scanBarcodeButton");
+        const sendButton = document.getElementById("sendDataButton");
+
+        // Simulated barcode scanning logic
+        scanButton.addEventListener("click", async () => {
+            try {
+                // Simulate barcode scanning (prompt input for demo)
+                const barcode = prompt("Scan a barcode (simulate input):");
+                if (barcode) {
+                    const currentText = textarea.value;
+                    textarea.value = currentText ? `${currentText},${barcode}` : barcode;
+                }
+            } catch (err) {
+                alert("Unable to start camera. Check browser permissions!");
+                console.error(err);
+            }
+        });
+
+        // Send data to backend
+        sendButton.addEventListener("click", () => {
+            const barcodes = textarea.value.split(",");
+            if (barcodes.length === 0 || barcodes[0].trim() === "") {
+                alert("Please scan barcodes first!");
+                return;
+            }
+
+            // Convert barcodes to JSON object
+            const jsonData = {};
+            barcodes.forEach((barcode, index) => {
+                const row = Math.floor(index / 3) + 3; // Calculate row number (starts at 3)
+                const column = ["C", "E", "G"][index % 3]; // Cycle through columns
+                jsonData[`${row}_${column}`] = barcode.trim();
+            });
+
+            // Log the generated JSON object for debugging
+            console.log("Generated JSON object:", jsonData);
+
+            // Replace with your backend API URL
+            const apiUrl = "http://your-backend-url/api/barcodes"; // Update with your actual API URL
+
+            // Send JSON data to backend
+            fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(jsonData)
+            }).then(response => response.json())
+              .then(data => {
+                  console.log("Backend response:", data);
+                  alert("Data sent successfully! Backend response: " + JSON.stringify(data));
+              })
+              .catch(err => {
+                  console.error("Failed to send data:", err);
+                  alert("Failed to send data. Check network or API!");
+              });
+        });
+    </script>
+</body>
+</html>
