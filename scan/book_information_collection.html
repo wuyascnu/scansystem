@@ -128,18 +128,15 @@
 
             input.value = ''; // 清空输入框
             isFetching = true;
-            fetch(`https://lib.nuotu.net/api/catalogue/queryIsbn`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ bookIsbn: isbn, graspNetworkImg: true, getGroupLibCatalogue: false })
+            fetch(`/api/bookCollection/search?isbn=${isbn}`, {
+                method: 'GET',
             })
             .then(response => response.json())
             .then(data => {
                 isFetching = false;
-                if (data.rtcode === '000') {
-                    const book = data.data.z39list[0];
-                    showAlert(`书名: ${book.bookName}\n价格: ${book.bookPrice}\n出版社: ${book.publishingCompany}\n出版时间: ${book.publishTime}`);
-                    saveBookInfo(book);
+                if (data.success) {
+                    const book = data.book;
+                    showAlert(`书名: ${book.title}\n价格: ${book.price}\n出版社: ${book.publisher}\n出版时间: ${book.publishTime}`);
                 } else {
                     showAlert("未找到书籍信息");
                 }
@@ -148,28 +145,6 @@
                 isFetching = false;
                 showAlert("查询失败");
             });
-        }
-
-        function saveBookInfo(book) {
-            fetch('/api/saveBookInfo', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    isbn: book.bookIsbn,
-                    title: book.bookName,
-                    price: book.bookPrice,
-                    publisher: book.publishingCompany,
-                    publishTime: book.publishTime,
-                    pages: book.bookPages,
-                    timestamp: new Date().toISOString()
-                })
-            })
-            .then(response => response.text())
-            .then(data => {
-                alert(data);
-                input.focus();
-            })
-            .catch(err => alert("保存失败"));
         }
 
         function triggerSearch() {
@@ -243,9 +218,8 @@
             }, 5000);
         }
 
-        // 导出今日采集数据
         exportBtn.addEventListener('click', function() {
-            fetch('/api/exportCollectedData', {
+            fetch('/api/bookCollection/export', {
                 method: 'GET',
             })
             .then(response => response.blob())
