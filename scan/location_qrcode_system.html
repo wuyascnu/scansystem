@@ -78,25 +78,24 @@
 
     // 格式化文本框内容：将换行符替换为逗号，并去除多余空格和重复条码
     function formatTextareaContent() {
-        let content = textarea.value.trim();
-        // 替换换行符为逗号，去掉多余空格，移除多余的逗号
-        content = content.replace(/\n+/g, ',').replace(/,+/g, ',').replace(/(^,|,$)/g, '');
+    let content = textarea.value.trim();
+    // 替换 CR+LF 或 LF 为逗号，去掉多余空格，移除重复条码
+    content = content.replace(/[\r\n]+/g, ',').replace(/,+/g, ',').replace(/(^,|,$)/g, '');
 
-        // 拆分条码号，去除重复
-        const barcodes = content.split(',').map(item => item.trim()).filter(item => item !== '');
-        const uniqueBarcodes = [...new Set(barcodes)];
+    // 拆分条码号，去重
+    const barcodes = content.split(',').map(item => item.trim()).filter(item => item !== '');
+    const uniqueBarcodes = [...new Set(barcodes)];
 
-        // 更新到文本框
-        textarea.value = uniqueBarcodes.join(',');
-    }
+    // 更新到文本框
+    textarea.value = uniqueBarcodes.join(',');
+}
 
-    // 实时监听输入事件，处理扫码枪的输入
-    textarea.addEventListener('input', () => {
-        // 延迟 50 毫秒格式化，以避免多次输入过快
-        setTimeout(() => {
-            formatTextareaContent(); // 实时格式化内容
-        }, 50);
-    });
+// 实时监听输入事件，处理扫码枪的输入
+textarea.addEventListener('input', () => {
+    setTimeout(() => {
+        formatTextareaContent(); // 实时格式化内容
+    }, 50);
+});
 
     // 启动扫码功能
     startScanBtn.addEventListener('click', function () {
