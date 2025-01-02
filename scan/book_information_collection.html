@@ -122,43 +122,39 @@
             };
         }
 
-        function searchBook(isbn) {
-            if (!isbn) return;
-            if (isFetching) return;
+function searchBook(isbn) {
+    if (!isbn) return;
+    if (isFetching) return;
 
-            input.value = ''; // 清空输入框
-            isFetching = true;
-            fetch('https://tiezheng.natapp4.cc/api/bookCollection/search', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer AT-ec07e06804b54bacb21d601778858e51---2c3734b5-4851-4cb8-905d-3dc944c45343'
-                },
-                body: JSON.stringify({
-                    isbn: isbn
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-    isFetching = false;
-    console.log(data);  // 查看返回的完整数据
-    if (data) {
-        if (data.success) {
-            const book = data.book;
+    input.value = ''; // 清空输入框
+    isFetching = true;
+    fetch('https://tiezheng.natapp4.cc/api/bookCollection/search', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer AT-ec07e06804b54bacb21d601778858e51---2c3734b5-4851-4cb8-905d-3dc944c45343'
+        },
+        body: JSON.stringify({
+            isbn: isbn
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        isFetching = false;
+        console.log(data);  // 查看返回的完整数据
+        if (data && data.isbn) {  // 如果返回的数据包含 isbn，则认为成功
+            const book = data;
             showAlert(`书名: ${book.title}\n价格: ${book.price}\n出版社: ${book.publisher}\n出版时间: ${book.publishTime}`);
         } else {
             showAlert("未找到书籍信息");
         }
-    } else {
+    })
+    .catch(error => {
+        isFetching = false;
         showAlert("查询失败，请重试");
-    }
-})
+    });
+}
 
-            .catch(error => {
-                isFetching = false;
-                showAlert("查询失败");
-            });
-        }
 
         function triggerSearch() {
             const value = input.value.trim();
