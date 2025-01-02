@@ -48,7 +48,7 @@
         /* 自定义弹出框样式 */
         #alertBox {
             position: fixed;
-            top: 20px;
+            top: 20%; /* 居中显示，离顶部20% */
             left: 50%;
             transform: translateX(-50%);
             background-color: #f8d7da;
@@ -75,7 +75,8 @@
                 font-size: 20px;  /* 调整移动端字体大小 */
                 padding: 30px;    /* 调整内边距 */
                 width: 80%;       /* 使宽度占据屏幕80% */
-                max-width: 80%;   /* 限制最大宽度为80% */
+                max-width: 90%;   /* 限制最大宽度为90% */
+                top: 30%;         /* 移动端弹框离顶部的位置稍微增加 */
             }
         }
     </style>
