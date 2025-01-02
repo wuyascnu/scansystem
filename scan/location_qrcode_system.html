@@ -60,7 +60,7 @@
     <div id="status"></div>
 
     <script src="./js/html5-qrcode.min.js"></script>
-   <script>
+  <script>
     const textarea = document.getElementById('barcodeTextarea');
     const startScanBtn = document.getElementById('startScanBtn');
     const stopScanBtn = document.getElementById('stopScanBtn');
@@ -95,11 +95,8 @@
         // 使用 Set 去重
         const uniqueBarcodes = [...new Set(barcodes)];
 
-        // 如果有重复条码，更新文本框内容并提示
-        if (barcodes.length !== uniqueBarcodes.length) {
-            textarea.value = uniqueBarcodes.join(',');
-            status.innerHTML = "发现重复条码，已自动移除！";
-        }
+        // 更新文本框内容
+        textarea.value = uniqueBarcodes.join(',');
     }
 
     // 监听文本框输入事件
