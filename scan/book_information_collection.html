@@ -129,7 +129,7 @@
             input.value = ''; // 清空输入框
             isFetching = true;
             fetch(`https://tiezheng.natapp4.cc/api/bookCollection/search?isbn=${isbn}`, {
-                method: 'GET',
+                method: 'POST',
             })
             .then(response => response.json())
             .then(data => {
