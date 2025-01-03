@@ -97,12 +97,72 @@
     <div id="status"></div>
     <div id="alertBox"></div>
     <script>
+        const input = document.getElementById('isbnInput');
         const exportBtn = document.getElementById('exportBtn');
         const clearBtn = document.getElementById('clearBtn');
+        const alertBox = document.getElementById('alertBox');
+
+        // 页面加载时设置焦点在输入框
+        window.onload = function () {
+            focusInput();
+        };
+
+        // 设置输入框焦点并将光标定位到最开始位置
+        function focusInput() {
+            input.value = ''; // 清空输入框
+            input.focus(); // 聚焦输入框
+            input.setSelectionRange(0, 0); // 设置光标在开头
+        }
+
+        // 显示查询结果弹窗
+        function showAlert(message) {
+            alertBox.textContent = message;
+            alertBox.style.display = 'block';
+
+            // 3秒后关闭弹窗
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 3000);
+        }
+
+        // 查询书籍信息
+        function searchBook(isbn) {
+            if (!isbn) return;
+
+            fetch('https://tiezheng.natapp4.cc/api/bookCollection/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ isbn: isbn }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.isbn) {
+                        const book = data;
+                        showAlert(`书名: ${book.title}\n价格: ${book.price}\n出版社: ${book.publisher}\n出版时间: ${book.publishTime}`);
+                    } else {
+                        showAlert('未找到书籍信息');
+                    }
+                    focusInput(); // 清空并重置焦点
+                })
+                .catch(error => {
+                    showAlert('查询失败，请重试');
+                    focusInput(); // 清空并重置焦点
+                });
+        }
+
+        // 输入框按回车键触发查询
+        input.addEventListener('keyup', function (event) {
+            if (event.key === 'Enter') {
+                const isbn = input.value.trim();
+                searchBook(isbn);
+            }
+        });
 
         // 导出采集数据
         exportBtn.addEventListener('click', function () {
-            fetch('https://tiezheng.natapp4.cc/api/bookCollection/export', {
+            fetch(`https://tiezheng.natapp4.cc/api/bookCollection/export?startTime=${encodeURIComponent(startTime)}`, {
                 method: 'GET',
             })
                 .then(response => response.blob())
@@ -113,13 +173,13 @@
                     link.download = 'collected_books_data.xlsx';
                     link.click();
                 })
-                .catch(err => alert("导出失败"));
+                .catch(err => alert('导出失败'));
         });
 
         // 清除采集数据
         clearBtn.addEventListener('click', function () {
             fetch('https://tiezheng.natapp4.cc/api/bookCollection/clear', {
-                method: 'DELETE', // 使用 DELETE 方法
+                method: 'DELETE',
             })
                 .then(response => {
                     if (response.ok) {
@@ -128,7 +188,7 @@
                         alert('清除失败！');
                     }
                 })
-                .catch(err => alert("清除失败"));
+                .catch(err => alert('清除失败'));
         });
     </script>
 </body>
