@@ -30,7 +30,7 @@
         }
         input, button {
             width: 90%;
-            padding: 10px;
+            padding: 15px; /* 增加高度 */
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -87,158 +87,48 @@
     <div id="header"></div>
     <h3>书籍信息采集盘点系统</h3>
     <div id="controls">
-        <input type="text" id="isbnInput" placeholder="请输入ISBN" onfocus="clearInputOnFocus()" onblur="triggerSearch()" onkeyup="handleKeyUp(event)">
+        <input type="text" id="isbnInput" placeholder="请输入ISBN">
         <button id="startScanBtn">启动摄像头扫描</button>
         <button id="stopScanBtn" style="display:none;">停止扫描</button>
-        <button id="exportBtn">导出今日采集数据</button>
+        <button id="exportBtn">导出采集此次的数据</button>
+        <button id="clearBtn">清除此次采集的数据</button>
     </div>
     <div id="reader"></div>
     <div id="status"></div>
     <div id="alertBox"></div>
-	<script src="./js/html5-qrcode.min.js"></script>
     <script>
-        const input = document.getElementById('isbnInput');
-        const startScanBtn = document.getElementById('startScanBtn');
-        const stopScanBtn = document.getElementById('stopScanBtn');
         const exportBtn = document.getElementById('exportBtn');
-        const status = document.getElementById('status');
-        const alertBox = document.getElementById('alertBox');
-        let html5QrCode;
-        let isFetching = false;
-        let debounceTimer;
+        const clearBtn = document.getElementById('clearBtn');
 
-        // 页面加载后自动聚焦文本框
-        window.onload = function() {
-            input.focus();
-        };
-
-        function debounceSearch(callback, delay = 500) {
-            return function(...args) {
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => {
-                    callback(...args);
-                }, delay);
-            };
-        }
-
-function searchBook(isbn) {
-    if (!isbn) return;
-    if (isFetching) return;
-
-    input.value = ''; // 清空输入框
-    isFetching = true;
-    fetch('https://tiezheng.natapp4.cc/api/bookCollection/search', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer AT-ec07e06804b54bacb21d601778858e51---2c3734b5-4851-4cb8-905d-3dc944c45343'
-        },
-        body: JSON.stringify({
-            isbn: isbn
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        isFetching = false;
-        console.log(data);  // 查看返回的完整数据
-        if (data && data.isbn) {  // 如果返回的数据包含 isbn，则认为成功
-            const book = data;
-            showAlert(`书名: ${book.title}\n价格: ${book.price}\n出版社: ${book.publisher}\n出版时间: ${book.publishTime}`);
-        } else {
-            showAlert("未找到书籍信息");
-        }
-    })
-    .catch(error => {
-        isFetching = false;
-        showAlert("查询失败，请重试");
-    });
-}
-
-
-        function triggerSearch() {
-            const value = input.value.trim();
-            if (value) {
-                searchBook(value);
-            }
-        }
-
-        const debouncedTriggerSearch = debounceSearch(triggerSearch, 500);
-
-        function handleKeyUp(event) {
-            if (event.key === 'Enter') {
-                debouncedTriggerSearch();
-            }
-        }
-
-        input.addEventListener('keyup', handleKeyUp);
-        input.addEventListener('blur', debouncedTriggerSearch);
-
-        function clearInputOnFocus() {
-            input.value = '';
-            input.setSelectionRange(0, 0);
-        }
-
-        startScanBtn.addEventListener('click', function() {
-            if (!html5QrCode) {
-                html5QrCode = new Html5Qrcode("reader");
-            }
-            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-            html5QrCode.start(
-                { facingMode: "environment" },
-                config,
-                function(decodedText) {
-                    input.value = '';
-                    input.focus();
-                    showAlert(`扫描到条码：${decodedText}`);
-                    searchBook(decodedText);
-                    status.innerHTML = '扫描成功，正在查询书籍...';
-                },
-                function(errorMessage) {
-                    status.innerHTML = '扫描中...';
-                    console.log("扫描中...", errorMessage);
-                }
-            ).catch(err => {
-                alert("无法启动摄像头：" + err);
-            });
-
-            startScanBtn.style.display = 'none';
-            stopScanBtn.style.display = 'inline';
-        });
-
-        stopScanBtn.addEventListener('click', function() {
-            if (html5QrCode) {
-                html5QrCode.stop().then(() => {
-                    console.log('摄像头已停止');
-                    status.innerHTML = '摄像头已停止';
-                    startScanBtn.style.display = 'inline';
-                    stopScanBtn.style.display = 'none';
-                }).catch(err => {
-                    console.error("停止摄像头失败：", err);
-                });
-            }
-        });
-
-        function showAlert(message) {
-            alertBox.textContent = message;
-            alertBox.style.display = 'block';
-            setTimeout(() => {
-                alertBox.style.display = 'none';
-            }, 5000);
-        }
-
-        exportBtn.addEventListener('click', function() {
+        // 导出采集数据
+        exportBtn.addEventListener('click', function () {
             fetch('https://tiezheng.natapp4.cc/api/bookCollection/export', {
                 method: 'GET',
             })
-            .then(response => response.blob())
-            .then(data => {
-                const url = window.URL.createObjectURL(data);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = 'collected_books_data.xlsx';
-                link.click();
+                .then(response => response.blob())
+                .then(data => {
+                    const url = window.URL.createObjectURL(data);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'collected_books_data.xlsx';
+                    link.click();
+                })
+                .catch(err => alert("导出失败"));
+        });
+
+        // 清除采集数据
+        clearBtn.addEventListener('click', function () {
+            fetch('https://tiezheng.natapp4.cc/api/bookCollection/clear', {
+                method: 'DELETE', // 使用 DELETE 方法
             })
-            .catch(err => alert("导出失败"));
+                .then(response => {
+                    if (response.ok) {
+                        alert('清除成功！');
+                    } else {
+                        alert('清除失败！');
+                    }
+                })
+                .catch(err => alert("清除失败"));
         });
     </script>
 </body>
