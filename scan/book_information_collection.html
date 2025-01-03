@@ -182,21 +182,24 @@
             }
         });
 
-        // 导出采集数据
-        exportBtn.addEventListener('click', function () {
-            fetch(`https://tiezheng.natapp4.cc/api/bookCollection/export?startTime=${encodeURIComponent(startTime)}`, {
-                method: 'GET',
-            })
-                .then(response => response.blob())
-                .then(data => {
-                    const url = window.URL.createObjectURL(data);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = 'collected_books_data.xlsx';
-                    link.click();
-                })
-                .catch(err => alert('导出失败'));
-        });
+        // 页面加载时记录当前时间
+let startTime = new Date().toISOString();
+
+exportBtn.addEventListener('click', function () {
+    fetch(`https://tiezheng.natapp4.cc/api/bookCollection/export?startTime=${encodeURIComponent(startTime)}`, {
+        method: 'GET',
+    })
+        .then(response => response.blob())
+        .then(data => {
+            const url = window.URL.createObjectURL(data);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'collected_books_data.xlsx';
+            link.click();
+        })
+        .catch(err => alert('导出失败'));
+});
+
 
         // 清除采集数据
         clearBtn.addEventListener('click', function () {
