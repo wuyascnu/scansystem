@@ -28,17 +28,35 @@
             align-items: center;
             gap: 15px;
         }
-        input, button {
+        input {
             width: 90%;
-            padding: 15px; /* 增加高度 */
+            padding: 15px;
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 5px;
             background-color: #fff;
+        }
+        .button-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px; /* 按钮之间的间距 */
+            width: 90%; /* 与输入框对齐 */
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 25px; /* 圆角按钮 */
+            background: linear-gradient(90deg, #4CAF50, #45A049); /* 按钮渐变背景 */
+            color: #fff;
             cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 按钮阴影 */
+            transition: all 0.3s ease;
         }
         button:hover {
-            background-color: #f1f1f1;
+            background: linear-gradient(90deg, #45A049, #4CAF50); /* 悬停时渐变颜色切换 */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* 悬停时增加阴影 */
+            transform: translateY(-2px); /* 悬停时轻微上移 */
         }
         #reader {
             width: 100%;
@@ -80,6 +98,10 @@
                 max-width: 90%;
                 top: 30%;
             }
+            button {
+                font-size: 14px;
+                padding: 8px 16px; /* 调整按钮大小 */
+            }
         }
     </style>
 </head>
@@ -88,10 +110,10 @@
     <h3>书籍信息采集盘点系统</h3>
     <div id="controls">
         <input type="text" id="isbnInput" placeholder="请输入ISBN">
-        <button id="startScanBtn">启动摄像头扫描</button>
-        <button id="stopScanBtn" style="display:none;">停止扫描</button>
-        <button id="exportBtn">导出采集此次的数据</button>
-        <button id="clearBtn">清除此次采集的数据</button>
+        <div class="button-row">
+            <button id="exportBtn">导出此次采集数据</button>
+            <button id="clearBtn">清除此次采集数据</button>
+        </div>
     </div>
     <div id="reader"></div>
     <div id="status"></div>
