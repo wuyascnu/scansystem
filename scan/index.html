@@ -14,7 +14,7 @@
         }
 
         .overlay {
-            background-color: rgba(255, 255, 255, 0.4); /* 亮化背景 */
+            background-color: rgba(255, 255, 255, 0.4);
             position: absolute;
             top: 0;
             left: 0;
@@ -26,7 +26,7 @@
         .container {
             position: relative;
             z-index: 2;
-            color: #333; /* 更清晰的文字颜色 */
+            color: #333;
             text-align: center;
             margin-top: 50px;
         }
@@ -35,7 +35,7 @@
             font-size: 3rem;
             font-weight: bold;
             margin-bottom: 30px;
-            color: #004d40; /* 深绿色标题 */
+            color: #004d40;
         }
 
         .row {
@@ -47,7 +47,7 @@
             border: none;
             border-radius: 10px;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            padding: 15px; /* 增加内边距 */
+            padding: 15px;
         }
 
         .card:hover {
@@ -56,20 +56,25 @@
         }
 
         .card-title {
-            color: #004d40; /* 深绿色标题 */
+            color: #004d40;
             font-size: 1.2rem;
             margin-bottom: 10px;
         }
 
         .btn-primary {
             font-size: 1rem;
-            border-radius: 20px; /* 圆角按钮 */
-            background: linear-gradient(to right, #4CAF50, #45A049); /* 渐变按钮背景 */
+            border-radius: 20px;
+            background: linear-gradient(to right, #4CAF50, #45A049);
             border: none;
         }
 
         .btn-primary:hover {
-            background: linear-gradient(to right, #45A049, #4CAF50); /* 悬停渐变切换 */
+            background: linear-gradient(to right, #45A049, #4CAF50);
+        }
+
+        .btn-disabled {
+            background: #ccc !important;
+            cursor: not-allowed !important;
         }
 
         .footer {
@@ -77,20 +82,29 @@
             font-size: 0.9rem;
             color: #555;
         }
+
+        .alert-message {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            display: none;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
-    <!-- 背景遮罩 -->
     <div class="overlay"></div>
-
-    <!-- 内容容器 -->
     <div class="container">
         <h1>铁铮图书馆信息管理平台</h1>
         <p class="mb-5">选择以下系统功能进行操作</p>
 
-        <!-- 系统入口布局 -->
         <div class="row">
-            <!-- 第一行系统 -->
             <div class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body text-center">
@@ -118,7 +132,6 @@
         </div>
 
         <div class="row">
-            <!-- 第二行系统 -->
             <div class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body text-center">
@@ -131,7 +144,7 @@
                 <div class="card">
                     <div class="card-body text-center">
                         <h5 class="card-title">读者大数据平台</h5>
-                        <a href="reader_bigdata_platform.html" class="btn btn-primary btn-block">进入系统</a>
+                        <button id="dataPlatformBtn" class="btn btn-primary btn-block">进入系统</button>
                     </div>
                 </div>
             </div>
@@ -146,7 +159,6 @@
         </div>
 
         <div class="row">
-            <!-- 第三行系统 -->
             <div class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body text-center">
@@ -170,8 +182,25 @@
         <p>© 2024 铁铮图书馆 | 信息管理平台</p>
     </div>
 
-    <!-- 引入 Bootstrap 脚本 -->
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="alert-message" id="alertMessage">功能开发中，敬请期待！</div>
+
+    <script>
+        const dataPlatformBtn = document.getElementById('dataPlatformBtn');
+        const alertMessage = document.getElementById('alertMessage');
+
+        dataPlatformBtn.addEventListener('click', function () {
+            // 按钮置灰并禁用
+            dataPlatformBtn.classList.add('btn-disabled');
+            dataPlatformBtn.setAttribute('disabled', 'true');
+
+            // 显示提示消息
+            alertMessage.style.display = 'block';
+
+            // 3秒后隐藏提示消息
+            setTimeout(() => {
+                alertMessage.style.display = 'none';
+            }, 3000);
+        });
+    </script>
 </body>
 </html>
