@@ -91,7 +91,7 @@
     <div id="header"></div>
     <h3>书籍位置查询系统</h3>
     <div id="controls">
-        <input type="text" id="barcodeInput" placeholder="输入条码或扫码" onfocus="clearInputOnFocus()" onblur="triggerSearch()" onkeyup="handleKeyUp(event)">
+        <input type="text" id="barcodeInput" placeholder="输入条码或扫码" onfocus="clearInputOnFocus()" onblur="refocusInput()" onkeyup="handleKeyUp(event)">
         <button id="startScanBtn">启动摄像头扫描</button>
         <button id="stopScanBtn" style="display:none;">停止扫描</button>
     </div>
@@ -151,6 +151,9 @@
                     const errorMessage = "未找到匹配的书籍信息";
                     addResult(barcode, "error", errorMessage);
                     speak("查询失败，未找到匹配的书籍信息");
+                })
+                .finally(() => {
+                    clearAndRefocusInput();
                 });
         }
 
@@ -167,8 +170,19 @@
             }
         }
 
+        function clearAndRefocusInput() {
+            input.value = ''; // 清空输入框
+            input.focus(); // 重新聚焦输入框
+        }
+
+        function refocusInput() {
+            setTimeout(() => {
+                input.focus(); // 强制重新聚焦输入框
+            }, 100);
+        }
+
         input.addEventListener('keyup', handleKeyUp);
-        input.addEventListener('blur', triggerSearch);
+        input.addEventListener('blur', refocusInput);
 
         function clearInputOnFocus() {
             input.value = ''; // 当输入框获取焦点时清空内容
@@ -187,11 +201,6 @@
                     console.log("扫描到结果：", decodedText);
                     searchBook(decodedText);  // 调用查询书籍信息
                     status.innerHTML = '扫描成功，正在查询书籍...';
-
-                    // 摄像头启动后重新聚焦输入框
-                    setTimeout(() => {
-                        input.focus();
-                    }, 100);
                 },
                 function(errorMessage) {
                     status.innerHTML = '扫描中...';
