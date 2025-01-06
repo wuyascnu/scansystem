@@ -110,7 +110,7 @@
     <h3>书籍位置查询系统</h3>
     <div id="controls">
         <input type="text" id="barcodeInput" placeholder="输入条码或扫码" onfocus="clearInputOnFocus()" onblur="triggerSearch()" onkeyup="handleKeyUp(event)">
-        <button id="startScanBtn">启动摄像头扫描</button>
+        <button id="startScanBtn">启动摄像头扫码</button>
         <button id="stopScanBtn" style="display:none;">停止扫描</button>
     </div>
     <div id="reader"></div>
@@ -173,6 +173,9 @@
                         speak("查询失败，未找到匹配的书籍信息");
                         addHistory(barcode, "error", errorMessage);
                     }
+                })
+                .finally(() => {
+                    clearAndFocusInput(); // 保证输入框清空并聚焦
                 });
         }
 
@@ -193,6 +196,11 @@
             input.value = ''; // 当输入框获取焦点时清空内容
         }
 
+        function clearAndFocusInput() {
+            input.value = ''; // 清空输入框
+            input.focus(); // 聚焦输入框
+        }
+
         startScanBtn.addEventListener('click', function() {
             if (!html5QrCode) {
                 html5QrCode = new Html5Qrcode("reader");
@@ -203,6 +211,7 @@
                 config,
                 function(decodedText, decodedResult) {
                     console.log("扫描到结果：", decodedText);
+                    input.value = decodedText; // 将扫码结果放入输入框
                     searchBook(decodedText); // 调用查询书籍信息
                 },
                 function(errorMessage) {
