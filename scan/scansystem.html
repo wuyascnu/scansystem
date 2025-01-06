@@ -91,7 +91,7 @@
     <div id="header"></div>
     <h3>书籍位置查询系统</h3>
     <div id="controls">
-        <input type="text" id="barcodeInput" placeholder="输入条码或扫码" onfocus="clearInputOnFocus()" onblur="triggerSearch()" onkeyup="handleKeyUp(event)">
+        <input type="text" id="barcodeInput" placeholder="输入条码或扫码" onfocus="clearInputOnFocus()" onblur="refocusInput()" onkeyup="handleKeyUp(event)">
         <button id="startScanBtn">启动摄像头扫描</button>
         <button id="stopScanBtn" style="display:none;">停止扫描</button>
     </div>
@@ -115,15 +115,9 @@
         // 页面加载后自动聚焦文本框
         window.onload = function() {
             input.focus();
-
-            // 在移动端解锁语音播报权限
-            document.addEventListener('click', () => {
-                const utterance = new SpeechSynthesisUtterance("语音播报已启用");
-                utterance.lang = "zh-CN";
-                speechSynthesis.speak(utterance);
-            }, { once: true });
         };
 
+        // 查询书籍
         function searchBook(barcode) {
             if (!barcode || isFetching || scannedBarcodes.has(barcode)) return;
 
@@ -157,6 +151,7 @@
                 });
         }
 
+        // 触发查询
         function triggerSearch() {
             const value = input.value.trim();
             if (value) {
@@ -166,23 +161,32 @@
             }
         }
 
+        // 输入回车触发查询
         function handleKeyUp(event) {
             if (event.key === 'Enter') {
                 triggerSearch();
             }
         }
 
+        // 清空输入框并重新聚焦
         function clearAndRefocusInput() {
             input.value = ''; // 清空输入框
             input.focus(); // 重新聚焦输入框
         }
 
-        input.addEventListener('keyup', handleKeyUp);
-        input.addEventListener('blur', triggerSearch); // 修复离开焦点时不触发查询的问题
+        // 确保输入框失焦后重新聚焦
+        function refocusInput() {
+            setTimeout(() => {
+                input.focus(); // 强制重新聚焦输入框
+            }, 100);
+        }
 
+        input.addEventListener('keyup', handleKeyUp);
+        input.addEventListener('blur', refocusInput);
+
+        // 清空输入框内容
         function clearInputOnFocus() {
             input.value = ''; // 当输入框获取焦点时清空内容
-            input.setSelectionRange(0, 0); // 重置光标到输入框开头
         }
 
         startScanBtn.addEventListener('click', function() {
@@ -196,7 +200,6 @@
                 function(decodedText, decodedResult) {
                     console.log("扫描到结果：", decodedText);
                     searchBook(decodedText);  // 调用查询书籍信息
-                    status.innerHTML = '扫描成功，正在查询书籍...';
                 },
                 function(errorMessage) {
                     status.innerHTML = '扫描中...';
@@ -214,10 +217,40 @@
             if (html5QrCode) {
                 html5QrCode.stop().then(() => {
                     console.log('摄像头已停止');
-                    status.innerHTML = '摄像头已停止';
                     startScanBtn.style.display = 'inline';
                     stopScanBtn.style.display = 'none';
                 }).catch(err => {
                     console.error("停止摄像头失败：", err);
                 });
-  
+            }
+        });
+
+        // 添加结果到页面
+        function addResult(barcode, status, message) {
+            const div = document.createElement('div');
+            div.className = `result-item ${status}`;
+            div.textContent = `条码: ${barcode} - ${message}`;
+            results.appendChild(div);
+        }
+
+        // 语音播报功能
+        function speak(text) {
+            if (!window.speechSynthesis) {
+                console.warn("当前浏览器不支持语音播报");
+                return;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = "zh-CN"; // 设置语言为中文
+            utterance.rate = 1; // 设置语速
+            utterance.pitch = 1; // 设置音调
+
+            if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+            }
+
+            speechSynthesis.speak(utterance);
+        }
+    </script>
+</body>
+</html>
