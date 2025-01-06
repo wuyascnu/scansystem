@@ -39,34 +39,24 @@
         .button-row {
             display: flex;
             justify-content: center;
-            gap: 20px; /* 按钮之间的间距 */
-            width: 90%; /* 与输入框对齐 */
+            gap: 20px;
+            width: 90%;
         }
         button {
             padding: 10px 20px;
             font-size: 16px;
             border: none;
-            border-radius: 25px; /* 圆角按钮 */
-            background: linear-gradient(90deg, #4CAF50, #45A049); /* 按钮渐变背景 */
+            border-radius: 25px;
+            background: linear-gradient(90deg, #4CAF50, #45A049);
             color: #fff;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 按钮阴影 */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
         }
         button:hover {
-            background: linear-gradient(90deg, #45A049, #4CAF50); /* 悬停时渐变颜色切换 */
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* 悬停时增加阴影 */
-            transform: translateY(-2px); /* 悬停时轻微上移 */
-        }
-        #reader {
-            width: 100%;
-            max-width: 400px;
-            margin: 10px auto;
-        }
-        #status {
-            text-align: center;
-            margin-top: 10px;
-            color: #555;
+            background: linear-gradient(90deg, #45A049, #4CAF50);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
         }
         #alertBox {
             position: fixed;
@@ -100,7 +90,7 @@
             }
             button {
                 font-size: 14px;
-                padding: 8px 16px; /* 调整按钮大小 */
+                padding: 8px 16px;
             }
         }
     </style>
@@ -115,28 +105,26 @@
             <button id="clearBtn">清除此次采集数据</button>
         </div>
     </div>
-    <div id="reader"></div>
-    <div id="status"></div>
     <div id="alertBox"></div>
     <script>
         const input = document.getElementById('isbnInput');
         const exportBtn = document.getElementById('exportBtn');
         const clearBtn = document.getElementById('clearBtn');
         const alertBox = document.getElementById('alertBox');
+        let debounceTimer = null; // 防抖计时器
 
         // 页面加载时设置焦点在输入框
         window.onload = function () {
             focusInput();
         };
 
-        // 设置输入框焦点并将光标定位到最开始位置
+        // 设置输入框焦点并清空
         function focusInput() {
             input.value = ''; // 清空输入框
             input.focus(); // 聚焦输入框
-            input.setSelectionRange(0, 0); // 设置光标在开头
         }
 
-        // 显示提示弹窗
+        // 显示查询结果弹窗
         function showAlert(message) {
             alertBox.textContent = message;
             alertBox.style.display = 'block';
@@ -147,17 +135,59 @@
             }, 3000);
         }
 
-        // 导出采集数据
+        // 查询书籍信息
+        function searchBook(isbn) {
+            if (!isbn) return;
+
+            fetch('https://tiezheng.natapp4.cc/api/bookCollection/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ isbn: isbn }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.isbn) {
+                        const book = data;
+                        showAlert(`书名: ${book.title}\n价格: ${book.price}\n出版社: ${book.publisher}\n出版时间: ${book.publishTime}`);
+                    } else {
+                        showAlert('未找到书籍信息');
+                    }
+                })
+                .catch(error => {
+                    showAlert('查询失败，请重试');
+                })
+                .finally(() => {
+                    focusInput(); // 查询完成后清空并聚焦输入框
+                });
+        }
+
+        // 输入框按回车键触发查询
+        input.addEventListener('keyup', function (event) {
+            if (event.key === 'Enter') {
+                const isbn = input.value.trim();
+                searchBook(isbn);
+            }
+        });
+
+        // 输入框内容变化实时触发查询（带防抖）
+        input.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const isbn = input.value.trim();
+                searchBook(isbn);
+            }, 300); // 设置防抖延迟时间为300ms
+        });
+
+        // 页面加载时记录当前时间
+        let startTime = new Date().toISOString();
+
         exportBtn.addEventListener('click', function () {
             fetch(`https://tiezheng.natapp4.cc/api/bookCollection/export?startTime=${encodeURIComponent(startTime)}`, {
                 method: 'GET',
             })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('无采集数据'); // 如果无数据，抛出错误
-                    }
-                    return response.blob();
-                })
+                .then(response => response.blob())
                 .then(data => {
                     const url = window.URL.createObjectURL(data);
                     const link = document.createElement('a');
@@ -165,9 +195,7 @@
                     link.download = 'collected_books_data.xlsx';
                     link.click();
                 })
-                .catch(err => {
-                    showAlert('无采集数据可导出！');
-                });
+                .catch(err => alert('导出失败'));
         });
 
         // 清除采集数据
@@ -176,14 +204,13 @@
                 method: 'DELETE',
             })
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('清除失败'); // 如果清除失败，抛出错误
+                    if (response.ok) {
+                        alert('清除成功！');
+                    } else {
+                        alert('清除失败！');
                     }
-                    showAlert('清除成功！');
                 })
-                .catch(err => {
-                    showAlert('无采集数据可清除！');
-                });
+                .catch(err => alert('清除失败'));
         });
     </script>
 </body>
