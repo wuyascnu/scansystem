@@ -187,6 +187,11 @@
                     console.log("扫描到结果：", decodedText);
                     searchBook(decodedText);  // 调用查询书籍信息
                     status.innerHTML = '扫描成功，正在查询书籍...';
+
+                    // 摄像头启动后重新聚焦输入框
+                    setTimeout(() => {
+                        input.focus();
+                    }, 100);
                 },
                 function(errorMessage) {
                     status.innerHTML = '扫描中...';
