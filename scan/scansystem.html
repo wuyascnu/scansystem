@@ -35,28 +35,53 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        #scanResults {
-            margin: 20px;
-            font-size: 14px;
+        #reader {
+            width: 100%;
+            max-width: 400px;
+            margin: 10px auto;
         }
-        #scanResults h4 {
+        #status {
+            text-align: center;
+            margin-top: 10px;
+            color: #555;
+        }
+        #alertBox {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 30px;
+            font-size: 24px;
+            font-weight: bold;
+            border: 2px solid #f5c6cb;
+            border-radius: 15px;
+            display: none;
+            z-index: 1000;
+            width: 50%;
+            min-width: 280px;
+            max-width: 500px;
+            text-align: left;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0 auto;
+        }
+        #results {
+            margin: 20px auto;
+            width: 90%;
+        }
+        .result-item {
             margin: 10px 0;
-        }
-        #scanResults ul {
-            list-style: none;
-            padding: 0;
-        }
-        #scanResults li {
-            margin: 5px 0;
-            padding: 5px;
+            padding: 10px;
             border: 1px solid #ccc;
-            border-radius: 3px;
+            border-radius: 5px;
         }
-        #scanResults li.success {
+        .result-item.success {
             background-color: #d4edda;
             color: #155724;
         }
-        #scanResults li.error {
+        .result-item.error {
             background-color: #f8d7da;
             color: #721c24;
         }
@@ -66,93 +91,152 @@
     <div id="header"></div>
     <h3>书籍位置查询系统</h3>
     <div id="controls">
-        <input type="text" id="barcodeInput" placeholder="输入条码或扫码" autofocus>
+        <input type="text" id="barcodeInput" placeholder="输入条码或扫码" onfocus="clearInputOnFocus()" onblur="triggerSearch()" onkeyup="handleKeyUp(event)">
         <button id="startScanBtn">启动摄像头扫描</button>
-        <button id="clearResultsBtn">清空结果</button>
-        <button id="exportErrorsBtn">导出错误条码</button>
+        <button id="stopScanBtn" style="display:none;">停止扫描</button>
     </div>
-    <div id="scanResults">
-        <h4>查询结果</h4>
-        <ul id="resultList"></ul>
-    </div>
+    <div id="reader"></div>
+    <div id="status"></div>
+    <div id="alertBox"></div> <!-- 自定义弹框 -->
+    <div id="results"></div> <!-- 查询结果展示区域 -->
 
+    <script src="./js/html5-qrcode.min.js"></script>
     <script>
         const input = document.getElementById('barcodeInput');
-        const resultList = document.getElementById('resultList');
         const startScanBtn = document.getElementById('startScanBtn');
-        const clearResultsBtn = document.getElementById('clearResultsBtn');
-        const exportErrorsBtn = document.getElementById('exportErrorsBtn');
-        const errorBarcodes = []; // 存储错误条码
-        const scannedBarcodes = new Set(); // 防止重复查询
+        const stopScanBtn = document.getElementById('stopScanBtn');
+        const status = document.getElementById('status');
+        const alertBox = document.getElementById('alertBox');
+        const results = document.getElementById('results');
+        let html5QrCode;
+        let isFetching = false; // 防止重复请求
+        let debounceTimer;
+        const scannedBarcodes = new Set(); // 防止重复条码查询
 
-        // 清空结果
-        clearResultsBtn.addEventListener('click', () => {
-            resultList.innerHTML = '';
-            errorBarcodes.length = 0;
-            scannedBarcodes.clear();
-        });
+        // 页面加载后自动聚焦文本框
+        window.onload = function() {
+            input.focus();
+        };
 
-        // 导出错误条码
-        exportErrorsBtn.addEventListener('click', () => {
-            if (errorBarcodes.length === 0) {
-                alert('没有错误条码可导出！');
-                return;
-            }
-            const csvContent = "data:text/csv;charset=utf-8," + errorBarcodes.join("\n");
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement('a');
-            link.setAttribute('href', encodedUri);
-            link.setAttribute('download', '错误条码.csv');
-            document.body.appendChild(link);
-            link.click();
-        });
-
-        // 显示结果
-        function addScanResult(barcode, status, message) {
-            const li = document.createElement('li');
-            li.className = status === '成功' ? 'success' : 'error';
-            li.textContent = `条码: ${barcode}, 状态: ${status}, 信息: ${message}`;
-            resultList.appendChild(li);
-
-            // 如果失败，记录错误条码
-            if (status === '失败') {
-                errorBarcodes.push(barcode);
-            }
-
-            // 语音播报
-            speak(message);
+        function debounceSearch(callback, delay = 500) {
+            return function(...args) {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    callback(...args);
+                }, delay);
+            };
         }
 
-        // 查询条码
         function searchBook(barcode) {
-            if (!barcode || scannedBarcodes.has(barcode)) return; // 跳过重复条码
-            scannedBarcodes.add(barcode);
+            if (!barcode || isFetching || scannedBarcodes.has(barcode)) return;
 
-            fetch(`/api/${barcode}`)
+            // 记录已查询条码
+            scannedBarcodes.add(barcode);
+            isFetching = true;
+
+            fetch(`https://tiezheng.natapp4.cc/api/${barcode}`)
                 .then(response => {
-                    if (!response.ok) throw new Error('查询失败');
+                    isFetching = false;
+                    if (!response.ok) {
+                        throw response;
+                    }
                     return response.json();
                 })
                 .then(data => {
-                    addScanResult(barcode, '成功', `位置: ${data.shelfName}`);
+                    // 成功查询
+                    const message = `位置编码: ${data.shelfCode}，位置名称: ${data.shelfName}`;
+                    addResult(barcode, "success", message);
+                    speak(`查询成功，位置在${data.shelfName}`);
                 })
-                .catch(() => {
-                    addScanResult(barcode, '失败', '未找到书籍信息');
+                .catch(error => {
+                    isFetching = false;
+                    const errorMessage = "未找到匹配的书籍信息";
+                    addResult(barcode, "error", errorMessage);
+                    speak("查询失败，未找到匹配的书籍信息");
                 });
         }
 
-        // 批量扫码
-        input.addEventListener('keyup', (event) => {
+        function triggerSearch() {
+            const value = input.value.trim();
+            if (value) {
+                searchBook(value);
+            }
+        }
+
+        const debouncedTriggerSearch = debounceSearch(triggerSearch, 500);
+
+        function handleKeyUp(event) {
             if (event.key === 'Enter') {
-                const barcode = input.value.trim();
-                searchBook(barcode);
-                input.value = ''; // 清空输入框
+                debouncedTriggerSearch();
+            }
+        }
+
+        input.addEventListener('keyup', handleKeyUp);
+        input.addEventListener('blur', debouncedTriggerSearch);
+
+        function clearInputOnFocus() {
+            input.value = ''; // 当输入框获取焦点时清空内容
+            input.setSelectionRange(0, 0); // 重置光标到输入框开头
+        }
+
+        startScanBtn.addEventListener('click', function() {
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            html5QrCode.start(
+                { facingMode: "environment" },
+                config,
+                function(decodedText, decodedResult) {
+                    console.log("扫描到结果：", decodedText);
+                    searchBook(decodedText);  // 调用查询书籍信息
+                    status.innerHTML = '扫描成功，正在查询书籍...';
+                },
+                function(errorMessage) {
+                    status.innerHTML = '扫描中...';
+                    console.log("扫描中...", errorMessage);
+                }
+            ).catch(err => {
+                alert("无法启动摄像头：" + err);
+            });
+
+            startScanBtn.style.display = 'none';
+            stopScanBtn.style.display = 'inline';
+        });
+
+        stopScanBtn.addEventListener('click', function() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    console.log('摄像头已停止');
+                    status.innerHTML = '摄像头已停止';
+                    startScanBtn.style.display = 'inline';
+                    stopScanBtn.style.display = 'none';
+                }).catch(err => {
+                    console.error("停止摄像头失败：", err);
+                });
             }
         });
 
-        // 语音播报
+        function addResult(barcode, status, message) {
+            const div = document.createElement('div');
+            div.className = `result-item ${status}`;
+            div.textContent = `条码: ${barcode} - ${message}`;
+            results.appendChild(div);
+        }
+
+        function showAlert(message) {
+            alertBox.textContent = message;
+            alertBox.style.display = 'block';
+
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // 语音播报功能
         function speak(text) {
             const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = "zh-CN"; // 设置为中文
             speechSynthesis.speak(utterance);
         }
     </script>
