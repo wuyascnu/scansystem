@@ -110,22 +110,19 @@
         const results = document.getElementById('results');
         let html5QrCode;
         let isFetching = false; // 防止重复请求
-        let debounceTimer;
         const scannedBarcodes = new Set(); // 防止重复条码查询
 
         // 页面加载后自动聚焦文本框
         window.onload = function() {
             input.focus();
-        };
 
-        function debounceSearch(callback, delay = 500) {
-            return function(...args) {
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => {
-                    callback(...args);
-                }, delay);
-            };
-        }
+            // 在移动端解锁语音播报权限
+            document.addEventListener('click', () => {
+                const utterance = new SpeechSynthesisUtterance("语音播报已启用");
+                utterance.lang = "zh-CN";
+                speechSynthesis.speak(utterance);
+            }, { once: true });
+        };
 
         function searchBook(barcode) {
             if (!barcode || isFetching || scannedBarcodes.has(barcode)) return;
@@ -146,10 +143,11 @@
                     // 成功查询
                     const message = `位置编码: ${data.shelfCode}，位置名称: ${data.shelfName}`;
                     addResult(barcode, "success", message);
-                    speak(`查询成功，位置在${data.shelfName}`);
+                    speak(`查询成功，位置在 ${data.shelfName}`);
                 })
                 .catch(error => {
                     isFetching = false;
+                    // 查询失败
                     const errorMessage = "未找到匹配的书籍信息";
                     addResult(barcode, "error", errorMessage);
                     speak("查询失败，未找到匹配的书籍信息");
@@ -163,16 +161,14 @@
             }
         }
 
-        const debouncedTriggerSearch = debounceSearch(triggerSearch, 500);
-
         function handleKeyUp(event) {
             if (event.key === 'Enter') {
-                debouncedTriggerSearch();
+                triggerSearch();
             }
         }
 
         input.addEventListener('keyup', handleKeyUp);
-        input.addEventListener('blur', debouncedTriggerSearch);
+        input.addEventListener('blur', triggerSearch);
 
         function clearInputOnFocus() {
             input.value = ''; // 当输入框获取焦点时清空内容
@@ -224,19 +220,23 @@
             results.appendChild(div);
         }
 
-        function showAlert(message) {
-            alertBox.textContent = message;
-            alertBox.style.display = 'block';
-
-            setTimeout(() => {
-                alertBox.style.display = 'none';
-            }, 5000);
-        }
-
         // 语音播报功能
         function speak(text) {
+            if (!window.speechSynthesis) {
+                console.warn("当前浏览器不支持语音播报");
+                return;
+            }
+
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = "zh-CN"; // 设置为中文
+            utterance.lang = "zh-CN"; // 设置语言为中文
+            utterance.rate = 1; // 设置语速
+            utterance.pitch = 1; // 设置音调
+
+            // 在移动端需要确保没有重复语音在播放
+            if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+            }
+
             speechSynthesis.speak(utterance);
         }
     </script>
