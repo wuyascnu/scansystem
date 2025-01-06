@@ -95,8 +95,8 @@
     <div id="header"></div>
     <h3>书籍位置查询系统</h3>
     <div id="controls">
-        <input type="text" id="barcodeInput" placeholder="输入条码或扫码" onfocus="clearInputOnFocus()" onblur="triggerSearch()" onkeyup="handleKeyUp(event)">
-        <button id="startScanBtn">启动摄像头扫描</button>
+        <input type="text" id="barcodeInput" placeholder="输入条码或扫码" onkeyup="handleKeyUp(event)">
+        <button id="startScanBtn">启动摄像头扫码</button>
         <button id="stopScanBtn" style="display:none;">停止扫描</button>
     </div>
     <div id="reader"></div>
@@ -120,13 +120,6 @@
         window.onload = function() {
             input.focus();
             results.innerHTML = ''; // 清空历史记录
-
-            // 在移动端解锁语音播报权限
-            document.addEventListener('click', () => {
-                const utterance = new SpeechSynthesisUtterance("语音播报已启用");
-                utterance.lang = "zh-CN";
-                speechSynthesis.speak(utterance);
-            }, { once: true });
         };
 
         // 查询书籍
@@ -159,34 +152,21 @@
                     speak("查询失败，未找到匹配的书籍信息");
                 })
                 .finally(() => {
-                    clearAndRefocusInput(); // 查询完成后清空并聚焦输入框
+                    setTimeout(() => {
+                        input.value = ''; // 保留条码短暂显示后清空
+                        input.focus(); // 重新聚焦输入框
+                    }, 1000); // 1秒后清空输入框
                 });
-        }
-
-        // 触发查询
-        function triggerSearch() {
-            const value = input.value.trim();
-            if (value) {
-                searchBook(value);
-            }
         }
 
         // 输入回车触发查询
         function handleKeyUp(event) {
             if (event.key === 'Enter') {
-                triggerSearch();
+                const barcode = input.value.trim();
+                if (barcode) {
+                    searchBook(barcode);
+                }
             }
-        }
-
-        // 清空输入框并重新聚焦
-        function clearAndRefocusInput() {
-            input.value = ''; // 清空输入框
-            input.focus(); // 重新聚焦输入框
-        }
-
-        // 确保输入框失焦后重新聚焦
-        function clearInputOnFocus() {
-            input.value = ''; // 当输入框获取焦点时清空内容
         }
 
         // 添加结果到历史记录
@@ -226,7 +206,8 @@
                 { facingMode: "environment" },
                 config,
                 function(decodedText, decodedResult) {
-                    searchBook(decodedText);  // 调用查询书籍信息
+                    input.value = decodedText; // 将扫码结果填入输入框
+                    searchBook(decodedText); // 执行查询
                 },
                 function(errorMessage) {
                     status.innerHTML = '扫描中...';
