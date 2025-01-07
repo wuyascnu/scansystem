@@ -80,6 +80,12 @@
             word-wrap: break-word;
             margin: 0 auto;
         }
+        #reader {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 400px;
+            display: none;
+        }
         @media (max-width: 600px) {
             #alertBox {
                 font-size: 18px;
@@ -104,46 +110,47 @@
             <button id="exportBtn">导出今天采集数据</button>
             <button id="clearBtn">清除今天采集数据</button>
         </div>
+        <div class="button-row">
+            <button id="startScanBtn">开启摄像头扫码</button>
+            <button id="stopScanBtn" style="display: none;">停止摄像头扫码</button>
+        </div>
+        <div id="reader"></div>
     </div>
     <div id="alertBox"></div>
+    <script src="./js/html5-qrcode.min.js"></script>
     <script>
         const input = document.getElementById('isbnInput');
         const exportBtn = document.getElementById('exportBtn');
         const clearBtn = document.getElementById('clearBtn');
+        const startScanBtn = document.getElementById('startScanBtn');
+        const stopScanBtn = document.getElementById('stopScanBtn');
+        const reader = document.getElementById('reader');
         const alertBox = document.getElementById('alertBox');
-        let debounceTimer = null; // 防抖计时器
+        let html5QrCode = null;
 
         // 页面加载时设置焦点在输入框
         window.onload = function () {
             focusInput();
         };
 
-        // 设置输入框焦点并清空
         function focusInput() {
-            input.value = ''; // 清空输入框
-            input.focus(); // 聚焦输入框
+            input.value = '';
+            input.focus();
         }
 
-        // 显示查询结果弹窗
         function showAlert(message) {
             alertBox.textContent = message;
             alertBox.style.display = 'block';
-
-            // 3秒后关闭弹窗
             setTimeout(() => {
                 alertBox.style.display = 'none';
             }, 3000);
         }
 
-        // 查询书籍信息
         function searchBook(isbn) {
             if (!isbn) return;
-
             fetch('https://tiezheng.natapp4.cc/api/bookCollection/search', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ isbn: isbn }),
             })
                 .then(response => response.json())
@@ -155,15 +162,14 @@
                         showAlert('未找到书籍信息');
                     }
                 })
-                .catch(error => {
+                .catch(() => {
                     showAlert('查询失败，请重试');
                 })
                 .finally(() => {
-                    focusInput(); // 查询完成后清空并聚焦输入框
+                    focusInput();
                 });
         }
 
-        // 输入框按回车键触发查询
         input.addEventListener('keyup', function (event) {
             if (event.key === 'Enter') {
                 const isbn = input.value.trim();
@@ -171,20 +177,8 @@
             }
         });
 
-        // 输入框内容变化实时触发查询（带防抖）
-        input.addEventListener('input', function () {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                const isbn = input.value.trim();
-                searchBook(isbn);
-            }, 300); // 设置防抖延迟时间为300ms
-        });
-
-        // 页面加载时记录当前时间
-        let startTime = new Date().toISOString();
-
         exportBtn.addEventListener('click', function () {
-            fetch(`https://tiezheng.natapp4.cc/api/bookCollection/export?startTime=${encodeURIComponent(startTime)}`, {
+            fetch(`https://tiezheng.natapp4.cc/api/bookCollection/export`, {
                 method: 'GET',
             })
                 .then(response => response.blob())
@@ -195,10 +189,9 @@
                     link.download = 'collected_books_data.xlsx';
                     link.click();
                 })
-                .catch(err => alert('导出失败'));
+                .catch(() => alert('导出失败'));
         });
 
-        // 清除采集数据
         clearBtn.addEventListener('click', function () {
             fetch('https://tiezheng.natapp4.cc/api/bookCollection/clear', {
                 method: 'DELETE',
@@ -210,7 +203,37 @@
                         alert('清除失败！');
                     }
                 })
-                .catch(err => alert('清除失败'));
+                .catch(() => alert('清除失败'));
+        });
+
+        startScanBtn.addEventListener('click', function () {
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            html5QrCode
+                .start({ facingMode: "environment" }, config, (decodedText) => {
+                    showAlert(`扫描到ISBN：${decodedText}`);
+                    input.value = decodedText;
+                    searchBook(decodedText);
+                })
+                .catch(err => {
+                    console.error("摄像头启动失败：", err);
+                });
+
+            reader.style.display = 'block';
+            startScanBtn.style.display = 'none';
+            stopScanBtn.style.display = 'inline';
+        });
+
+        stopScanBtn.addEventListener('click', function () {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    reader.style.display = 'none';
+                    startScanBtn.style.display = 'inline';
+                    stopScanBtn.style.display = 'none';
+                });
+            }
         });
     </script>
 </body>
