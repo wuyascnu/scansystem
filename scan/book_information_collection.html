@@ -178,19 +178,30 @@
         });
 
         exportBtn.addEventListener('click', function () {
-            fetch(`https://tiezheng.natapp4.cc/api/bookCollection/export`, {
-                method: 'GET',
-            })
-                .then(response => response.blob())
-                .then(data => {
-                    const url = window.URL.createObjectURL(data);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = 'collected_books_data.xlsx';
-                    link.click();
-                })
-                .catch(() => alert('导出失败'));
+    const startTime = new Date().toISOString(); // 获取当前时间的 ISO8601 格式
+    fetch(`https://tiezheng.natapp4.cc/api/bookCollection/export?startTime=${encodeURIComponent(startTime)}`, {
+        method: 'GET',
+    })
+        .then(response => {
+            if (response.ok) {
+                return response.blob();
+            } else {
+                throw new Error('导出失败');
+            }
+        })
+        .then(data => {
+            const url = window.URL.createObjectURL(data);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'collected_books_data.xlsx'; // 下载文件名
+            link.click();
+        })
+        .catch(err => {
+            console.error('导出失败:', err);
+            alert('导出失败，请重试');
         });
+});
+
 
         clearBtn.addEventListener('click', function () {
             fetch('https://tiezheng.natapp4.cc/api/bookCollection/clear', {
