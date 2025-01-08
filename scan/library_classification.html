@@ -161,7 +161,11 @@
            </div>
         </div>
     </div>
-
+	<div id="loading-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
+  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white;">
+    加载中...
+  </div>
+</div>
      <!-- 引入脚本 -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -172,6 +176,25 @@
 	<!-- Import SweetAlert2 for better dialog -->
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
    <script>
+    // 显示 Loading 动画
+function showLoading() {
+    const loadingOverlay = document.getElementById('loading-overlay');
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'block';
+    } else {
+        console.error('Loading overlay element not found!');
+    }
+}
+
+// 隐藏 Loading 动画
+function hideLoading() {
+    const loadingOverlay = document.getElementById('loading-overlay');
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+    } else {
+        console.error('Loading overlay element not found!');
+    }
+}
    
     function loadAllocationTimes() {
     $.get('https://tiezheng.natapp4.cc/api/books/allocation_times', function (data) {
@@ -645,6 +668,10 @@ $('#importShelfBtn').click(function () {
     input.onchange = function (e) {
         const file = e.target.files[0];
         const reader = new FileReader();
+
+        // 显示 Loading 动画
+        showLoading();
+
         reader.onload = function (e) {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
@@ -674,12 +701,10 @@ $('#importShelfBtn').click(function () {
 
             // 验证数据格式
             if (!validateData(mappedData)) {
+                hideLoading(); // 隐藏动画
                 Swal.fire('导入失败', '数据格式有误，请检查文件内容', 'error');
                 return;
             }
-
-            // 显示 Loading 动画
-            showLoading();
 
             // 发出 AJAX 请求
             $.ajax({
@@ -700,12 +725,11 @@ $('#importShelfBtn').click(function () {
                 }
             });
         };
+
         reader.readAsArrayBuffer(file);
     };
     input.click();
 });
-
-
 
 		 //==================================shelfTable============================================
 	    //================================bookAllocationTable===========================================
