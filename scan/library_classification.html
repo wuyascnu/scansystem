@@ -640,11 +640,39 @@ $('#importShelfBtn').click(function () {
             const sheetName = workbook.SheetNames[0];
             const sheet = workbook.Sheets[sheetName];
             const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+            // 字段映射
+            const fieldMapping = {
+                "层架号编码": "shelfCode",
+                "层架名": "shelfName",
+                "最大存放容量(单位：本)": "capacity",
+                "已用容量(单位：本)": "usedCapacity"
+            };
+
+            const mappedData = jsonData.map(row => {
+                const mappedRow = {};
+                for (const key in row) {
+                    if (fieldMapping[key]) {
+                        mappedRow[fieldMapping[key]] = row[key];
+                    }
+                }
+                return mappedRow;
+            });
+
+            console.log("上传的JSON数据: ", JSON.stringify(mappedData));
+
+            // 验证数据格式
+            if (!validateData(mappedData)) {
+                Swal.fire('导入失败', '数据格式有误，请检查文件内容', 'error');
+                return;
+            }
+
+            // 发出 AJAX 请求
             $.ajax({
-                url: 'https://tiezheng.natapp4.cc/api/shelves/import', // 使用新的导入端点
+                url: 'https://tiezheng.natapp4.cc/api/shelves/import',
                 method: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify(jsonData),
+                data: JSON.stringify(mappedData),
                 success: function () {
                     Swal.fire('导入成功！', '', 'success');
                     $('#shelfTable').bootstrapTable('refresh');
@@ -658,6 +686,7 @@ $('#importShelfBtn').click(function () {
     };
     input.click();
 });
+
 
 		 //==================================shelfTable============================================
 	    //================================bookAllocationTable===========================================
