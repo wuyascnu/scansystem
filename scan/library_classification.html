@@ -187,6 +187,17 @@
     });
 }
 
+function validateData(data) {
+    // 遍历每一行数据，检查字段是否存在且格式正确
+    return data.every(row =>
+        row.shelfCode && // 检查 shelfCode 是否存在
+        row.shelfName && // 检查 shelfName 是否存在
+        !isNaN(row.capacity) && row.capacity > 0 && // capacity 必须是正整数
+        !isNaN(row.usedCapacity) && row.usedCapacity >= 0 // usedCapacity 必须是非负整数
+    );
+}
+
+
 
  // 统一的密钥验证函数
 function verifySecretKey(callback) {
