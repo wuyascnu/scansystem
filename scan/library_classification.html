@@ -678,6 +678,9 @@ $('#importShelfBtn').click(function () {
                 return;
             }
 
+            // 显示 Loading 动画
+            showLoading();
+
             // 发出 AJAX 请求
             $.ajax({
                 url: 'https://tiezheng.natapp4.cc/api/shelves/import',
@@ -690,6 +693,10 @@ $('#importShelfBtn').click(function () {
                 },
                 error: function () {
                     Swal.fire('导入失败，请检查数据格式！', '', 'error');
+                },
+                complete: function () {
+                    // 隐藏 Loading 动画
+                    hideLoading();
                 }
             });
         };
@@ -697,6 +704,7 @@ $('#importShelfBtn').click(function () {
     };
     input.click();
 });
+
 
 
 		 //==================================shelfTable============================================
