@@ -5,46 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>书籍位置查询系统</title>
     <style>
+        /* 背景样式 */
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background: url('https://i.imgur.com/Q3xJcCy.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #333;
         }
+
+        /* 页面顶部 Logo 区域 */
         #header {
             position: relative;
-            height: 100px;
+            height: 120px;
             background: url('./img/logo.png') no-repeat center top;
-            background-size: 80px;
+            background-size: 100px;
         }
+
+        /* 页面标题 */
         h3 {
             text-align: center;
             margin: 5px 0;
-            font-size: 18px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 20px;
         }
+
+        /* 控件样式 */
         #controls {
             margin-top: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
         }
+
         input, button {
             width: 90%;
+            max-width: 400px;
             padding: 10px;
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 5px;
         }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
         #reader {
             width: 100%;
             max-width: 400px;
             margin: 10px auto;
         }
+
         #status {
             text-align: center;
             margin-top: 10px;
             color: #555;
         }
+
         #alertBox {
             position: fixed;
             top: 20%;
@@ -67,20 +99,24 @@
             word-wrap: break-word;
             margin: 0 auto;
         }
+
+        /* 历史记录样式 */
         #history {
             margin: 20px auto;
             width: 90%;
             max-width: 600px;
-            background-color: #f8f9fa;
+            background-color: rgba(255, 255, 255, 0.8);
             border-radius: 5px;
             padding: 15px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+
         #history h4 {
             margin: 0 0 10px;
             font-size: 18px;
             color: #333;
         }
+
         #historyList {
             list-style: none;
             padding: 0;
@@ -88,6 +124,7 @@
             max-height: 200px;
             overflow-y: auto;
         }
+
         #historyList li {
             margin: 5px 0;
             padding: 10px;
@@ -95,13 +132,28 @@
             border-radius: 5px;
             background-color: #ffffff;
         }
+
         .success {
             background-color: #d4edda;
             color: #155724;
         }
+
         .error {
             background-color: #f8d7da;
             color: #721c24;
+        }
+
+        /* 页面底部版权信息 */
+        footer {
+            text-align: center;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            position: relative;
+            bottom: 0;
+            width: 100%;
         }
     </style>
 </head>
@@ -120,6 +172,10 @@
         <h4>历史扫码记录</h4>
         <ul id="historyList"></ul>
     </div>
+
+    <footer>
+        <p>© 2025 校园图书馆书籍位置查询系统 | 设计者: 我爱go语言</p>
+    </footer>
 
     <script src="./js/html5-qrcode.min.js"></script>
     <script>
@@ -151,31 +207,20 @@
                     return response.json();
                 })
                 .then(data => {
-                    // 查询成功，显示结果框并添加历史记录
                     const successMessage = `位置编码: ${data.shelfCode}，位置名称: ${data.shelfName}`;
                     showAlert(successMessage);
                     speak(`查询成功，书籍位置为${data.shelfName}`);
                     addHistory(barcode, "success", successMessage);
                 })
                 .catch(error => {
-                    // 查询失败，显示错误信息并添加历史记录
                     isFetching = false;
-                    if (error instanceof Response) {
-                        error.json().then(errData => {
-                            const errorMessage = errData.error || "未知错误";
-                            showAlert(errorMessage);
-                            speak("查询失败，未找到匹配的书籍信息");
-                            addHistory(barcode, "error", errorMessage);
-                        });
-                    } else {
-                        const errorMessage = "未找到匹配的书籍信息";
-                        showAlert(errorMessage);
-                        speak("查询失败，未找到匹配的书籍信息");
-                        addHistory(barcode, "error", errorMessage);
-                    }
+                    const errorMessage = "未找到匹配的书籍信息";
+                    showAlert(errorMessage);
+                    speak("查询失败，未找到匹配的书籍信息");
+                    addHistory(barcode, "error", errorMessage);
                 })
                 .finally(() => {
-                    clearAndFocusInput(); // 保证输入框清空并聚焦
+                    clearAndFocusInput();
                 });
         }
 
@@ -260,9 +305,9 @@
             li.className = status;
             li.textContent = `条码: ${barcode} - ${message}`;
             historyList.appendChild(li);
-			
-			 // 自动滚动到最新的记录
-    historyList.scrollTop = historyList.scrollHeight;
+            
+            // 自动滚动到最新的记录
+            historyList.scrollTop = historyList.scrollHeight;
         }
     </script>
 </body>
