@@ -8,61 +8,43 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: url('./img/library-background.jpg') no-repeat center center fixed;
-            background-size: cover;
+            background-color: #f4f4f4;
         }
-
-        /* 顶部横幅 */
         #header {
             position: relative;
-            height: 120px;
-            background: url('./img/library-banner.jpg') no-repeat center center;
-            background-size: cover;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            height: 100px;
+            background: url('./img/logo.png') no-repeat center top;
+            background-size: 80px;
         }
-
         h3 {
             text-align: center;
-            margin: 20px 0 10px;
-            font-size: 22px;
-            font-weight: bold;
-            color: #4a4a4a;
+            margin: 5px 0;
+            font-size: 18px;
         }
-
-        /* 卡片式布局 */
-        .card {
-            margin: 20px auto;
-            padding: 20px;
-            width: 90%;
-            max-width: 600px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        #controls {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
         }
-
         input, button {
-            width: 100%;
+            width: 90%;
             padding: 10px;
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            margin-bottom: 10px;
         }
-
-        button {
-            background-color: #6c757d;
-            color: white;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #5a6268;
-        }
-
         #reader {
-            margin: 20px auto;
+            width: 100%;
+            max-width: 400px;
+            margin: 10px auto;
         }
-
+        #status {
+            text-align: center;
+            margin-top: 10px;
+            color: #555;
+        }
         #alertBox {
             position: fixed;
             top: 20%;
@@ -71,15 +53,20 @@
             background-color: #f8d7da;
             color: #721c24;
             padding: 30px;
-            font-size: 20px;
+            font-size: 24px;
             font-weight: bold;
             border: 2px solid #f5c6cb;
             border-radius: 15px;
             display: none;
             z-index: 1000;
-            text-align: center;
+            width: 50%;
+            min-width: 280px;
+            max-width: 500px;
+            text-align: left;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0 auto;
         }
-
         #history {
             margin: 20px auto;
             width: 90%;
@@ -89,13 +76,11 @@
             padding: 15px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-
         #history h4 {
             margin: 0 0 10px;
             font-size: 18px;
             color: #333;
         }
-
         #historyList {
             list-style: none;
             padding: 0;
@@ -103,7 +88,6 @@
             max-height: 200px;
             overflow-y: auto;
         }
-
         #historyList li {
             margin: 5px 0;
             padding: 10px;
@@ -111,12 +95,10 @@
             border-radius: 5px;
             background-color: #ffffff;
         }
-
         .success {
             background-color: #d4edda;
             color: #155724;
         }
-
         .error {
             background-color: #f8d7da;
             color: #721c24;
@@ -126,25 +108,20 @@
 <body>
     <div id="header"></div>
     <h3>书籍位置查询系统</h3>
-
-    <!-- 查询部分 -->
-    <div class="card">
+    <div id="controls">
         <input type="text" id="barcodeInput" placeholder="输入条码或扫码" onfocus="clearInputOnFocus()" onblur="triggerSearch()" onkeyup="handleKeyUp(event)">
         <button id="startScanBtn">启动摄像头扫码</button>
         <button id="stopScanBtn" style="display:none;">停止扫描</button>
-        <div id="reader"></div>
-        <div id="status"></div>
     </div>
-
-    <!-- 弹框提示 -->
-    <div id="alertBox"></div>
-
-    <!-- 历史记录部分 -->
+    <div id="reader"></div>
+    <div id="status"></div>
+    <div id="alertBox"></div> <!-- 自定义弹框 -->
     <div id="history">
         <h4>历史扫码记录</h4>
         <ul id="historyList"></ul>
     </div>
 
+    <script src="./js/html5-qrcode.min.js"></script>
     <script>
         const input = document.getElementById('barcodeInput');
         const startScanBtn = document.getElementById('startScanBtn');
@@ -202,15 +179,63 @@
                 });
         }
 
-        function addHistory(barcode, status, message) {
-            const li = document.createElement('li');
-            li.className = status;
-            li.textContent = `条码: ${barcode} - ${message}`;
-            historyList.appendChild(li);
-
-            // 自动滚动到最新的记录
-            historyList.scrollTop = historyList.scrollHeight;
+        function triggerSearch() {
+            const value = input.value.trim();
+            if (value) {
+                searchBook(value);
+            }
         }
+
+        function handleKeyUp(event) {
+            if (event.key === 'Enter') {
+                triggerSearch();
+            }
+        }
+
+        function clearInputOnFocus() {
+            input.value = ''; // 当输入框获取焦点时清空内容
+        }
+
+        function clearAndFocusInput() {
+            input.value = ''; // 清空输入框
+            input.focus(); // 聚焦输入框
+        }
+
+        startScanBtn.addEventListener('click', function() {
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            html5QrCode.start(
+                { facingMode: "environment" },
+                config,
+                function(decodedText, decodedResult) {
+                    console.log("扫描到结果：", decodedText);
+                    input.value = decodedText; // 将扫码结果放入输入框
+                    searchBook(decodedText); // 调用查询书籍信息
+                },
+                function(errorMessage) {
+                    status.innerHTML = '扫描中...';
+                    console.log("扫描中...", errorMessage);
+                }
+            ).catch(err => {
+                alert("无法启动摄像头：" + err);
+            });
+
+            startScanBtn.style.display = 'none';
+            stopScanBtn.style.display = 'inline';
+        });
+
+        stopScanBtn.addEventListener('click', function() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    startScanBtn.style.display = 'inline';
+                    stopScanBtn.style.display = 'none';
+                }).catch(err => {
+                    console.error("停止摄像头失败：", err);
+                });
+            }
+        });
 
         function showAlert(message) {
             alertBox.textContent = message;
@@ -228,6 +253,16 @@
                 speechSynthesis.cancel();
             }
             speechSynthesis.speak(utterance);
+        }
+
+        function addHistory(barcode, status, message) {
+            const li = document.createElement('li');
+            li.className = status;
+            li.textContent = `条码: ${barcode} - ${message}`;
+            historyList.appendChild(li);
+			
+			 // 自动滚动到最新的记录
+    historyList.scrollTop = historyList.scrollHeight;
         }
     </script>
 </body>
