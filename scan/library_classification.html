@@ -1,36 +1,63 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-   <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>图书书架层架位置分配维护系统</title>
     <!-- 引入 Bootstrap 和 Bootstrap Table 样式 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.20.2/dist/bootstrap-table.min.css">
-    <!-- Ensure FileSaver and xlsx scripts are loaded for tableExport -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
         }
+
         .container {
             max-width: 100%;
             padding: 15px;
         }
+
         .table-container {
-            margin-top: 40px; /* 增加上边距，将按钮和表格向下移动 */
+            margin-top: 40px;
             max-height: calc(100vh - 200px);
-            overflow-y: auto;
+            overflow-x: auto; /* 水平滚动 */
+            overflow-y: auto; /* 垂直滚动 */
         }
-        .mb-3 {
-            margin-top: 20px; /* 增加按钮的上边距 */
+
+        /* 按钮在移动端上响应式显示 */
+        .mb-3 button {
+            margin-bottom: 10px;
+            width: 100%; /* 按钮占满宽度 */
         }
-		thead th {
+
+        .table-responsive {
+            display: block;
+            width: 100%;
+            overflow-x: auto; /* 表格在小屏幕上支持水平滚动 */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        thead th {
             position: sticky;
             top: 0;
-            background-color: #fff; /* 确保背景不透明 */
-            z-index: 10; /* 高层次以确保滚动内容不会覆盖表头 */
+            background-color: #fff;
+            z-index: 10;
+        }
+
+        /* 移动端表格字体优化 */
+        table {
+            font-size: 12px; /* 缩小表格字体 */
+        }
+
+        /* Tab 栏在移动端的布局优化 */
+        .nav-tabs .nav-item {
+            flex: 1;
+            text-align: center;
+        }
+
+        /* 表头字体优化 */
+        th {
+            white-space: nowrap; /* 保持表头文字不换行 */
         }
     </style>
 </head>
