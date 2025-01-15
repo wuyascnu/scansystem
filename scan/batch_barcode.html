@@ -38,12 +38,12 @@
     </style>
 </head>
 <body>
-    <h1>Batch Barcode Generator</h1>
+    <h1>书籍条形码生成器</h1>
     <form id="barcodeForm">
-        <label for="description">Barcode Description:</label><br>
+        <label for="description">请输入条形码描述:</label><br>
         <input type="text" id="description" name="description" placeholder="Enter barcode description" required><br><br>
         
-        <label for="barcode">Barcode Numbers (comma-separated, max 40):</label><br>
+        <label for="barcode">请输入条码号 (用","做分割，一次最多输入40个条码号):</label><br>
         <textarea id="barcode" name="barcode" rows="5" placeholder="Enter barcode numbers separated by commas" required></textarea><br><br>
         
         <button type="submit">Generate</button>
