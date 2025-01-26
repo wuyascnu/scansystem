@@ -17,9 +17,8 @@
             width: 300px;
         }
 
-        textarea {
-            width: 100%;
-            resize: none;
+        input[type="file"] {
+            margin-top: 10px;
         }
 
         button {
@@ -35,55 +34,154 @@
         button:hover {
             background-color: #45a049;
         }
+
+        #barcodePreview {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .barcodeItem {
+            width: 150px;
+            height: 200px;
+            margin: 10px;
+            text-align: center;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        .barcode img {
+            width: 100px;
+            height: 100px;
+        }
+
+        .description {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .barcodeNumber {
+            font-size: 12px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
     <h1>书籍条形码生成器</h1>
     <form id="barcodeForm">
-        <label for="description">请输入条形码描述:</label><br>
+        <label for="description">Barcode Description:</label><br>
         <input type="text" id="description" name="description" placeholder="Enter barcode description" required><br><br>
         
-        <label for="barcode">请输入条码号 (用","做分割，一次最多输入40个条码号):</label><br>
-        <textarea id="barcode" name="barcode" rows="5" placeholder="Enter barcode numbers separated by commas" required></textarea><br><br>
-        
-        <button type="submit">Generate</button>
+        <label for="file">Upload Excel file:</label><br>
+        <input type="file" id="file" accept=".xlsx" required><br><br>
+
+        <button type="submit">Generate Barcodes</button>
     </form>
 
+    <div id="barcodePreview"></div>
+
+    <button id="exportButton" style="display:none;">Export Barcodes</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
     <script>
+        let barcodeData = [];
+
         document.getElementById('barcodeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const description = document.getElementById('description').value;
-            const barcodeInput = document.getElementById('barcode').value;
-            const barcodeNumbers = barcodeInput.split(',').map(num => num.trim());
+            // 读取文件
+            const fileInput = document.getElementById('file');
+            const file = fileInput.files[0];
 
-            if (barcodeNumbers.length > 40) {
-                alert('You can enter a maximum of 40 barcode numbers.');
+            if (!file) {
+                alert('Please upload a valid Excel file.');
                 return;
             }
 
-            const data = {
-                description,
-                barcodes: barcodeNumbers
-            };
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const data = event.target.result;
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]]; // 读取第一个sheet
+                const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-            try {
-                const response = await fetch('/api/barcode/batch-generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                // 假设条码号位于第一列
+                barcodeData = rows.map(row => row[0]).filter(barcode => barcode);
+
+                if (barcodeData.length > 0) {
+                    generatePreview();
+                } else {
+                    alert('No barcodes found in the Excel file.');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        // 生成条形码预览
+        function generatePreview() {
+            const previewContainer = document.getElementById('barcodePreview');
+            previewContainer.innerHTML = ''; // 清空之前的预览
+
+            const description = document.getElementById('description').value;
+
+            barcodeData.forEach(barcode => {
+                const barcodeItem = document.createElement('div');
+                barcodeItem.classList.add('barcodeItem');
+
+                const barcodeContent = document.createElement('div');
+                barcodeContent.classList.add('barcode');
+
+                // 创建条形码
+                const barcodeImg = document.createElement('img');
+                JsBarcode(barcodeImg, barcode, {
+                    format: 'CODE128',
+                    width: 2,
+                    height: 40,
+                    displayValue: false
                 });
 
-                if (response.ok) {
-                    const filePath = await response.text();
-                    alert(`Excel file generated: ${filePath}`);
-                } else {
-                    alert('Error generating barcodes.');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Network error.');
-            }
+                const descriptionText = document.createElement('div');
+                descriptionText.classList.add('description');
+                descriptionText.textContent = description;
+
+                const barcodeNumber = document.createElement('div');
+                barcodeNumber.classList.add('barcodeNumber');
+                barcodeNumber.textContent = barcode;
+
+                barcodeContent.appendChild(barcodeImg);
+                barcodeItem.appendChild(descriptionText);
+                barcodeItem.appendChild(barcodeContent);
+                barcodeItem.appendChild(barcodeNumber);
+
+                previewContainer.appendChild(barcodeItem);
+            });
+
+            // 显示导出按钮
+            document.getElementById('exportButton').style.display = 'block';
+        }
+
+        // 导出条形码为Excel
+        document.getElementById('exportButton').addEventListener('click', function() {
+            const description = document.getElementById('description').value;
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet([]);
+
+            // 添加标题行
+            ws['A1'] = { v: 'Description', t: 's' };
+            ws['B1'] = { v: 'Barcode', t: 's' };
+            ws['C1'] = { v: 'Barcode Number', t: 's' };
+
+            barcodeData.forEach((barcode, index) => {
+                const rowIndex = index + 2; // 从第二行开始
+                ws[`A${rowIndex}`] = { v: description, t: 's' };
+                ws[`B${rowIndex}`] = { v: barcode, t: 's' };
+                ws[`C${rowIndex}`] = { v: barcode, t: 's' };
+            });
+
+            XLSX.utils.book_append_sheet(wb, ws, 'Barcodes');
+            XLSX.writeFile(wb, 'generated_barcodes.xlsx');
         });
     </script>
 </body>
