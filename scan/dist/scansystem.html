@@ -131,13 +131,30 @@
         const historyList = document.getElementById('historyList'); // 历史记录列表
         let html5QrCode;
         let isFetching = false; // 防止重复请求
+        let apiUrl = ''; // 存储配置中的 apiUrl
+
 
         // 页面加载后自动聚焦文本框并清空历史记录
         window.onload = function() {
             input.focus();
             historyList.innerHTML = ''; // 清空历史记录
+            loadConfig(); // 加载配置
         };
-
+		
+		 // 加载 config.json 配置文件
+        function loadConfig() {
+            fetch('../config.json')
+                .then(response => response.json())
+                .then(config => {
+                    apiUrl = config.apiUrl; // 获取 apiUrl
+                })
+                .catch(error => {
+                    console.error('加载配置失败:', error);
+                });
+        }
+		
+		
+/*
         function searchBook(barcode) {
             if (!barcode || isFetching) return;
 
@@ -178,6 +195,48 @@
                     clearAndFocusInput(); // 保证输入框清空并聚焦
                 });
         }
+*/
+        function searchBook(barcode) {
+            if (!barcode || isFetching) return;
+            isFetching = true;
+            const apiEndpoint = `${apiUrl}/api/${barcode}`; // 使用从 config.json 中获取的 apiUrl
+            fetch(apiEndpoint)
+                .then(response => {
+                    isFetching = false;
+                    if (!response.ok) {
+                        throw response;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // 查询成功，显示结果框并添加历史记录
+                    const successMessage = `位置编码: ${data.shelfCode}，位置名称: ${data.shelfName}`;
+                    showAlert(successMessage);
+                    speak(`查询成功，书籍位置为${data.shelfName}`);
+                    addHistory(barcode, "success", successMessage);
+                })
+                .catch(error => {
+                    // 查询失败，显示错误信息并添加历史记录
+                    isFetching = false;
+                    if (error instanceof Response) {
+                        error.json().then(errData => {
+                            const errorMessage = errData.error || "未知错误";
+                            showAlert(errorMessage);
+                            speak("查询失败，未找到匹配的书籍信息");
+                            addHistory(barcode, "error", errorMessage);
+                        });
+                    } else {
+                        const errorMessage = "未找到匹配的书籍信息";
+                        showAlert(errorMessage);
+                        speak("查询失败，未找到匹配的书籍信息");
+                        addHistory(barcode, "error", errorMessage);
+                    }
+                })
+                .finally(() => {
+                    clearAndFocusInput(); // 保证输入框清空并聚焦
+                });
+        }
+         		
 
         function triggerSearch() {
             const value = input.value.trim();
