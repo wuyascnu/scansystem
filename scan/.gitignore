@@ -1,0 +1,12 @@
+# 忽略 Excel 文件
+*.xlsx
+*.xls
+
+# 忽略 HTML 文件
+*.html
+
+# 忽略 JAR 文件
+*.jar
+
+# 忽略 ngrok.exe 文件
+ngrok.exe
