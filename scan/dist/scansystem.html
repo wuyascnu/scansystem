@@ -153,9 +153,10 @@
                 });
         }
 		
-		function searchBook(barcode) {
-    if (!barcode || isFetching) return;
 
+/*		
+function searchBook(barcode) {
+    if (!barcode || isFetching) return;
     isFetching = true;
     fetch(`https://43b1-14-151-65-79.ngrok-free.app/api/${barcode}`, {
         method: 'GET',  // 你可以根据需求调整请求方法
@@ -199,50 +200,56 @@
         clearAndFocusInput(); // 保证输入框清空并聚焦
     });
 }
+*/
         
+function searchBook(barcode) {
+    if (!barcode || isFetching) return;
 
-        /*
-		function searchBook(barcode) {
-            if (!barcode || isFetching) return;
-            isFetching = true;
-            const apiEndpoint = `${apiUrl}/api/${barcode}`; // 使用从 config.json 中获取的 apiUrl
-            fetch(apiEndpoint)
-                .then(response => {
-                    isFetching = false;
-                    if (!response.ok) {
-                        throw response;
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // 查询成功，显示结果框并添加历史记录
-                    const successMessage = `位置编码: ${data.shelfCode}，位置名称: ${data.shelfName}`;
-                    showAlert(successMessage);
-                    speak(`查询成功，书籍位置为${data.shelfName}`);
-                    addHistory(barcode, "success", successMessage);
-                })
-                .catch(error => {
-                    // 查询失败，显示错误信息并添加历史记录
-                    isFetching = false;
-                    if (error instanceof Response) {
-                        error.json().then(errData => {
-                            const errorMessage = errData.error || "未知错误";
-                            showAlert(errorMessage);
-                            speak("查询失败，未找到匹配的书籍信息");
-                            addHistory(barcode, "error", errorMessage);
-                        });
-                    } else {
-                        const errorMessage = "未找到匹配的书籍信息";
-                        showAlert(errorMessage);
-                        speak("查询失败，未找到匹配的书籍信息");
-                        addHistory(barcode, "error", errorMessage);
-                    }
-                })
-                .finally(() => {
-                    clearAndFocusInput(); // 保证输入框清空并聚焦
-                });
+    isFetching = true;
+    const apiEndpoint = `${apiUrl}/api/${barcode}`; // 使用从 config.json 中获取的 apiUrl
+    fetch(apiEndpoint, {
+        method: 'GET',  // 你可以根据需求调整请求方法
+        headers: {
+            'ngrok-skip-browser-warning': '69420',  // 添加自定义的请求头
+            'Content-Type': 'application/json',     // 其他你可能需要的请求头
         }
-		*/
+    })
+    .then(response => {
+        isFetching = false;
+        if (!response.ok) {
+            throw response;
+        }
+        return response.json();
+    })
+    .then(data => {
+        // 查询成功，显示结果框并添加历史记录
+        const successMessage = `位置编码: ${data.shelfCode}，位置名称: ${data.shelfName}`;
+        showAlert(successMessage);
+        speak(`查询成功，书籍位置为${data.shelfName}`);
+        addHistory(barcode, "success", successMessage);
+    })
+    .catch(error => {
+        // 查询失败，显示错误信息并添加历史记录
+        isFetching = false;
+        if (error instanceof Response) {
+            error.json().then(errData => {
+                const errorMessage = errData.error || "未知错误";
+                showAlert(errorMessage);
+                speak("查询失败，未找到匹配的书籍信息");
+                addHistory(barcode, "error", errorMessage);
+            });
+        } else {
+            const errorMessage = "未找到匹配的书籍信息";
+            showAlert(errorMessage);
+            speak("查询失败，未找到匹配的书籍信息");
+            addHistory(barcode, "error", errorMessage);
+        }
+    })
+    .finally(() => {
+        clearAndFocusInput(); // 保证输入框清空并聚焦
+    });
+}
+
          		
 
         function triggerSearch() {
