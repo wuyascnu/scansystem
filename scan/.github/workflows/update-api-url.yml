@@ -1,0 +1,39 @@
+name: Update API URL
+
+on:
+  push:
+    branches:
+      - main  # 在主分支推送时触发
+  workflow_dispatch:  # 允许手动触发工作流
+
+jobs:
+  update-url:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+      - name: Fetch the latest Ngrok URL
+        run: |
+          # 获取 Ngrok 公网 URL
+          NGROK_URL=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+          echo "Ngrok URL is: $NGROK_URL"
+          
+          # 更新 config.json 文件中的 API URL
+          # 假设你要替换 API URL 配置项（以 "apiUrl" 为示例）
+          sed -i "s|\"apiUrl\": \".*\"|\"apiUrl\": \"$NGROK_URL/api\"|" config.json
+
+      - name: Commit and push updated config.json
+        run: |
+          git config --global user.name 'wuyascnu'
+          git config --global user.email 'wuya_scnu@qq.com'
+          git add config.json
+          git commit -m "Update Ngrok URL"
+          git push origin main
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist  # 发布的静态文件目录
