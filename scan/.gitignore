@@ -5,6 +5,9 @@
 # 忽略 HTML 文件
 *.html
 
+# 忽略 DOCX 文件
+*.docx
+
 # 忽略 JAR 文件
 *.jar
 
