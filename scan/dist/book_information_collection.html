@@ -86,6 +86,13 @@
             max-width: 400px;
             display: none;
         }
+        #bookDetails {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #bookDetails p {
+            font-size: 16px;
+        }
         @media (max-width: 600px) {
             #alertBox {
                 font-size: 18px;
@@ -117,6 +124,12 @@
         <div id="reader"></div>
     </div>
     <div id="alertBox"></div>
+
+    <!-- 添加一个区域来显示书籍详细信息和库存数量 -->
+    <div id="bookDetails">
+        <p><strong>库存数量:</strong> <span id="bookQuantity">0</span></p>
+    </div>
+
     <script src="./js/html5-qrcode.min.js"></script>
     <script>
         const input = document.getElementById('isbnInput');
@@ -126,6 +139,7 @@
         const stopScanBtn = document.getElementById('stopScanBtn');
         const reader = document.getElementById('reader');
         const alertBox = document.getElementById('alertBox');
+        const bookQuantity = document.getElementById('bookQuantity');
         let html5QrCode = null;
         let apiUrl = '';
 
@@ -172,7 +186,16 @@
             .then(data => {
                 if (data && data.isbn) {
                     const book = data;
-                    showAlert(`书名: ${book.title}\n价格: ${book.price}\n出版社: ${book.publisher}\n出版时间: ${book.publishTime}`);
+                    // 显示书籍信息和库存数量
+                    showAlert(`
+                        书名: ${book.title}
+                        价格: ${book.price}
+                        出版社: ${book.publisher}
+                        出版时间: ${book.publishTime}
+                        库存数量: ${book.quantity}`);  // 显示库存数量
+
+                    // 更新页面中的库存数量显示
+                    bookQuantity.textContent = book.quantity;
                 } else {
                     showAlert('未找到书籍信息');
                 }
