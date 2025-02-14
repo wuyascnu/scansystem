@@ -136,7 +136,7 @@
         };
 
         function loadConfig() {
-            fetch('./config.json')  // 假设配置文件位于根目录
+            fetch('../config.json')  // 假设配置文件位于根目录
                 .then(response => response.json())
                 .then(config => {
                     apiUrl = config.apiUrl; // 获取 API 地址
