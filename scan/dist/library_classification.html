@@ -2,15 +2,15 @@
 <html lang="zh">
 <head>
    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>图书书架层架位置分配维护系统</title>
-    <!-- 引入 Bootstrap 和 Bootstrap Table 样式 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.20.2/dist/bootstrap-table.min.css">
-    <!-- Ensure FileSaver and xlsx scripts are loaded for tableExport -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-    <style>
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>图书书架层架位置分配维护系统</title>
+   <!-- 引入 Bootstrap 和 Bootstrap Table 样式 -->
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.20.2/dist/bootstrap-table.min.css">
+   <!-- Ensure FileSaver and xlsx scripts are loaded for tableExport -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
+   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+   <style>
        body {
            font-family: 'Arial', sans-serif;
        }
@@ -21,39 +21,23 @@
        .table-container {
            margin-top: 20px;
            max-height: calc(100vh - 200px);
-           overflow-x: auto; /* 水平滚动 */
+           overflow-x: auto;
            overflow-y: auto;
        }
        thead th {
            position: sticky;
            top: 0;
-           background-color: #fff; /* 确保背景不透明 */
+           background-color: #fff;
            z-index: 10;
        }
-       /* 按钮组在移动端的样式 */
-       .btn-group-mobile button {
-           margin-bottom: 10px;
-           width: 100%;
-       }
-       /* 表格字体缩放 */
        table {
-           font-size: 14px;
-       }
-       /* 调整导航栏在移动端的布局 */
-       .nav-tabs .nav-item {
-           flex: 1 1 auto;
-           text-align: center;
-       }
-       .nav-tabs .nav-link {
            font-size: 14px;
        }
    </style>
 </head>
 <body>
     <div class="container mt-4">
-        <!-- <h3 class="text-center">图书书架及层架维护系统</h3> -->
-		<div class="text-center d-flex align-items-center justify-content-center">
-            <!-- 添加 logo 图片 -->
+        <div class="text-center d-flex align-items-center justify-content-center">
             <img src="./img/logo.png" alt="Logo" style="height: 1.5em; margin-right: 10px;">
             <h3>图书书架层架位置分配维护系统</h3>
         </div>
@@ -61,18 +45,18 @@
         <!-- Tab 导航栏 -->
         <ul class="nav nav-tabs" id="tabMenu" role="tablist">
             <li class="nav-item">
-             <a class="nav-link active" id="classification-tab" data-toggle="tab" href="#classification" role="tab" aria-controls="classification" aria-selected="true">图书书架信息</a>
-           </li>
+                <a class="nav-link active" id="classification-tab" data-toggle="tab" href="#classification" role="tab" aria-controls="classification" aria-selected="true">图书书架信息</a>
+            </li>
             <li class="nav-item">
-            <a class="nav-link" id="shelf-tab" data-toggle="tab" href="#shelf" role="tab" aria-controls="shelf" aria-selected="false">图书层架信息</a>
-           </li>
-           <li class="nav-item">
-           <a class="nav-link" id="book-allocation-tab" data-toggle="tab" href="#book-allocation" role="tab" aria-controls="book-allocation" aria-selected="false">图书位置分配信息</a>
-           </li>
+                <a class="nav-link" id="shelf-tab" data-toggle="tab" href="#shelf" role="tab" aria-controls="shelf" aria-selected="false">图书层架信息</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="book-allocation-tab" data-toggle="tab" href="#book-allocation" role="tab" aria-controls="book-allocation" aria-selected="false">图书位置分配信息</a>
+            </li>
         </ul>
 
         <!-- Tab 内容 -->
-         <div class="tab-content" id="tabContent">
+        <div class="tab-content" id="tabContent">
             <!-- 图书分类层架信息维护 -->
             <div class="tab-pane fade show active" id="classification" role="tabpanel" aria-labelledby="classification-tab">
                 <div class="mb-3 text-center">
@@ -82,17 +66,10 @@
                     <button id="exportBtn" class="btn btn-info">导出</button>
                     <button id="importBtn" class="btn btn-warning">导入</button>
                     <a href="template.xlsx" download="导入模板.xlsx" class="btn btn-secondary">模板下载</a>
-					  <!-- Refresh Button for Classification Table -->
                     <button id="refreshClassificationBtn" class="btn btn-secondary">刷新</button>
                 </div>
                 <div class="table-container">
-                    <table id="classificationTable"
-                           data-toggle="table"
-                           data-search="true"
-                           data-pagination="false"
-                           data-click-to-select="true"
-                           data-single-select="true"
-                           data-id-field="classificationId">
+                    <table id="classificationTable" data-toggle="table" data-search="true" data-pagination="false" data-click-to-select="true" data-single-select="true" data-id-field="classificationId">
                         <thead>
                             <tr>
                                 <th data-checkbox="true"></th>
@@ -101,7 +78,7 @@
                                 <th data-field="classificationLetter">中图法分类字母</th>
                                 <th data-field="classificationDescription">分类描述</th>
                                 <th data-field="shelfNumber">书架号</th>
-								<th data-field="allocatedCapacity">目前分配书籍容量</th>
+                                <th data-field="allocatedCapacity">目前分配书籍容量</th>
                             </tr>
                         </thead>
                     </table>
@@ -109,935 +86,100 @@
             </div>
 
             <!-- 层架信息 -->
-	    <div class="tab-pane fade" id="shelf" role="tabpanel" aria-labelledby="shelf-tab">
-			<div class="mb-3 text-center">
+            <div class="tab-pane fade" id="shelf" role="tabpanel" aria-labelledby="shelf-tab">
+                <div class="mb-3 text-center">
                     <button id="addShelfBtn" class="btn btn-success">新增</button>
                     <button id="editShelfBtn" class="btn btn-primary">编辑</button>
                     <button id="deleteShelfBtn" class="btn btn-danger">删除</button>
                     <button id="exportShelfBtn" class="btn btn-info">导出</button>
                     <button id="importShelfBtn" class="btn btn-warning">导入</button>
-								<!-- Refresh Button for Shelf Table -->
-					 <button id="refreshShelfBtn" class="btn btn-secondary">刷新</button>
-            </div>
+                    <button id="refreshShelfBtn" class="btn btn-secondary">刷新</button>
+                </div>
                 <div class="table-container">
-                    <table id="shelfTable"
-                           data-toggle="table"
-                           data-search="true"
-                           data-pagination="true"
-                           data-click-to-select="true"
-						   data-id-field="id">
+                    <table id="shelfTable" data-toggle="table" data-search="true" data-pagination="true" data-click-to-select="true" data-id-field="id">
                         <thead>
                             <tr>
-     							<th data-checkbox="true"></th>
+                                <th data-checkbox="true"></th>
                                 <th data-field="id">序号</th>
                                 <th data-field="shelfCode">层架号编码</th>
                                 <th data-field="shelfName">层架名</th>
-    							<th data-field="capacity">最大存放容量(单位：本)</th>
+                                <th data-field="capacity">最大存放容量(单位：本)</th>
                                 <th data-field="usedCapacity">已用容量(单位：本)</th>
                             </tr>
                         </thead>
                     </table>
                 </div>
             </div>
-			 <!-- 图书位置分配信息 -->
-           <div class="tab-pane fade" id="book-allocation" role="tabpanel" aria-labelledby="book-allocation-tab">
-               <div class="mb-3 text-center">
-                  <select id="allocationDateFilter" class="form-control" style="width: 200px; display: inline-block;">
-                         <option value="">选择分配时间</option>
-                  </select>
-				  <button id="clearDateBtn" class="btn btn-danger">一键清除该分配时间的位置信息</button>
-                  <button id="addBookAllocationBtn" class="btn btn-success">新增</button>
-                  <button id="editBookAllocationBtn" class="btn btn-primary">编辑</button>
-                  <button id="deleteBookAllocationBtn" class="btn btn-danger">删除</button>
-                  <button id="refreshBookAllocationBtn" class="btn btn-secondary">刷新</button>
-               </div>
-               <div class="table-container">
-                   <table id="bookAllocationTable"
-                          data-toggle="table"
-                          data-search="true"
-                          data-pagination="true"
-                          data-click-to-select="true"
-                          data-id-field="id">
-                       <thead>
-                           <tr>
-     						   <th data-checkbox="true"></th>
-                               <th data-field="id">ID</th>
-                               <th data-field="barcode">条码号</th>
-                               <th data-field="shelfCode">层架号编码</th>
-                               <th data-field="shelfName">层架名</th>
-                               <!--<th data-field="timestamp">分配时间</th>-->
-                           </tr>
-                       </thead>
-                   </table>
-               </div>
-           </div>
+
+            <!-- 图书位置分配信息 -->
+            <div class="tab-pane fade" id="book-allocation" role="tabpanel" aria-labelledby="book-allocation-tab">
+                <div class="mb-3 text-center">
+                    <select id="allocationDateFilter" class="form-control" style="width: 200px; display: inline-block;">
+                        <option value="">选择分配时间</option>
+                    </select>
+                    <button id="clearDateBtn" class="btn btn-danger">一键清除该分配时间的位置信息</button>
+                    <button id="addBookAllocationBtn" class="btn btn-success">新增</button>
+                    <button id="editBookAllocationBtn" class="btn btn-primary">编辑</button>
+                    <button id="deleteBookAllocationBtn" class="btn btn-danger">删除</button>
+                    <button id="refreshBookAllocationBtn" class="btn btn-secondary">刷新</button>
+                </div>
+                <div class="table-container">
+                    <table id="bookAllocationTable" data-toggle="table" data-search="true" data-pagination="true" data-click-to-select="true" data-id-field="id">
+                        <thead>
+                            <tr>
+                                <th data-checkbox="true"></th>
+                                <th data-field="id">ID</th>
+                                <th data-field="barcode">条码号</th>
+                                <th data-field="shelfCode">层架号编码</th>
+                                <th data-field="shelfName">层架名</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
-	<div id="loading-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
-  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white;">
-    加载中...
-  </div>
-</div>
-     <!-- 引入脚本 -->
+    <div id="loading-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white;">
+            加载中...
+        </div>
+    </div>
+
+    <!-- 引入脚本 -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.20.2/dist/bootstrap-table.min.js"></script>
-    <!-- 引入 tableExport 插件 -->
     <script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin/tableExport.min.js"></script>
-	<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-	<!-- Import SweetAlert2 for better dialog -->
-	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-   <script>
-        let apiUrl = '';
-		
-		// 页面加载时加载配置
-        //window.onload = function () {
-        //    loadConfig();  // 加载配置
-        //};
-		
-             // 加载配置文件
-        function loadConfig() {
-             fetch('../config.json')  // 假设配置文件位于根目录
-        .then(response => response.json())
-        .then(config => {
-            apiUrl = config.apiUrl; // 获取 API 地址
-            console.log('API URL:', apiUrl);  // 打印 API 地址
-            initializeTables(); // 初始化表格
-        })
-        .catch(err => {
-            console.error('配置加载失败:', err);
-        });
-}
-
-
-    // 显示 Loading 动画
-function showLoading() {
-    const loadingOverlay = document.getElementById('loading-overlay');
-    if (loadingOverlay) {
-        loadingOverlay.style.display = 'block';
-    } else {
-        console.error('Loading overlay element not found!');
-    }
-}
-
-// 隐藏 Loading 动画
-function hideLoading() {
-    const loadingOverlay = document.getElementById('loading-overlay');
-    if (loadingOverlay) {
-        loadingOverlay.style.display = 'none';
-    } else {
-        console.error('Loading overlay element not found!');
-    }
-}
-
-/*   
-    function loadAllocationTimes() {
-    $.get('https://tiezheng.natapp4.cc/api/books/allocation_times', function (data) {
-        const select = $('#allocationDateFilter');
-        select.empty(); // 清除旧选项
-        select.append($('<option>', { value: '', text: '选择分配时间' }));
-        data.forEach(function (time) {
-            select.append($('<option>', {
-                value: time, // 保留原始时间格式 (ISO 8601)
-                text: new Date(time).toLocaleString() // 显示为用户友好的本地时间格式
-            }));
-        });
-    });
-}
-*/
-
-function loadAllocationTimes() {
-    const requestUrl = `${apiUrl}/api/books/allocation_times`;
-    console.log('Request URL:', requestUrl);  // 调试打印请求的URL
-    $.get(requestUrl, function (data) {
-        const select = $('#allocationDateFilter');
-        select.empty(); // 清除旧选项
-        select.append($('<option>', { value: '', text: '选择分配时间' }));
-        data.forEach(function (time) {
-            select.append($('<option>', {
-                value: time, // 保留原始时间格式 (ISO 8601)
-                text: new Date(time).toLocaleString() // 显示为用户友好的本地时间格式
-            }));
-        });
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-        console.error('Error loading allocation times:', textStatus, errorThrown);
-    });
-}
-
-
-function validateData(data) {
-    // 遍历每一行数据，检查字段是否存在且格式正确
-    return data.every(row =>
-        row.shelfCode && // 检查 shelfCode 是否存在
-        row.shelfName && // 检查 shelfName 是否存在
-        !isNaN(row.capacity) && row.capacity > 0 && // capacity 必须是正整数
-        !isNaN(row.usedCapacity) && row.usedCapacity >= 0 // usedCapacity 必须是非负整数
-    );
-}
-
-
-/*
- // 统一的密钥验证函数
-function verifySecretKey(callback) {
-    Swal.fire({
-        title: '请输入操作密钥',
-        input: 'password',
-        inputLabel: '密钥',
-        inputPlaceholder: '请输入密钥',
-        inputAttributes: {
-            autocapitalize: 'off',
-        },
-        showCancelButton: true,
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
-        showLoaderOnConfirm: true,
-        preConfirm: (key) => {
-            return fetch('https://tiezheng.natapp4.cc/api/verify-key', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ key: key }), // 将密钥传递到后端进行验证
-            })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error('密钥验证失败');
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    if (data.success) {
-                        return true; // 密钥验证成功
-                    } else {
-                        Swal.showValidationMessage('密钥错误，请重试');
-                        return false; // 密钥验证失败
-                    }
-                })
-                .catch((error) => {
-                    Swal.showValidationMessage(`验证失败: ${error.message}`);
-                    return false;
-                });
-        },
-        allowOutsideClick: () => !Swal.isLoading(),
-    }).then((result) => {
-        if (result.isConfirmed && result.value) {
-            // 显示验证成功的提示框
-            Swal.fire({
-                title: '密钥验证成功！',
-                icon: 'success',
-                timer: 3000, // 3 秒后自动关闭
-                showConfirmButton: false,
-                willClose: () => {
-                    // 提示框关闭后执行回调操作
-                    callback();
-                },
-            });
-        }
-    });
-}
-*/
-
-function verifySecretKey(callback) {
-    Swal.fire({
-        title: '请输入操作密钥',
-        input: 'password',
-        inputLabel: '密钥',
-        inputPlaceholder: '请输入密钥',
-        inputAttributes: {
-            autocapitalize: 'off',
-        },
-        showCancelButton: true,
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
-        showLoaderOnConfirm: true,
-        preConfirm: (key) => {
-            return fetch(`${apiUrl}/api/verify-key`, {  // 使用动态 API 地址
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ key: key }), // 将密钥传递到后端进行验证
-            })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error('密钥验证失败');
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    if (data.success) {
-                        return true; // 密钥验证成功
-                    } else {
-                        Swal.showValidationMessage('密钥错误，请重试');
-                        return false; // 密钥验证失败
-                    }
-                })
-                .catch((error) => {
-                    Swal.showValidationMessage(`验证失败: ${error.message}`);
-                    return false;
-                });
-        },
-        allowOutsideClick: () => !Swal.isLoading(),
-    }).then((result) => {
-        if (result.isConfirmed && result.value) {
-            // 显示验证成功的提示框
-            Swal.fire({
-                title: '密钥验证成功！',
-                icon: 'success',
-                timer: 3000, // 3 秒后自动关闭
-                showConfirmButton: false,
-                willClose: () => {
-                    // 提示框关闭后执行回调操作
-                    callback();
-                },
-            });
-        }
-    });
-}
-
-// 初始化所有表格的公共函数
-function initializeTable(tableId, apiUrl) {
-    $(tableId).bootstrapTable({
-        url: apiUrl,  // 使用动态的 URL
-        onLoadSuccess: function (data) {
-            console.log(`${tableId} loaded successfully`, data);
-        },
-        onLoadError: function (status, jqXHR) {
-            console.error(`${tableId} failed to load:`, status, jqXHR);
-        }
-    });
-}
-
-// 初始化表格
-function initializeTables() {
-    // 使用动态的 apiUrl 来更新表格的 URL
-    initializeTable('#classificationTable', `${apiUrl}/api/library-classification`);
-    initializeTable('#shelfTable', `${apiUrl}/api/shelves`);
-    initializeTable('#bookAllocationTable', `${apiUrl}/api/books`);
-}
-
-// 刷新按钮点击事件
-$('#refreshClassificationBtn').click(function () { refreshTable('#classificationTable'); });
-$('#refreshShelfBtn').click(function () { refreshTable('#shelfTable'); });
-$('#refreshBookAllocationBtn').click(function () { refreshTable('#bookAllocationTable'); });
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
    
-    //初始化  
-   $(document).ready(function () {
-        loadConfig(); // 在页面加载时调用加载配置函数
-		loadAllocationTimes(); // 在页面加载时调用
+    <script>
+        let apiUrl = '';
 
-        // 初始化表格
-//        $('#classificationTable').bootstrapTable({
-//            onLoadSuccess: function (data) {
-//                console.log('分类表格加载成功', data);
-//            },
-//            onLoadError: function (status, jqXHR) {
-//                console.error('分类表格加载失败:', status, jqXHR);
-//            }
-//        });
-		
-		 // Initialize shelf table
-//            $('#shelfTable').bootstrapTable({
-//                onLoadSuccess: function (data) {
-//                    console.log('Shelf table loaded successfully', data);
-//                },
-//                onLoadError: function (status, jqXHR) {
-//                    console.error('Failed to load shelf table:', status, jqXHR);
-//                }
-//            });
-		
-		// Initialize shelf table
-//            $('#bookAllocationTable').bootstrapTable({
-//                onLoadSuccess: function (data) {
-//                    console.log('Shelf table loaded successfully', data);
-//                },
-//                onLoadError: function (status, jqXHR) {
-//                    console.error('Failed to load shelf table:', status, jqXHR);
-//                }
-//            });	
-		
-		 // Refresh Classification Table
-//    $('#refreshClassificationBtn').click(function () {$('#classificationTable').bootstrapTable('refresh');});
-
-        // Refresh Shelf Table
-//    $('#refreshShelfBtn').click(function () {$('#shelfTable').bootstrapTable('refresh');});	
-
-        // Refresh BookAllocation Table
-//    $('#refreshBookAllocationBtn').click(function () {$('#bookAllocationTable').bootstrapTable('refresh');});		
-    
-    //==================================classificationTable============================================
-        // 新增功能
-/*
-        $('#addBtn').click(function () {
-            const newData = {
-                classificationId: null, // 让后端生成 ID
-                classificationName: prompt('请输入分类名称：'),
-                classificationLetter: prompt('请输入中图法分类字母：'),
-                classificationDescription: prompt('请输入分类描述：'),
-                shelfNumber: prompt('请输入书架号：')
-            };
-
-            if (newData.classificationName && newData.classificationLetter && newData.classificationDescription && newData.shelfNumber) {
-                $.ajax({
-                    url: 'https://tiezheng.natapp4.cc/api/library-classification',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify([newData]),
-                    success: function () {
-                        alert('新增成功！');
-                        $('#classificationTable').bootstrapTable('refresh');
-                    },
-                    error: function (xhr) {
-					if (xhr.status === 403) { // 捕获 403 状态码
-							 alert('访问被拒绝", xhr.responseText || "您无权访问该资源！');
-                             } else {
-                          alert('新增失败，请检查数据是否正确！');
-                          }
-                    }
+        // 加载配置文件
+        function loadConfig() {
+            fetch('../config.json')
+                .then(response => response.json())
+                .then(config => {
+                    apiUrl = config.apiUrl; // 获取 API 地址
+                    console.log('API URL:', apiUrl);  // 打印 API 地址
+                    initializeTables(); // 初始化表格
+                })
+                .catch(err => {
+                    console.error('配置加载失败:', err);
                 });
-            } else {
-                alert('新增失败，请填写完整信息！');
-            }
-        });
-*/
-
-/*
-  // 新增按钮点击事件
-$('#addBtn').click(function () {
-    verifySecretKey(() => {
-        // 在这里执行新增操作
-        const newData = {
-            classificationName: prompt('请输入分类名称：'),
-            classificationLetter: prompt('请输入中图法分类字母：'),
-            classificationDescription: prompt('请输入分类描述：'),
-            shelfNumber: prompt('请输入书架号：'),
-        };
-
-        if (newData.classificationName && newData.classificationLetter && newData.classificationDescription && newData.shelfNumber) {
-            $.ajax({
-                url: 'https://tiezheng.natapp4.cc/api/library-classification',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(newData),
-                success: function () {
-                    Swal.fire('新增成功！', '', 'success');
-                    $('#classificationTable').bootstrapTable('refresh');
-                },
-                error: function () {
-                    Swal.fire('新增失败，请检查数据是否正确！', '', 'error');
-                },
-            });
-        } else {
-            Swal.fire('新增失败，请填写完整信息！', '', 'error');
-        }
-    });
-});
-*/
- // 新增功能
-    $('#addBtn').click(function () {
-        verifySecretKey(() => {
-            const newData = {
-                classificationName: prompt('请输入分类名称：'),
-                classificationLetter: prompt('请输入中图法分类字母：'),
-                classificationDescription: prompt('请输入分类描述：'),
-                shelfNumber: prompt('请输入书架号：'),
-            };
-
-            if (newData.classificationName && newData.classificationLetter && newData.classificationDescription && newData.shelfNumber) {
-                $.ajax({
-                    url: `${apiUrl}/api/library-classification`,
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(newData),
-                    success: function () {
-                        Swal.fire('新增成功！', '', 'success');
-                        $('#classificationTable').bootstrapTable('refresh');
-                    },
-                    error: function () {
-                        Swal.fire('新增失败，请检查数据是否正确！', '', 'error');
-                    },
-                });
-            } else {
-                Swal.fire('新增失败，请填写完整信息！', '', 'error');
-            }
-        });
-    });
-
-        // 编辑功能
-        $('#editBtn').click(function () {
-            const selected = $('#classificationTable').bootstrapTable('getSelections');
-            if (selected.length === 1) {
-                const row = selected[0];
-                const updatedData = {
-                    classificationId: row.classificationId,
-                    classificationName: prompt('修改分类名称：', row.classificationName),
-                    classificationLetter: prompt('修改中图法分类字母：', row.classificationLetter),
-                    classificationDescription: prompt('修改分类描述：', row.classificationDescription),
-                    shelfNumber: prompt('修改书架号：', row.shelfNumber)
-                };
-
-                if (updatedData.classificationName && updatedData.classificationLetter && updatedData.classificationDescription && updatedData.shelfNumber) {
-                    $.ajax({
-                        url: `${apiUrl}/api/library-classification`,
-                        method: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify([updatedData]),
-                        success: function () {
-                            alert('编辑成功！');
-                            $('#classificationTable').bootstrapTable('refresh');
-                        },
-                        error: function () {
-                            alert('编辑失败，请检查数据是否正确！');
-                        }
-                    });
-                } else {
-                    alert('编辑失败，请填写完整信息！');
-                }
-            } else {
-                alert('请选择一条记录进行编辑！');
-            }
-        });
-
-        // 删除功能
-        $('#deleteBtn').click(function () {
-            const selected = $('#classificationTable').bootstrapTable('getSelections');
-            if (selected.length === 1) {
-                const row = selected[0];
-                if (confirm(`确定要删除分类 "${row.classificationName}" 吗？`)) {
-                    $.ajax({
-                        url: `${apiUrl}/api/library-classification/${row.classificationId}`,
-                        method: 'DELETE',
-                        success: function () {
-                            alert('删除成功！');
-                            $('#classificationTable').bootstrapTable('refresh');
-                        },
-                        error: function () {
-                            alert('删除失败，请检查数据是否正确！');
-                        }
-                    });
-                }
-            } else {
-                alert('请选择一条记录进行删除！');
-            }
-        });
-		
-		 // 导出功能
-            $('#exportBtn').click(function () {
-                $('#classificationTable').tableExport({
-                    type: 'excel',
-                    fileName: '图书书架信息表',
-                    exportDataType: 'all'
-                });
-            });
-		
-        // 导入功能
-        $('#importBtn').click(function () {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.xlsx, .xls';
-            input.onchange = function (e) {
-                const file = e.target.files[0];
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const sheetName = workbook.SheetNames[0];
-                    const sheet = workbook.Sheets[sheetName];
-                    const jsonData = XLSX.utils.sheet_to_json(sheet);
-
-                    const fieldMapping = {
-                        "分类ID": "classificationId",
-                        "分类名称": "classificationName",
-                        "中图法分类字母": "classificationLetter",
-                        "分类描述": "classificationDescription",
-                        "书架号": "shelfNumber"
-                    };
-
-                    const mappedData = jsonData.map(row => {
-                        const mappedRow = {};
-                        for (const key in row) {
-                            if (fieldMapping[key]) {
-                                mappedRow[fieldMapping[key]] = row[key];
-                            }
-                        }
-                        return mappedRow;
-                    });
-
-                    $.ajax({
-						url: `${apiUrl}/api/library-classification`,
-						method: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify(mappedData),
-                        success: function () {
-                            alert('导入成功！');
-                            $('#classificationTable').bootstrapTable('refresh');
-                        },
-                        error: function () {
-                            alert('导入失败，请检查数据格式！');
-                        }
-                    });
-                };
-                reader.readAsArrayBuffer(file);
-            };
-            input.click();
-        });
-		//==================================classificationTable============================================
-		//==================================shelfTable============================================
-		 // Add new shelf
-// Unified function for adding or editing shelves
-function handleShelfOperation(shelf = {}) {
-    let shelfCode, shelfName, capacity;
-    if (shelf.id) {
-        // Edit operation
-        shelfCode = prompt('修改层架号编码：', shelf.shelfCode);
-        shelfName = prompt('修改层架名：', shelf.shelfName);
-        capacity = prompt('修改最大存放容量：', shelf.capacity);
-    } else {
-        // Add operation
-        shelfCode = prompt('请输入层架号编码：');
-        shelfName = prompt('请输入层架名：');
-        capacity = prompt('请输入最大存放容量：');
-    }
-
-    // 检查输入有效性
-    if (shelfCode && shelfName && capacity && !isNaN(capacity) && capacity > 0) {
-        shelf.shelfCode = shelfCode;
-        shelf.shelfName = shelfName;
-        shelf.capacity = parseInt(capacity, 10); // 确保容量是整数
-        if (!shelf.id) {
-            shelf.usedCapacity = 0; // 新增时默认已用容量为0
         }
 
-        //let apiUrl = 'https://tiezheng.natapp4.cc/api/shelves';
-		let apiUrl = `${apiUrl}/api/shelves`;
-        if (shelf.id) {
-            apiUrl += `/${shelf.id}`; // Update if id exists
+        function initializeTables() {
+            // 使用动态的 apiUrl 来更新表格的 URL
+            $('#classificationTable').bootstrapTable('destroy').attr('data-url', `${apiUrl}/api/library-classification`).bootstrapTable();
+            $('#shelfTable').bootstrapTable('destroy').attr('data-url', `${apiUrl}/api/shelves`).bootstrapTable();
+            $('#bookAllocationTable').bootstrapTable('destroy').attr('data-url', `${apiUrl}/api/books`).bootstrapTable();
         }
 
-        $.ajax({
-            url: apiUrl,
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(shelf),
-            success: function () {
-                alert('操作成功！');
-                $('#shelfTable').bootstrapTable('refresh');
-            },
-            error: function () {
-                alert('操作失败，请检查数据是否正确！');
-            }
+        $(document).ready(function () {
+            loadConfig(); // 页面加载时调用加载配置函数
         });
-    } else {
-        alert('操作失败，请填写完整信息，并确保容量为正整数！');
-    }
-}
-
-// Button click events
-$('#addShelfBtn').click(function () {
-    handleShelfOperation(); // Call without arguments for new shelf
-});
-
-$('#editShelfBtn').click(function () {
-    const selected = $('#shelfTable').bootstrapTable('getSelections');
-	
-    if (selected.length === 1) {
-        handleShelfOperation(selected[0]); // Pass selected shelf for editing
-    } else if (selected.length === 0) {
-        Swal.fire('错误!', '请选择一条记录进行编辑。', 'error');
-    } else {
-        Swal.fire('错误!', '只能选择一条记录进行编辑！', 'error');
-    }
-});
-
-
-
-    // Delete shelf
-/*	
-$('#deleteShelfBtn').click(function () {
-    const selected = $('#shelfTable').bootstrapTable('getSelections');
-    if (selected.length === 1) {
-        const shelfId = selected[0].id;
-        Swal.fire({
-            title: '确定要删除这条记录吗？',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: '是的，删除它！'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `https://tiezheng.natapp4.cc/api/shelves/${shelfId}`,
-                    method: 'DELETE',
-                    success: function () {
-                        Swal.fire('已删除!', '记录已被删除。', 'success');
-                        $('#shelfTable').bootstrapTable('refresh');
-                    },
-                    error: function () {
-                        Swal.fire('失败!', '删除失败，请检查数据是否正确。', 'error');
-                    }
-                });
-            }
-        });
-    } else {
-        Swal.fire('错误!', '请选择一条记录进行删除。', 'error');
-    }
-});
-*/
-$('#deleteShelfBtn').click(function () {
-    const selected = $('#shelfTable').bootstrapTable('getSelections'); // 获取选中记录
-    if (selected.length > 0) {
-        const ids = selected.map(row => row.id); // 提取所有选中记录的 ID
-        Swal.fire({
-            title: `确定要删除选中的 ${ids.length} 条记录吗？`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    //url: `https://tiezheng.natapp4.cc/api/shelves/batch-delete`, // 调用后端批量删除接口
-                    url: `${apiUrl}/api/shelves/batch-delete`,
-					method: 'DELETE',
-                    contentType: 'application/json',
-                    data: JSON.stringify(ids), // 将 ID 列表作为 JSON 传递
-                    success: function () {
-                        Swal.fire('删除成功！', '', 'success');
-                        $('#shelfTable').bootstrapTable('refresh'); // 刷新表格
-                    },
-                    error: function () {
-                        Swal.fire('删除失败，请检查数据是否正确！', '', 'error');
-                    }
-                });
-            }
-        });
-    } else {
-        Swal.fire('错误!', '请选择至少一条记录进行删除。', 'error');
-    }
-});
-
-
-    // Export shelf data
-    $('#exportShelfBtn').click(function () {
-        $('#shelfTable').tableExport({
-            type: 'excel',
-            fileName: '层架信息表',
-            exportDataType: 'all'
-        });
-    });
-
-// 导入功能
-$('#importShelfBtn').click(function () {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.xlsx, .xls';
-    input.onchange = function (e) {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-
-        // 显示 Loading 动画
-        showLoading();
-
-        reader.onload = function (e) {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const sheetName = workbook.SheetNames[0];
-            const sheet = workbook.Sheets[sheetName];
-            const jsonData = XLSX.utils.sheet_to_json(sheet);
-
-            // 字段映射
-            const fieldMapping = {
-                "层架号编码": "shelfCode",
-                "层架名": "shelfName",
-                "最大存放容量(单位：本)": "capacity",
-                "已用容量(单位：本)": "usedCapacity"
-            };
-
-            const mappedData = jsonData.map(row => {
-                const mappedRow = {};
-                for (const key in row) {
-                    if (fieldMapping[key]) {
-                        mappedRow[fieldMapping[key]] = row[key];
-                    }
-                }
-                return mappedRow;
-            });
-
-            console.log("上传的JSON数据: ", JSON.stringify(mappedData));
-
-            // 验证数据格式
-            if (!validateData(mappedData)) {
-                hideLoading(); // 隐藏动画
-                Swal.fire('导入失败', '数据格式有误，请检查文件内容', 'error');
-                return;
-            }
-
-            // 发出 AJAX 请求
-            $.ajax({
-                //url: 'https://tiezheng.natapp4.cc/api/shelves/import',
-				url: `${apiUrl}/api/shelves/import`,
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(mappedData),
-                success: function () {
-                    Swal.fire('导入成功！', '', 'success');
-                    $('#shelfTable').bootstrapTable('refresh');
-                },
-                error: function () {
-                    Swal.fire('导入失败，请检查数据格式！', '', 'error');
-                },
-                complete: function () {
-                    // 隐藏 Loading 动画
-                    hideLoading();
-                }
-            });
-        };
-
-        reader.readAsArrayBuffer(file);
-    };
-    input.click();
-});
-
-		 //==================================shelfTable============================================
-	    //================================bookAllocationTable===========================================
-	  // 监听分配时间选择事件
-   $('#allocationDateFilter').change(function () {
-       const selectedDate = $(this).val(); // 获取选中的时间值
-         if (selectedDate) {
-            // 构造筛选 API 的请求 URL
-           //const url = `https://tiezheng.natapp4.cc/api/books/filter?timestamp=${selectedDate}`;
-		   const url = `${apiUrl}/api/books/filter?timestamp=${selectedDate}`;
-           // 刷新表格数据
-          $('#bookAllocationTable').bootstrapTable('refresh', { url: url });
-            } else {
-           // 如果未选择时间，刷新到原始数据
-          $('#bookAllocationTable').bootstrapTable('refresh', { url: `${apiUrl}/api/books` });
-       }
-});
-
-	  
-
-      // 清除特定日期分配数据
-            $('#clearDateBtn').click(function () {
-                const date = $('#allocationDateFilter').val();
-                if (!date) {
-                    Swal.fire('请选择分配时间', '', 'warning');
-                    return;
-                }
-                Swal.fire({
-                    title: `确认清除${date}的数据？`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            //url: `https://tiezheng.natapp4.cc/api/books/delete?date=${date}`,
-							url: `${apiUrl}/api/books/delete?date=${date}`,
-                            method: 'DELETE',
-                            success: function () {
-                                Swal.fire('删除成功', '', 'success');
-                                $('#bookAllocationTable').bootstrapTable('refresh');
-                            },
-                            error: function () {
-                                Swal.fire('删除失败', '', 'error');
-                            }
-                        });
-                    }
-                });
-            });
-			
-// 新增功能
-$('#addBookAllocationBtn').click(function () {
-    const newData = {
-        barcode: prompt('请输入条码号：'),
-        shelfCode: prompt('请输入层架号编码：'),
-        shelfName: prompt('请输入层架名：')
-    };
-
-    if (newData.barcode && newData.shelfCode && newData.shelfName) {
-        $.ajax({
-            //url: 'https://tiezheng.natapp4.cc/api/books',
-            url: `${apiUrl}/api/books`,
-			method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(newData),
-            success: function () {
-                alert('新增成功！');
-                $('#bookAllocationTable').bootstrapTable('refresh');
-            },
-            error: function () {
-                alert('新增失败，请检查数据是否正确！');
-            }
-        });
-    } else {
-        alert('新增失败，请填写完整信息！');
-    }
-});
-
-// 编辑功能
-$('#editBookAllocationBtn').click(function () {
-    const selected = $('#bookAllocationTable').bootstrapTable('getSelections');
-    if (selected.length === 1) {
-        const row = selected[0];
-        const updatedData = {
-            barcode: prompt('请输入新的条码号：', row.barcode),
-            shelfCode: prompt('请输入新的层架号编码：', row.shelfCode),
-            shelfName: prompt('请输入新的层架名：', row.shelfName)
-        };
-
-        if (updatedData.barcode && updatedData.shelfCode && updatedData.shelfName) {
-            $.ajax({
-                //url: `https://tiezheng.natapp4.cc/api/books/${row.id}`,
-                url: `${apiUrl}/api/books/${row.id}`,
-				method: 'PUT',
-                contentType: 'application/json',
-                data: JSON.stringify(updatedData),
-                success: function () {
-                    alert('编辑成功！');
-                    $('#bookAllocationTable').bootstrapTable('refresh');
-                },
-                error: function () {
-                    alert('编辑失败，请检查数据是否正确！');
-                }
-            });
-        } else {
-            alert('编辑失败，请填写完整信息！');
-        }
-    } else {
-        alert('请选择一条记录进行编辑！');
-    }
-});
-
-// 删除功能
-$('#deleteBookAllocationBtn').click(function () {
-    const selected = $('#bookAllocationTable').bootstrapTable('getSelections');
-    if (selected.length === 1) {
-        const row = selected[0];
-        if (confirm(`确定要删除条码号为 "${row.barcode}" 的记录吗？`)) {
-            $.ajax({
-                //url: `https://tiezheng.natapp4.cc/api/books/${row.id}`,
-                url: `${apiUrl}/api/books/${row.id}`,
-				method: 'DELETE',
-                success: function () {
-                    alert('删除成功！');
-                    $('#bookAllocationTable').bootstrapTable('refresh');
-                },
-                error: function () {
-                    alert('删除失败，请检查数据是否正确！');
-                }
-            });
-        }
-    } else {
-        alert('请选择一条记录进行删除！');
-    }
-});
-		//================================bookAllocationTable===========================================
-});
-</script>
+    </script>
 </body>
 </html>
