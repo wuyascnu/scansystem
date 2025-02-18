@@ -20,7 +20,6 @@ ngrok.exe
 ../*
 
 # 忽略所有位于 "C:\Users\17238.000\Desktop\11" 下，但不在 "scan" 文件夹内的文件
-
 # 忽略所有位于上层目录的文件
 /Book_Allocation_Result.xlsx
 /Book_Allocation_Result_20241224115005.xlsx
