@@ -194,9 +194,9 @@
         let apiUrl = '';
 		
 		// 页面加载时加载配置
-        //window.onload = function () {
-        //    loadConfig();  // 加载配置
-        //};
+        window.onload = function () {
+            loadConfig();  // 加载配置
+        };
 		
              // 加载配置文件
         function loadConfig() {
@@ -393,6 +393,31 @@ function verifySecretKey(callback) {
     });
 }
 
+// 初始化所有表格的公共函数
+function initializeTable(tableId, apiUrl) {
+    $(tableId).bootstrapTable({
+        url: apiUrl,  // 使用动态的 URL
+        onLoadSuccess: function (data) {
+            console.log(`${tableId} loaded successfully`, data);
+        },
+        onLoadError: function (status, jqXHR) {
+            console.error(`${tableId} failed to load:`, status, jqXHR);
+        }
+    });
+}
+
+// 初始化表格
+function initializeTables() {
+    // 使用动态的 apiUrl 来更新表格的 URL
+    initializeTable('#classificationTable', `${apiUrl}/api/library-classification`);
+    initializeTable('#shelfTable', `${apiUrl}/api/shelves`);
+    initializeTable('#bookAllocationTable', `${apiUrl}/api/books`);
+}
+
+// 刷新按钮点击事件
+$('#refreshClassificationBtn').click(function () { refreshTable('#classificationTable'); });
+$('#refreshShelfBtn').click(function () { refreshTable('#shelfTable'); });
+$('#refreshBookAllocationBtn').click(function () { refreshTable('#bookAllocationTable'); });
    
     //初始化  
    $(document).ready(function () {
@@ -400,46 +425,43 @@ function verifySecretKey(callback) {
 		loadAllocationTimes(); // 在页面加载时调用
 
         // 初始化表格
-        $('#classificationTable').bootstrapTable({
-            onLoadSuccess: function (data) {
-                console.log('分类表格加载成功', data);
-            },
-            onLoadError: function (status, jqXHR) {
-                console.error('分类表格加载失败:', status, jqXHR);
-            }
-        });
+//        $('#classificationTable').bootstrapTable({
+//            onLoadSuccess: function (data) {
+//                console.log('分类表格加载成功', data);
+//            },
+//            onLoadError: function (status, jqXHR) {
+//                console.error('分类表格加载失败:', status, jqXHR);
+//            }
+//        });
 		
 		 // Initialize shelf table
-            $('#shelfTable').bootstrapTable({
-                onLoadSuccess: function (data) {
-                    console.log('Shelf table loaded successfully', data);
-                },
-                onLoadError: function (status, jqXHR) {
-                    console.error('Failed to load shelf table:', status, jqXHR);
-                }
-            });
+//            $('#shelfTable').bootstrapTable({
+//                onLoadSuccess: function (data) {
+//                    console.log('Shelf table loaded successfully', data);
+//                },
+//                onLoadError: function (status, jqXHR) {
+//                    console.error('Failed to load shelf table:', status, jqXHR);
+//                }
+//            });
 		
 		// Initialize shelf table
-            $('#bookAllocationTable').bootstrapTable({
-                onLoadSuccess: function (data) {
-                    console.log('Shelf table loaded successfully', data);
-                },
-                onLoadError: function (status, jqXHR) {
-                    console.error('Failed to load shelf table:', status, jqXHR);
-                }
-            });	
-			
-	     
-		
+//            $('#bookAllocationTable').bootstrapTable({
+//                onLoadSuccess: function (data) {
+//                    console.log('Shelf table loaded successfully', data);
+//                },
+//                onLoadError: function (status, jqXHR) {
+//                    console.error('Failed to load shelf table:', status, jqXHR);
+//                }
+//            });	
 		
 		 // Refresh Classification Table
-    $('#refreshClassificationBtn').click(function () {$('#classificationTable').bootstrapTable('refresh');});
+//    $('#refreshClassificationBtn').click(function () {$('#classificationTable').bootstrapTable('refresh');});
 
         // Refresh Shelf Table
-    $('#refreshShelfBtn').click(function () {$('#shelfTable').bootstrapTable('refresh');});	
+//    $('#refreshShelfBtn').click(function () {$('#shelfTable').bootstrapTable('refresh');});	
 
         // Refresh BookAllocation Table
-    $('#refreshBookAllocationBtn').click(function () {$('#bookAllocationTable').bootstrapTable('refresh');});	
+//    $('#refreshBookAllocationBtn').click(function () {$('#bookAllocationTable').bootstrapTable('refresh');});		
     
     //==================================classificationTable============================================
         // 新增功能
@@ -640,7 +662,6 @@ $('#addBtn').click(function () {
                     });
 
                     $.ajax({
-                        //url: 'https://tiezheng.natapp4.cc/api/library-classification'
 						url: `${apiUrl}/api/library-classification`,
 						method: 'POST',
                         contentType: 'application/json',
@@ -891,7 +912,7 @@ $('#importShelfBtn').click(function () {
           $('#bookAllocationTable').bootstrapTable('refresh', { url: url });
             } else {
            // 如果未选择时间，刷新到原始数据
-          $('#bookAllocationTable').bootstrapTable('refresh', { url: 'https://tiezheng.natapp4.cc/api/books' });
+          $('#bookAllocationTable').bootstrapTable('refresh', { url: `${apiUrl}/api/books` });
        }
 });
 
