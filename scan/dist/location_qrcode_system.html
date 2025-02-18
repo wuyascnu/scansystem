@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>位置二维码生成系统</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        #header {
+            position: relative;
+            height: 100px;
+            background: url('./img/logo.png') no-repeat center top;
+            background-size: 80px;
+        }
+        h3 {
+            text-align: center;
+            margin: 5px 0;
+            font-size: 18px;
+        }
+        #controls {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        textarea, button {
+            width: 90%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #reader {
+            width: 100%;
+            max-width: 400px;
+            margin: 10px auto;
+        }
+        #status {
+            text-align: center;
+            margin-top: 10px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div id="header"></div>
+    <h3>位置二维码生成系统</h3>
+    <div id="controls">
+        <textarea id="barcodeTextarea" placeholder="扫码条码会出现在这里，逗号分隔..." rows="6"></textarea>
+        <button id="startScanBtn">启动摄像头扫描</button>
+        <button id="stopScanBtn" style="display:none;">停止扫描</button>
+        <button id="sendDataBtn">生成并发送 JSON</button>
+    </div>
+    <div id="reader"></div>
+    <div id="status"></div>
+
+    <script src="./js/html5-qrcode.min.js"></script>
+    <script>
+        const textarea = document.getElementById('barcodeTextarea');
+        const startScanBtn = document.getElementById('startScanBtn');
+        const stopScanBtn = document.getElementById('stopScanBtn');
+        const sendDataBtn = document.getElementById('sendDataBtn');
+        const status = document.getElementById('status');
+        let html5QrCode;
+
+        // 用于存储已扫描的条码号
+        const scannedBarcodes = new Set();
+
+        // 页面加载时自动聚焦到多行文本框
+        window.onload = function () {
+            textarea.focus();
+        };
+
+        // 格式化文本框内容：将换行符替换为逗号，并去重
+        function formatTextareaContent() {
+            let content = textarea.value.trim();
+            // 替换 CR+LF 或 LF 为逗号，去掉多余空格，移除重复条码
+            content = content.replace(/[\r\n]+/g, ',').replace(/,+/g, ',').replace(/(^,|,$)/g, '');
+
+            // 拆分条码号，去重
+            const barcodes = content.split(',').map(item => item.trim()).filter(item => item !== '');
+            const uniqueBarcodes = [...new Set(barcodes)];
+
+            // 更新到文本框
+            textarea.value = uniqueBarcodes.join(',');
+        }
+
+        // 实时监听输入事件，处理扫码枪的输入
+        textarea.addEventListener('input', () => {
+            setTimeout(() => {
+                formatTextareaContent(); // 实时格式化内容
+            }, 50);
+        });
+
+        // 启动扫码功能
+        startScanBtn.addEventListener('click', function () {
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            html5QrCode.start(
+                { facingMode: "environment" },
+                config,
+                function (decodedText) {
+                    console.log("扫描到结果：", decodedText);
+
+                    // 检查条码是否已存在，避免重复
+                    if (scannedBarcodes.has(decodedText)) {
+                        status.innerHTML = "条码已扫描，跳过...";
+                        return;
+                    }
+
+                    // 将新扫描的条码加入集合并追加到多行文本框
+                    scannedBarcodes.add(decodedText);
+                    const currentText = textarea.value;
+                    textarea.value = currentText ? `${currentText},${decodedText}` : decodedText;
+
+                    status.innerHTML = "扫描成功，条码已追加";
+
+                    // 格式化文本框内容
+                    formatTextareaContent();
+                },
+                function (errorMessage) {
+                    status.innerHTML = "扫描中...";
+                    console.log("扫描中...", errorMessage);
+                }
+            ).catch(err => {
+                alert("无法启动摄像头：" + err);
+            });
+
+            // 切换按钮状态
+            startScanBtn.style.display = 'none';
+            stopScanBtn.style.display = 'inline';
+        });
+
+        // 停止扫码功能
+        stopScanBtn.addEventListener('click', function () {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    console.log('摄像头已停止');
+                    status.innerHTML = '摄像头已停止';
+                    startScanBtn.style.display = 'inline';
+                    stopScanBtn.style.display = 'none';
+                }).catch(err => {
+                    console.error("停止摄像头失败：", err);
+                });
+            }
+        });
+
+        // 点击生成并发送 JSON
+        sendDataBtn.addEventListener('click', function () {
+            // 格式化内容，确保统一格式
+            formatTextareaContent();
+
+            const barcodeInput = textarea.value.trim();
+            if (!barcodeInput) {
+                alert("请先输入或扫描条码！");
+                return;
+            }
+
+            // 将条码转换为 JSON 格式
+            const barcodes = barcodeInput.split(",");
+            const jsonData = {};
+            barcodes.forEach((barcode, index) => {
+                const row = Math.floor(index / 3) + 3; // 每行对应的数字从 3 开始
+                const column = ["C", "E", "G"][index % 3]; // 列依次为 C, E, G
+                jsonData[`${row}_${column}`] = barcode.trim();
+            });
+
+            // 替换为后端 API 地址
+            const apiUrl = "https://tiezheng.natapp4.cc/api/generate-qr"; // 替换为实际地址
+
+            // 打印生成的 JSON 对象
+            console.log("生成的 JSON 数据：", jsonData);
+
+            // 发送数据到后端
+            fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(jsonData)
+            }).then(response => response.json())
+                .then(data => {
+                    console.log("后端响应：", data);
+                    alert("数据发送成功！请查看控制台日志。");
+
+                    // 清空文本框内容并重新聚焦
+                    textarea.value = "";
+                    textarea.focus();
+                    scannedBarcodes.clear(); // 清空已扫描的条码记录
+                })
+                .catch(err => {
+                    console.error("发送失败：", err);
+                    alert("发送失败，请检查网络或后端接口！");
+                });
+        });
+
+        // 每次文本框失去焦点时格式化内容
+        textarea.addEventListener('blur', formatTextareaContent);
+    </script>
+</body>
+</html>

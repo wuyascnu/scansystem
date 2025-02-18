@@ -1,9 +1,12 @@
+# 忽略所有 HTML 文件
+*.html
+
+# 但是不忽略 dist 目录中的 HTML 文件
+!dist/*.html
+
 # 忽略 Excel 文件
 *.xlsx
 *.xls
-
-# 忽略 HTML 文件
-*.html
 
 # 忽略 DOCX 文件
 *.docx
@@ -18,28 +21,3 @@ ngrok.exe
 
 # 忽略上一层目录的所有文件
 ../*
-
-# 忽略所有位于 "C:\Users\17238.000\Desktop\11" 下，但不在 "scan" 文件夹内的文件
-# 忽略所有位于上层目录的文件
-/Book_Allocation_Result.xlsx
-/Book_Allocation_Result_20241224115005.xlsx
-/Book_Allocation_Result_20241225113805.xlsx
-/Book_Allocation_Result_20250108094538.xlsx
-/Book_Allocation_Result_20250108113926.xlsx
-/Book_Allocation_Result_20250108121428.xlsx
-/Book_Allocation_Result_20250109074419.xlsx
-/Book_Allocation_Result_20250109075720.xlsx
-/Book_Allocation_Result_20250109082706.xlsx
-/Book_Allocation_Result_20250109083926.xlsx
-/Books_QRCode1.xlsx
-/Books_QRCode_20250102_154508.xlsx
-/book_information_collection.html1.html
-/book_location_allocation_system.html
-/lib-0.0.1-SNAPSHOT.jar
-/library_classification.html
-/ngrok.exe
-/scan.zip
-/scansystem.html
-/scansystem.html20250109.html
-/scansystem1.html
-/scansystem\345\244\207\344\273\2750106.html

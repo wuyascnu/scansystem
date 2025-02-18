@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>书籍位置查询系统</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        #header {
+            position: relative;
+            height: 100px;
+            background: url('./img/logo.png') no-repeat center top;
+            background-size: 80px;
+        }
+        h3 {
+            text-align: center;
+            margin: 5px 0;
+            font-size: 18px;
+        }
+        #controls {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        input, button {
+            width: 90%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #reader {
+            width: 100%;
+            max-width: 400px;
+            margin: 10px auto;
+        }
+        #status {
+            text-align: center;
+            margin-top: 10px;
+            color: #555;
+        }
+        #alertBox {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 30px;
+            font-size: 24px;
+            font-weight: bold;
+            border: 2px solid #f5c6cb;
+            border-radius: 15px;
+            display: none;
+            z-index: 1000;
+            width: 50%;
+            min-width: 280px;
+            max-width: 500px;
+            text-align: left;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0 auto;
+        }
+        #history {
+            margin: 20px auto;
+            width: 90%;
+            max-width: 600px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        #history h4 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #333;
+        }
+        #historyList {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        #historyList li {
+            margin: 5px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #ffffff;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div id="header"></div>
+    <h3>书籍位置查询系统</h3>
+    <div id="controls">
+        <input type="text" id="barcodeInput" placeholder="输入条码或扫码" onfocus="clearInputOnFocus()" onblur="triggerSearch()" onkeyup="handleKeyUp(event)">
+        <button id="startScanBtn">启动摄像头扫码</button>
+        <button id="stopScanBtn" style="display:none;">停止扫描</button>
+    </div>
+    <div id="reader"></div>
+    <div id="status"></div>
+    <div id="alertBox"></div> <!-- 自定义弹框 -->
+    <div id="history">
+        <h4>历史扫码记录</h4>
+        <ul id="historyList"></ul>
+    </div>
+
+    <script src="./js/html5-qrcode.min.js"></script>
+    <script>
+        const input = document.getElementById('barcodeInput');
+        const startScanBtn = document.getElementById('startScanBtn');
+        const stopScanBtn = document.getElementById('stopScanBtn');
+        const status = document.getElementById('status');
+        const alertBox = document.getElementById('alertBox');
+        const historyList = document.getElementById('historyList'); // 历史记录列表
+        let html5QrCode;
+        let isFetching = false; // 防止重复请求
+        let apiUrl = ''; // 存储配置中的 apiUrl
+
+
+        // 页面加载后自动聚焦文本框并清空历史记录
+        window.onload = function() {
+            input.focus();
+            historyList.innerHTML = ''; // 清空历史记录
+            loadConfig(); // 加载配置
+        };
+		
+		 // 加载 config.json 配置文件
+        function loadConfig() {
+            fetch('../config.json')
+                .then(response => response.json())
+                .then(config => {
+                    apiUrl = config.apiUrl; // 获取 apiUrl
+                })
+                .catch(error => {
+                    console.error('加载配置失败:', error);
+                });
+        }
+		
+
+/*		
+function searchBook(barcode) {
+    if (!barcode || isFetching) return;
+    isFetching = true;
+    fetch(`https://43b1-14-151-65-79.ngrok-free.app/api/${barcode}`, {
+        method: 'GET',  // 你可以根据需求调整请求方法
+        headers: {
+            'ngrok-skip-browser-warning': '69420',  // 添加自定义的请求头
+            'Content-Type': 'application/json',     // 其他你可能需要的请求头
+        }
+    })
+    .then(response => {
+        isFetching = false;
+        if (!response.ok) {
+            throw response;
+        }
+        return response.json();
+    })
+    .then(data => {
+        // 查询成功，显示结果框并添加历史记录
+        const successMessage = `位置编码: ${data.shelfCode}，位置名称: ${data.shelfName}`;
+        showAlert(successMessage);
+        speak(`查询成功，书籍位置为${data.shelfName}`);
+        addHistory(barcode, "success", successMessage);
+    })
+    .catch(error => {
+        // 查询失败，显示错误信息并添加历史记录
+        isFetching = false;
+        if (error instanceof Response) {
+            error.json().then(errData => {
+                const errorMessage = errData.error || "未知错误";
+                showAlert(errorMessage);
+                speak("查询失败，未找到匹配的书籍信息");
+                addHistory(barcode, "error", errorMessage);
+            });
+        } else {
+            const errorMessage = "未找到匹配的书籍信息";
+            showAlert(errorMessage);
+            speak("查询失败，未找到匹配的书籍信息");
+            addHistory(barcode, "error", errorMessage);
+        }
+    })
+    .finally(() => {
+        clearAndFocusInput(); // 保证输入框清空并聚焦
+    });
+}
+*/
+        
+function searchBook(barcode) {
+    if (!barcode || isFetching) return;
+
+    isFetching = true;
+    const apiEndpoint = `${apiUrl}/api/${barcode}`; // 使用从 config.json 中获取的 apiUrl
+    fetch(apiEndpoint, {
+        method: 'GET',  // 你可以根据需求调整请求方法
+        headers: {
+            'ngrok-skip-browser-warning': '69420',  // 添加自定义的请求头
+            'Content-Type': 'application/json',     // 其他你可能需要的请求头
+        }
+    })
+    .then(response => {
+        isFetching = false;
+        if (!response.ok) {
+            throw response;
+        }
+        return response.json();
+    })
+    .then(data => {
+        // 查询成功，显示结果框并添加历史记录
+        const successMessage = `位置编码: ${data.shelfCode}，位置名称: ${data.shelfName}`;
+        showAlert(successMessage);
+        speak(`查询成功，书籍位置为${data.shelfName}`);
+        addHistory(barcode, "success", successMessage);
+    })
+    .catch(error => {
+        // 查询失败，显示错误信息并添加历史记录
+        isFetching = false;
+        if (error instanceof Response) {
+            error.json().then(errData => {
+                const errorMessage = errData.error || "未知错误";
+                showAlert(errorMessage);
+                speak("查询失败，未找到匹配的书籍信息");
+                addHistory(barcode, "error", errorMessage);
+            });
+        } else {
+            const errorMessage = "未找到匹配的书籍信息";
+            showAlert(errorMessage);
+            speak("查询失败，未找到匹配的书籍信息");
+            addHistory(barcode, "error", errorMessage);
+        }
+    })
+    .finally(() => {
+        clearAndFocusInput(); // 保证输入框清空并聚焦
+    });
+}
+
+         		
+
+        function triggerSearch() {
+            const value = input.value.trim();
+            if (value) {
+                searchBook(value);
+            }
+        }
+
+        function handleKeyUp(event) {
+            if (event.key === 'Enter') {
+                triggerSearch();
+            }
+        }
+
+        function clearInputOnFocus() {
+            input.value = ''; // 当输入框获取焦点时清空内容
+        }
+
+        function clearAndFocusInput() {
+            input.value = ''; // 清空输入框
+            input.focus(); // 聚焦输入框
+        }
+
+        startScanBtn.addEventListener('click', function() {
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            html5QrCode.start(
+                { facingMode: "environment" },
+                config,
+                function(decodedText, decodedResult) {
+                    console.log("扫描到结果：", decodedText);
+                    input.value = decodedText; // 将扫码结果放入输入框
+                    searchBook(decodedText); // 调用查询书籍信息
+                },
+                function(errorMessage) {
+                    status.innerHTML = '扫描中...';
+                    console.log("扫描中...", errorMessage);
+                }
+            ).catch(err => {
+                alert("无法启动摄像头：" + err);
+            });
+
+            startScanBtn.style.display = 'none';
+            stopScanBtn.style.display = 'inline';
+        });
+
+        stopScanBtn.addEventListener('click', function() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    startScanBtn.style.display = 'inline';
+                    stopScanBtn.style.display = 'none';
+                }).catch(err => {
+                    console.error("停止摄像头失败：", err);
+                });
+            }
+        });
+
+        function showAlert(message) {
+            alertBox.textContent = message;
+            alertBox.style.display = 'block';
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+
+        function speak(text) {
+            if (!window.speechSynthesis) return;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = "zh-CN";
+            if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+            }
+            speechSynthesis.speak(utterance);
+        }
+
+        function addHistory(barcode, status, message) {
+            const li = document.createElement('li');
+            li.className = status;
+            li.textContent = `条码: ${barcode} - ${message}`;
+            historyList.appendChild(li);
+			
+			 // 自动滚动到最新的记录
+    historyList.scrollTop = historyList.scrollHeight;
+        }
+    </script>
+</body>
+</html>
