@@ -191,6 +191,26 @@
 	<!-- Import SweetAlert2 for better dialog -->
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
    <script>
+        let apiUrl = '';
+		
+		// 页面加载时加载配置
+        //window.onload = function () {
+        //    loadConfig();  // 加载配置
+        //};
+		
+             // 加载配置文件
+        function loadConfig() {
+            fetch('../config.json')  // 假设配置文件位于根目录
+                .then(response => response.json())
+                .then(config => {
+                    apiUrl = config.apiUrl; // 获取 API 地址
+                    initializeTables(); // 初始化表格
+                })
+                .catch(err => {
+                    console.error('配置加载失败:', err);
+                });
+        }
+
     // 显示 Loading 动画
 function showLoading() {
     const loadingOverlay = document.getElementById('loading-overlay');
@@ -210,7 +230,8 @@ function hideLoading() {
         console.error('Loading overlay element not found!');
     }
 }
-   
+
+/*   
     function loadAllocationTimes() {
     $.get('https://tiezheng.natapp4.cc/api/books/allocation_times', function (data) {
         const select = $('#allocationDateFilter');
@@ -224,6 +245,23 @@ function hideLoading() {
         });
     });
 }
+*/
+
+function loadAllocationTimes() {
+    // 使用动态的 API 地址
+    $.get(`${apiUrl}/api/books/allocation_times`, function (data) {
+        const select = $('#allocationDateFilter');
+        select.empty(); // 清除旧选项
+        select.append($('<option>', { value: '', text: '选择分配时间' }));
+        data.forEach(function (time) {
+            select.append($('<option>', {
+                value: time, // 保留原始时间格式 (ISO 8601)
+                text: new Date(time).toLocaleString() // 显示为用户友好的本地时间格式
+            }));
+        });
+    });
+}
+
 
 function validateData(data) {
     // 遍历每一行数据，检查字段是否存在且格式正确
@@ -236,7 +274,7 @@ function validateData(data) {
 }
 
 
-
+/*
  // 统一的密钥验证函数
 function verifySecretKey(callback) {
     Swal.fire({
@@ -295,11 +333,70 @@ function verifySecretKey(callback) {
         }
     });
 }
+*/
+
+function verifySecretKey(callback) {
+    Swal.fire({
+        title: '请输入操作密钥',
+        input: 'password',
+        inputLabel: '密钥',
+        inputPlaceholder: '请输入密钥',
+        inputAttributes: {
+            autocapitalize: 'off',
+        },
+        showCancelButton: true,
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        showLoaderOnConfirm: true,
+        preConfirm: (key) => {
+            return fetch(`${apiUrl}/api/verify-key`, {  // 使用动态 API 地址
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ key: key }), // 将密钥传递到后端进行验证
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('密钥验证失败');
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (data.success) {
+                        return true; // 密钥验证成功
+                    } else {
+                        Swal.showValidationMessage('密钥错误，请重试');
+                        return false; // 密钥验证失败
+                    }
+                })
+                .catch((error) => {
+                    Swal.showValidationMessage(`验证失败: ${error.message}`);
+                    return false;
+                });
+        },
+        allowOutsideClick: () => !Swal.isLoading(),
+    }).then((result) => {
+        if (result.isConfirmed && result.value) {
+            // 显示验证成功的提示框
+            Swal.fire({
+                title: '密钥验证成功！',
+                icon: 'success',
+                timer: 3000, // 3 秒后自动关闭
+                showConfirmButton: false,
+                willClose: () => {
+                    // 提示框关闭后执行回调操作
+                    callback();
+                },
+            });
+        }
+    });
+}
 
    
     //初始化  
    $(document).ready(function () {
-        
+        loadConfig(); // 在页面加载时调用加载配置函数
 		loadAllocationTimes(); // 在页面加载时调用
 
         // 初始化表格
@@ -379,6 +476,8 @@ function verifySecretKey(callback) {
             }
         });
 */
+
+/*
   // 新增按钮点击事件
 $('#addBtn').click(function () {
     verifySecretKey(() => {
@@ -409,7 +508,36 @@ $('#addBtn').click(function () {
         }
     });
 });
+*/
+ // 新增功能
+    $('#addBtn').click(function () {
+        verifySecretKey(() => {
+            const newData = {
+                classificationName: prompt('请输入分类名称：'),
+                classificationLetter: prompt('请输入中图法分类字母：'),
+                classificationDescription: prompt('请输入分类描述：'),
+                shelfNumber: prompt('请输入书架号：'),
+            };
 
+            if (newData.classificationName && newData.classificationLetter && newData.classificationDescription && newData.shelfNumber) {
+                $.ajax({
+                    url: `${apiUrl}/api/library-classification`,
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(newData),
+                    success: function () {
+                        Swal.fire('新增成功！', '', 'success');
+                        $('#classificationTable').bootstrapTable('refresh');
+                    },
+                    error: function () {
+                        Swal.fire('新增失败，请检查数据是否正确！', '', 'error');
+                    },
+                });
+            } else {
+                Swal.fire('新增失败，请填写完整信息！', '', 'error');
+            }
+        });
+    });
 
         // 编辑功能
         $('#editBtn').click(function () {
@@ -426,7 +554,7 @@ $('#addBtn').click(function () {
 
                 if (updatedData.classificationName && updatedData.classificationLetter && updatedData.classificationDescription && updatedData.shelfNumber) {
                     $.ajax({
-                        url: 'https://tiezheng.natapp4.cc/api/library-classification',
+                        url: `${apiUrl}/api/library-classification`,
                         method: 'POST',
                         contentType: 'application/json',
                         data: JSON.stringify([updatedData]),
@@ -453,7 +581,7 @@ $('#addBtn').click(function () {
                 const row = selected[0];
                 if (confirm(`确定要删除分类 "${row.classificationName}" 吗？`)) {
                     $.ajax({
-                        url: `https://tiezheng.natapp4.cc/api/library-classification/${row.classificationId}`,
+                        url: `${apiUrl}/api/library-classification/${row.classificationId}`,
                         method: 'DELETE',
                         success: function () {
                             alert('删除成功！');
@@ -512,8 +640,9 @@ $('#addBtn').click(function () {
                     });
 
                     $.ajax({
-                        url: 'https://tiezheng.natapp4.cc/api/library-classification',
-                        method: 'POST',
+                        //url: 'https://tiezheng.natapp4.cc/api/library-classification'
+						url: `${apiUrl}/api/library-classification`,
+						method: 'POST',
                         contentType: 'application/json',
                         data: JSON.stringify(mappedData),
                         success: function () {
@@ -556,7 +685,8 @@ function handleShelfOperation(shelf = {}) {
             shelf.usedCapacity = 0; // 新增时默认已用容量为0
         }
 
-        let apiUrl = 'https://tiezheng.natapp4.cc/api/shelves';
+        //let apiUrl = 'https://tiezheng.natapp4.cc/api/shelves';
+		let apiUrl = `${apiUrl}/api/shelves`;
         if (shelf.id) {
             apiUrl += `/${shelf.id}`; // Update if id exists
         }
@@ -646,8 +776,9 @@ $('#deleteShelfBtn').click(function () {
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `https://tiezheng.natapp4.cc/api/shelves/batch-delete`, // 调用后端批量删除接口
-                    method: 'DELETE',
+                    //url: `https://tiezheng.natapp4.cc/api/shelves/batch-delete`, // 调用后端批量删除接口
+                    url: `${apiUrl}/api/shelves/batch-delete`,
+					method: 'DELETE',
                     contentType: 'application/json',
                     data: JSON.stringify(ids), // 将 ID 列表作为 JSON 传递
                     success: function () {
@@ -723,7 +854,8 @@ $('#importShelfBtn').click(function () {
 
             // 发出 AJAX 请求
             $.ajax({
-                url: 'https://tiezheng.natapp4.cc/api/shelves/import',
+                //url: 'https://tiezheng.natapp4.cc/api/shelves/import',
+				url: `${apiUrl}/api/shelves/import`,
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(mappedData),
@@ -753,8 +885,8 @@ $('#importShelfBtn').click(function () {
        const selectedDate = $(this).val(); // 获取选中的时间值
          if (selectedDate) {
             // 构造筛选 API 的请求 URL
-           const url = `https://tiezheng.natapp4.cc/api/books/filter?timestamp=${selectedDate}`;
-        
+           //const url = `https://tiezheng.natapp4.cc/api/books/filter?timestamp=${selectedDate}`;
+		   const url = `${apiUrl}/api/books/filter?timestamp=${selectedDate}`;
            // 刷新表格数据
           $('#bookAllocationTable').bootstrapTable('refresh', { url: url });
             } else {
@@ -781,7 +913,8 @@ $('#importShelfBtn').click(function () {
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: `https://tiezheng.natapp4.cc/api/books/delete?date=${date}`,
+                            //url: `https://tiezheng.natapp4.cc/api/books/delete?date=${date}`,
+							url: `${apiUrl}/api/books/delete?date=${date}`,
                             method: 'DELETE',
                             success: function () {
                                 Swal.fire('删除成功', '', 'success');
@@ -805,8 +938,9 @@ $('#addBookAllocationBtn').click(function () {
 
     if (newData.barcode && newData.shelfCode && newData.shelfName) {
         $.ajax({
-            url: 'https://tiezheng.natapp4.cc/api/books',
-            method: 'POST',
+            //url: 'https://tiezheng.natapp4.cc/api/books',
+            url: `${apiUrl}/api/books`,
+			method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(newData),
             success: function () {
@@ -835,8 +969,9 @@ $('#editBookAllocationBtn').click(function () {
 
         if (updatedData.barcode && updatedData.shelfCode && updatedData.shelfName) {
             $.ajax({
-                url: `https://tiezheng.natapp4.cc/api/books/${row.id}`,
-                method: 'PUT',
+                //url: `https://tiezheng.natapp4.cc/api/books/${row.id}`,
+                url: `${apiUrl}/api/books/${row.id}`,
+				method: 'PUT',
                 contentType: 'application/json',
                 data: JSON.stringify(updatedData),
                 success: function () {
@@ -862,8 +997,9 @@ $('#deleteBookAllocationBtn').click(function () {
         const row = selected[0];
         if (confirm(`确定要删除条码号为 "${row.barcode}" 的记录吗？`)) {
             $.ajax({
-                url: `https://tiezheng.natapp4.cc/api/books/${row.id}`,
-                method: 'DELETE',
+                //url: `https://tiezheng.natapp4.cc/api/books/${row.id}`,
+                url: `${apiUrl}/api/books/${row.id}`,
+				method: 'DELETE',
                 success: function () {
                     alert('删除成功！');
                     $('#bookAllocationTable').bootstrapTable('refresh');
