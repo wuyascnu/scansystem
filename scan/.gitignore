@@ -13,6 +13,8 @@
 
 # 忽略 ngrok.exe 文件
 ngrok.exe
+*.exe
+*.zip
 
 # 忽略所有位于 "C:\Users\17238.000\Desktop\11" 下，但不在 "scan" 文件夹内的文件
 
