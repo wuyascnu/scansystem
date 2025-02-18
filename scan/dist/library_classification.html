@@ -191,22 +191,24 @@
         let apiUrl = '';
 		
 		// 页面加载时加载配置
-        window.onload = function () {
-            loadConfig();  // 加载配置
-        };
+        //window.onload = function () {
+        //    loadConfig();  // 加载配置
+        //};
 		
              // 加载配置文件
         function loadConfig() {
-            fetch('../config.json')  // 假设配置文件位于根目录
-                .then(response => response.json())
-                .then(config => {
-                    apiUrl = config.apiUrl; // 获取 API 地址
-                    initializeTables(); // 初始化表格
-                })
-                .catch(err => {
-                    console.error('配置加载失败:', err);
-                });
-        }
+             fetch('../config.json')  // 假设配置文件位于根目录
+        .then(response => response.json())
+        .then(config => {
+            apiUrl = config.apiUrl; // 获取 API 地址
+            console.log('API URL:', apiUrl);  // 打印 API 地址
+            initializeTables(); // 初始化表格
+        })
+        .catch(err => {
+            console.error('配置加载失败:', err);
+        });
+}
+
 
     // 显示 Loading 动画
 function showLoading() {
