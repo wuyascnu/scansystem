@@ -247,9 +247,9 @@ function hideLoading() {
 */
 
 function loadAllocationTimes() {
-    // 使用动态的 API 地址
-    $.get(`${apiUrl}/api/books/allocation_times`, function (data) {
-	    consol.log(`${apiUrl}/api/books/allocation_times`);
+    const requestUrl = `${apiUrl}/api/books/allocation_times`;
+    console.log('Request URL:', requestUrl);  // 调试打印请求的URL
+    $.get(requestUrl, function (data) {
         const select = $('#allocationDateFilter');
         select.empty(); // 清除旧选项
         select.append($('<option>', { value: '', text: '选择分配时间' }));
@@ -259,8 +259,11 @@ function loadAllocationTimes() {
                 text: new Date(time).toLocaleString() // 显示为用户友好的本地时间格式
             }));
         });
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        console.error('Error loading allocation times:', textStatus, errorThrown);
     });
 }
+
 
 
 function validateData(data) {
