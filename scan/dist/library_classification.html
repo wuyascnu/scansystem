@@ -175,6 +175,19 @@ function initializeTables() {
     // 使用 AJAX 方式直接加载数据
     $('#classificationTable').bootstrapTable('destroy').bootstrapTable({
         url: `${apiUrl}/api/library-classification`, // 动态设置数据源URL
+		ajaxOptions: {                  // 自定义AJAX请求选项
+        type: 'GET',                    // 请求类型（默认是GET）
+        headers: {                      // 添加自定义请求头
+            'ngrok-skip-browser-warning': '69420',
+            'Content-Type': 'application/json',
+        },
+        success: function(data) {       // 请求成功的回调函数
+            console.log('数据加载成功:', data);
+        },
+        error: function(err) {          // 请求失败的回调函数
+            console.error('请求失败:', err);
+        }
+    }
         search: true,
         pagination: false,
         clickToSelect: true,
@@ -184,6 +197,19 @@ function initializeTables() {
     
     $('#shelfTable').bootstrapTable('destroy').bootstrapTable({
         url: `${apiUrl}/api/shelves`, // 动态设置数据源URL
+	    ajaxOptions: {                  // 自定义AJAX请求选项
+        type: 'GET',                    // 请求类型（默认是GET）
+        headers: {                      // 添加自定义请求头
+            'ngrok-skip-browser-warning': '69420',
+            'Content-Type': 'application/json',
+        },
+        success: function(data) {       // 请求成功的回调函数
+            console.log('数据加载成功:', data);
+        },
+        error: function(err) {          // 请求失败的回调函数
+            console.error('请求失败:', err);
+        }
+    }
         search: true,
         pagination: true,
         clickToSelect: true,
@@ -192,6 +218,19 @@ function initializeTables() {
 
     $('#bookAllocationTable').bootstrapTable('destroy').bootstrapTable({
         url: `${apiUrl}/api/books`, // 动态设置数据源URL
+	    ajaxOptions: {                  // 自定义AJAX请求选项
+        type: 'GET',                    // 请求类型（默认是GET）
+        headers: {                      // 添加自定义请求头
+            'ngrok-skip-browser-warning': '69420',
+            'Content-Type': 'application/json',
+        },
+        success: function(data) {       // 请求成功的回调函数
+            console.log('数据加载成功:', data);
+        },
+        error: function(err) {          // 请求失败的回调函数
+            console.error('请求失败:', err);
+        }
+    }
         search: true,
         pagination: true,
         clickToSelect: true,
