@@ -203,6 +203,7 @@ function loadAllocationTimes() {
 	console.log(allocationTimesUrl);
 	
     $.get(allocationTimesUrl, function (data) {
+	    console.log(data);
         const select = $('#allocationDateFilter');
         select.empty(); // 清除旧选项
         select.append($('<option>', { value: '', text: '选择分配时间' }));
