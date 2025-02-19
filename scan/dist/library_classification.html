@@ -170,25 +170,9 @@ function loadConfig() {
         });
 }
 
-let apiUrl = '';  // 用于存储动态的 API 地址
-
-// 加载配置文件
-function loadConfig() {
-    fetch('../config.json')  // 读取配置文件
-        .then(response => response.json())  // 解析 JSON
-        .then(config => {
-            apiUrl = config.apiUrl;  // 获取 API 地址
-            console.log('API URL:', apiUrl);  // 打印 API 地址
-            initializeTables();  // 调用表格初始化函数
-        })
-        .catch(err => {
-            console.error('配置加载失败:', err);
-        });
-}
-
 // 初始化表格并更新 URL
 function initializeTables() {
-    // 使用 AJAX 方式直接加载数据，并加上请求头
+    // 使用 AJAX 方式直接加载数据
     $('#classificationTable').bootstrapTable('destroy').bootstrapTable({
         url: `${apiUrl}/api/library-classification`, // 动态设置数据源URL
         search: true,
@@ -196,12 +180,6 @@ function initializeTables() {
         clickToSelect: true,
         singleSelect: true,
         idField: 'classificationId', // 设置 ID 字段
-        ajaxOptions: {
-            headers: {
-                'ngrok-skip-browser-warning': '69420',  // 添加自定义请求头
-                'Content-Type': 'application/json',     // 设置 Content-Type 请求头
-            }
-        }
     });
     
     $('#shelfTable').bootstrapTable('destroy').bootstrapTable({
@@ -210,12 +188,6 @@ function initializeTables() {
         pagination: true,
         clickToSelect: true,
         idField: 'id', // 设置 ID 字段
-        ajaxOptions: {
-            headers: {
-                'ngrok-skip-browser-warning': '69420',  // 添加自定义请求头
-                'Content-Type': 'application/json',     // 设置 Content-Type 请求头
-            }
-        }
     });
 
     $('#bookAllocationTable').bootstrapTable('destroy').bootstrapTable({
@@ -224,12 +196,6 @@ function initializeTables() {
         pagination: true,
         clickToSelect: true,
         idField: 'id', // 设置 ID 字段
-        ajaxOptions: {
-            headers: {
-                'ngrok-skip-browser-warning': '69420',  // 添加自定义请求头
-                'Content-Type': 'application/json',     // 设置 Content-Type 请求头
-            }
-        }
     });
 }
 
@@ -237,6 +203,6 @@ $(document).ready(function () {
     loadConfig();  // 页面加载时调用加载配置函数
 });
 
-</script>
+    </script>
 </body>
 </html>
