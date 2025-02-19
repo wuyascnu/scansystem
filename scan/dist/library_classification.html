@@ -200,8 +200,8 @@ function loadAllocationTimes() {
 */
 function loadAllocationTimes() {
     const allocationTimesUrl = `${apiUrl}/api/books/allocation_times`;  // 动态生成 API URL
-	console.log(allocationTimesUrl);
-	
+	//console.log(allocationTimesUrl);
+	/*
     $.get(allocationTimesUrl, function (data) {
 	    console.log(data);
         const select = $('#allocationDateFilter');
@@ -226,6 +226,40 @@ function loadAllocationTimes() {
         console.error('加载分配时间失败:', textStatus, errorThrown);
         Swal.fire('加载失败', '无法加载分配时间', 'error');
     });
+	*/
+	$.ajax({
+    url: allocationTimesUrl, // 使用拼接好的 URL
+    method: 'GET', // 请求方法
+    headers: {
+        'ngrok-skip-browser-warning': '69420', // 自定义的请求头
+        'Content-Type': 'application/json'     // 请求体内容类型
+    },
+    success: function (data) {
+        console.log(data);
+        const select = $('#allocationDateFilter');
+        select.empty(); // 清除旧选项
+        select.append($('<option>', { value: '', text: '选择分配时间' }));
+
+        // 检查返回的数据类型，确保它是数组
+        if (Array.isArray(data)) {
+            // 如果是数组，使用 forEach 循环
+            data.forEach(function (time) {
+                select.append($('<option>', {
+                    value: time, // 保留原始时间格式 (ISO 8601)
+                    text: new Date(time).toLocaleString() // 显示为用户友好的本地时间格式
+                }));
+            });
+        } else {
+            // 如果不是数组，打印调试信息并告知用户
+            console.error('返回的数据不是数组:', data);
+            Swal.fire('数据格式错误', '返回的数据格式不是预期的数组', 'error');
+        }
+    },
+    fail: function (jqXHR, textStatus, errorThrown) {
+        console.error('加载分配时间失败:', textStatus, errorThrown);
+        Swal.fire('加载失败', '无法加载分配时间', 'error');
+    }
+});
 }
 
 function validateData(data) {
