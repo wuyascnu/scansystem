@@ -156,6 +156,69 @@
     <script>
         let apiUrl = '';  // 用于存储动态的 API 地址
 
+ // 统一的密钥验证函数
+function verifySecretKey(callback) {
+    Swal.fire({
+        title: '请输入操作密钥',
+        input: 'password',
+        inputLabel: '密钥',
+        inputPlaceholder: '请输入密钥',
+        inputAttributes: {
+            autocapitalize: 'off',
+        },
+        showCancelButton: true,
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        showLoaderOnConfirm: true,
+        preConfirm: (key) => {
+            // 使用动态的 API 地址
+            const verifyKeyUrl = `${apiUrl}/api/verify-key`; // 动态生成 API URL
+
+            return fetch(verifyKeyUrl, {
+                method: 'POST',
+                headers: {
+                    'ngrok-skip-browser-warning': '69420', // 自定义的请求头
+                    'Content-Type': 'application/json',    // 请求体内容类型
+                },
+                body: JSON.stringify({ key: key }), // 将密钥传递到后端进行验证
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('密钥验证失败');
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (data.success) {
+                        return true; // 密钥验证成功
+                    } else {
+                        Swal.showValidationMessage('密钥错误，请重试');
+                        return false; // 密钥验证失败
+                    }
+                })
+                .catch((error) => {
+                    Swal.showValidationMessage(`验证失败: ${error.message}`);
+                    return false;
+                });
+        },
+        allowOutsideClick: () => !Swal.isLoading(),
+    }).then((result) => {
+        if (result.isConfirmed && result.value) {
+            // 显示验证成功的提示框
+            Swal.fire({
+                title: '密钥验证成功！',
+                icon: 'success',
+                timer: 3000, // 3 秒后自动关闭
+                showConfirmButton: false,
+                willClose: () => {
+                    // 提示框关闭后执行回调操作
+                    callback();
+                },
+            });
+        }
+    });
+}
+
     // 显示 Loading 动画
 function showLoading() {
     const loadingOverlay = document.getElementById('loading-overlay');
@@ -235,7 +298,7 @@ function loadAllocationTimes() {
         'Content-Type': 'application/json'     // 请求体内容类型
     },
     success: function (data) {
-        console.log(data);
+        //console.log(data);
         const select = $('#allocationDateFilter');
         select.empty(); // 清除旧选项
         select.append($('<option>', { value: '', text: '选择分配时间' }));
