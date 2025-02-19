@@ -200,7 +200,8 @@ function loadAllocationTimes() {
 */
 function loadAllocationTimes() {
     const allocationTimesUrl = `${apiUrl}/api/books/allocation_times`;  // 动态生成 API URL
-
+	console.log(allocationTimesUrl);
+	
     $.get(allocationTimesUrl, function (data) {
         const select = $('#allocationDateFilter');
         select.empty(); // 清除旧选项
