@@ -154,32 +154,55 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
    
     <script>
-        let apiUrl = '';
+        let apiUrl = '';  // 用于存储动态的 API 地址
 
-        // 加载配置文件
-        function loadConfig() {
-            fetch('../config.json')
-                .then(response => response.json())
-                .then(config => {
-                    apiUrl = config.apiUrl; // 获取 API 地址
-                    console.log('API URL:', apiUrl);  // 打印 API 地址
-                    initializeTables(); // 初始化表格
-                })
-                .catch(err => {
-                    console.error('配置加载失败:', err);
-                });
-        }
-
-        function initializeTables() {
-            // 使用动态的 apiUrl 来更新表格的 URL
-            $('#classificationTable').bootstrapTable('destroy').attr('data-url', `${apiUrl}/api/library-classification`).bootstrapTable();
-            $('#shelfTable').bootstrapTable('destroy').attr('data-url', `${apiUrl}/api/shelves`).bootstrapTable();
-            $('#bookAllocationTable').bootstrapTable('destroy').attr('data-url', `${apiUrl}/api/books`).bootstrapTable();
-        }
-
-        $(document).ready(function () {
-            loadConfig(); // 页面加载时调用加载配置函数
+// 加载配置文件
+function loadConfig() {
+    fetch('../config.json')  // 读取配置文件
+        .then(response => response.json())  // 解析 JSON
+        .then(config => {
+            apiUrl = config.apiUrl;  // 获取 API 地址
+            console.log('API URL:', apiUrl);  // 打印 API 地址
+            initializeTables();  // 调用表格初始化函数
+        })
+        .catch(err => {
+            console.error('配置加载失败:', err);
         });
+}
+
+// 初始化表格并更新 URL
+function initializeTables() {
+    // 使用 AJAX 方式直接加载数据
+    $('#classificationTable').bootstrapTable('destroy').bootstrapTable({
+        url: `${apiUrl}/api/library-classification`, // 动态设置数据源URL
+        search: true,
+        pagination: false,
+        clickToSelect: true,
+        singleSelect: true,
+        idField: 'classificationId', // 设置 ID 字段
+    });
+    
+    $('#shelfTable').bootstrapTable('destroy').bootstrapTable({
+        url: `${apiUrl}/api/shelves`, // 动态设置数据源URL
+        search: true,
+        pagination: true,
+        clickToSelect: true,
+        idField: 'id', // 设置 ID 字段
+    });
+
+    $('#bookAllocationTable').bootstrapTable('destroy').bootstrapTable({
+        url: `${apiUrl}/api/books`, // 动态设置数据源URL
+        search: true,
+        pagination: true,
+        clickToSelect: true,
+        idField: 'id', // 设置 ID 字段
+    });
+}
+
+$(document).ready(function () {
+    loadConfig();  // 页面加载时调用加载配置函数
+});
+
     </script>
 </body>
 </html>
