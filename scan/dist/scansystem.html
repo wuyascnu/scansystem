@@ -79,11 +79,12 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-
-        #reader {
+		
+		#reader {
             width: 100%;
-            max-width: 400px;
-            margin-top: 20px;
+            max-width: 400px;  /* 限制扫码框的最大宽度 */
+            margin: 0 auto;    /* 居中显示 */
+            display: block;    /* 确保是块级元素 */
         }
 
         #status {
@@ -164,7 +165,6 @@
 
     <!-- 导航条 -->
     <div id="navbar">
-        <a href="index.html" class="active">首页</a>
         <a href="scansystem.html">书籍位置查询系统</a>
         <a href="library_classification.html">书架层架位置分配维护系统</a>
         <a href="location_qrcode_system.html">书籍位置二维码生成系统</a>
