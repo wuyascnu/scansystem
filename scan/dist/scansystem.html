@@ -10,41 +10,89 @@
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
         }
+
+        /* 顶部Logo区域 */
         #header {
             position: relative;
             height: 100px;
             background: url('./img/logo.png') no-repeat center top;
             background-size: 80px;
+            padding-top: 30px; /* 增加logo与导航条的间距 */
+            background-color: #fff; /* 背景色，防止透明背景问题 */
+            border-bottom: 3px solid #ddd;
         }
-        h3 {
+
+        /* 导航栏样式 */
+        #navbar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #007bff;
+            padding: 15px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin: 0 5px;
+            transition: background-color 0.3s;
+        }
+
+        #navbar a:hover {
+            background-color: #0056b3;
+        }
+
+        #navbar a.active {
+            background-color: #003366;
+        }
+
+        /* 主体内容部分 */
+        #main-content {
+            margin-top: 30px;
+            padding: 20px;
             text-align: center;
-            margin: 5px 0;
-            font-size: 18px;
         }
+
+        h3 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
         #controls {
-            margin-top: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
+            margin-top: 20px;
         }
+
         input, button {
-            width: 90%;
+            width: 70%;
             padding: 10px;
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        #reader {
+		
+		#reader {
             width: 100%;
-            max-width: 400px;
-            margin: 10px auto;
+            max-width: 400px;  /* 限制扫码框的最大宽度 */
+            margin: 0 auto;    /* 居中显示 */
+            display: block;    /* 确保是块级元素 */
         }
+
         #status {
             text-align: center;
-            margin-top: 10px;
+            margin-top: 20px;
             color: #555;
         }
+
         #alertBox {
             position: fixed;
             top: 20%;
@@ -67,6 +115,7 @@
             word-wrap: break-word;
             margin: 0 auto;
         }
+
         #history {
             margin: 20px auto;
             width: 90%;
@@ -76,11 +125,13 @@
             padding: 15px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+
         #history h4 {
             margin: 0 0 10px;
             font-size: 18px;
             color: #333;
         }
+
         #historyList {
             list-style: none;
             padding: 0;
@@ -88,6 +139,7 @@
             max-height: 200px;
             overflow-y: auto;
         }
+
         #historyList li {
             margin: 5px 0;
             padding: 10px;
@@ -95,10 +147,12 @@
             border-radius: 5px;
             background-color: #ffffff;
         }
+
         .success {
             background-color: #d4edda;
             color: #155724;
         }
+
         .error {
             background-color: #f8d7da;
             color: #721c24;
@@ -106,24 +160,11 @@
     </style>
 </head>
 <body>
-    <!--
-	<div id="header"></div>
-    <h3>书籍位置查询系统</h3>
-    <div id="controls">
-        <input type="text" id="barcodeInput" placeholder="输入条码或扫码" onfocus="clearInputOnFocus()" onblur="triggerSearch()" onkeyup="handleKeyUp(event)">
-        <button id="startScanBtn">启动摄像头扫码</button>
-        <button id="stopScanBtn" style="display:none;">停止扫描</button>
-    </div>
-    <div id="reader"></div>
-    <div id="status"></div>
-    <div id="alertBox"></div> <!-- 自定义弹框 -->
-    <!--<div id="history">
-        <h4>历史扫码记录</h4>
-        <ul id="historyList"></ul>
-    </div>
--->
- <div id="sidebar">
-        <a href="index.html">首页</a>
+<!-- 顶部Logo区域 -->
+    <div id="header"></div>
+
+    <!-- 导航条 -->
+    <div id="navbar">
         <a href="scansystem.html">书籍位置查询系统</a>
         <a href="library_classification.html">书架层架位置分配维护系统</a>
         <a href="location_qrcode_system.html">书籍位置二维码生成系统</a>
@@ -132,8 +173,9 @@
         <a href="https://so.nuotu.net/hptzdxq/Home" target="_blank">读者服务平台</a>
         <a href="https://lib.nuotu.net/hptzdxq/home" target="_blank">诺图图书馆管理云平台</a>
     </div>
+
+    <!-- 主体内容 -->
     <div id="main-content">
-        <div id="header"></div>
         <h3>书籍位置查询系统</h3>
         <div id="controls">
             <input type="text" id="barcodeInput" placeholder="输入条码或扫码" onfocus="clearInputOnFocus()" onblur="triggerSearch()" onkeyup="handleKeyUp(event)">
@@ -148,8 +190,8 @@
             <ul id="historyList"></ul>
         </div>
     </div>
-    <script src="./js/html5-qrcode.min.js"></script>
-    <script>
+ <script src="./js/html5-qrcode.min.js"></script>
+ <script>
         const input = document.getElementById('barcodeInput');
         const startScanBtn = document.getElementById('startScanBtn');
         const stopScanBtn = document.getElementById('stopScanBtn');
