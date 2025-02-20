@@ -11,23 +11,24 @@
             background-color: #f4f4f4;
         }
 
-        /* 导航栏样式 */
+        /* 顶部Logo区域 */
         #header {
             position: relative;
             height: 100px;
             background: url('./img/logo.png') no-repeat center top;
             background-size: 80px;
-            padding-top: 20px; /* 增加logo与导航条的间距 */
+            padding-top: 30px; /* 增加logo与导航条的间距 */
             background-color: #fff; /* 背景色，防止透明背景问题 */
             border-bottom: 3px solid #ddd;
         }
 
+        /* 导航栏样式 */
         #navbar {
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
             align-items: center;
             background-color: #007bff;
-            padding: 10px 0;
+            padding: 15px 0;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
@@ -37,6 +38,7 @@
             font-size: 16px;
             padding: 12px 20px;
             border-radius: 4px;
+            margin: 0 5px;
             transition: background-color 0.3s;
         }
 
@@ -48,28 +50,30 @@
             background-color: #003366;
         }
 
-        /* 主内容部分 */
+        /* 主体内容部分 */
         #main-content {
-            margin-left: 200px;
+            margin-top: 30px;
             padding: 20px;
+            text-align: center;
         }
 
         h3 {
-            text-align: center;
-            margin: 5px 0;
-            font-size: 18px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
         }
 
         #controls {
-            margin-top: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
+            margin-top: 20px;
         }
 
         input, button {
-            width: 90%;
+            width: 70%;
             padding: 10px;
             font-size: 16px;
             border: 1px solid #ccc;
@@ -79,12 +83,12 @@
         #reader {
             width: 100%;
             max-width: 400px;
-            margin: 10px auto;
+            margin-top: 20px;
         }
 
         #status {
             text-align: center;
-            margin-top: 10px;
+            margin-top: 20px;
             color: #555;
         }
 
@@ -155,7 +159,7 @@
     </style>
 </head>
 <body>
-  <!-- 顶部Logo区域 -->
+<!-- 顶部Logo区域 -->
     <div id="header"></div>
 
     <!-- 导航条 -->
