@@ -106,7 +106,8 @@
     </style>
 </head>
 <body>
-    <div id="header"></div>
+    <!--
+	<div id="header"></div>
     <h3>书籍位置查询系统</h3>
     <div id="controls">
         <input type="text" id="barcodeInput" placeholder="输入条码或扫码" onfocus="clearInputOnFocus()" onblur="triggerSearch()" onkeyup="handleKeyUp(event)">
@@ -116,11 +117,37 @@
     <div id="reader"></div>
     <div id="status"></div>
     <div id="alertBox"></div> <!-- 自定义弹框 -->
-    <div id="history">
+    <!--<div id="history">
         <h4>历史扫码记录</h4>
         <ul id="historyList"></ul>
     </div>
-
+-->
+ <div id="sidebar">
+        <a href="index.html">首页</a>
+        <a href="scansystem.html">书籍位置查询系统</a>
+        <a href="library_classification.html">书架层架位置分配维护系统</a>
+        <a href="location_qrcode_system.html">书籍位置二维码生成系统</a>
+        <a href="book_location_allocation_system.html">书籍位置分配系统</a>
+        <a href="book_information_collection.html">书籍信息采集盘点系统</a>
+        <a href="https://so.nuotu.net/hptzdxq/Home" target="_blank">读者服务平台</a>
+        <a href="https://lib.nuotu.net/hptzdxq/home" target="_blank">诺图图书馆管理云平台</a>
+    </div>
+    <div id="main-content">
+        <div id="header"></div>
+        <h3>书籍位置查询系统</h3>
+        <div id="controls">
+            <input type="text" id="barcodeInput" placeholder="输入条码或扫码" onfocus="clearInputOnFocus()" onblur="triggerSearch()" onkeyup="handleKeyUp(event)">
+            <button id="startScanBtn">启动摄像头扫码</button>
+            <button id="stopScanBtn" style="display:none;">停止扫描</button>
+        </div>
+        <div id="reader"></div>
+        <div id="status"></div>
+        <div id="alertBox"></div> <!-- 自定义弹框 -->
+        <div id="history">
+            <h4>历史扫码记录</h4>
+            <ul id="historyList"></ul>
+        </div>
+    </div>
     <script src="./js/html5-qrcode.min.js"></script>
     <script>
         const input = document.getElementById('barcodeInput');
