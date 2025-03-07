@@ -16,32 +16,41 @@
             color: #333;
             text-align: center;
         }
+        h1 {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #ff4081;
+            text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.4);
+        }
         .section-title {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: bold;
             color: #004d40;
             margin-top: 30px;
-            border-bottom: 2px solid #004d40;
+            border-bottom: 3px solid #004d40;
             display: inline-block;
             padding-bottom: 5px;
         }
         .card {
             background-color: rgba(255, 255, 255, 0.95);
-            border-radius: 10px;
+            border-radius: 15px;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             padding: 15px;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            border: 2px solid #ff80ab;
         }
         .card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+            transform: scale(1.1);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
         }
         .card-title {
-            color: #004d40;
-            font-size: 1.2rem;
+            color: #ff4081;
+            font-size: 1.6rem;
+            font-weight: bold;
         }
         .btn-primary {
             border-radius: 20px;
-            background: linear-gradient(to right, #4CAF50, #45A049);
+            background: linear-gradient(to right, #ff4081, #ff80ab);
             border: none;
         }
         .footer {
@@ -55,9 +64,9 @@
     <div class="container">
         <h1>铁铮信息管理门户</h1>
         <p>请选择需要进入的系统</p>
-
+        
         <!-- 图书馆查询模块 -->
-        <div class="section-title">图书馆查询模块</div>
+        <div class="section-title">公共查询</div>
         <div class="row">
             <div class="col-md-4 mb-4">
                 <div class="card">
@@ -86,8 +95,16 @@
         </div>
         
         <!-- 图书馆工作模块 -->
-        <div class="section-title">图书馆工作模块</div>
+        <div class="section-title">图书馆工作</div>
         <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">书籍位置分配系统</h5>
+                        <a href="book_location_allocation_system.html" class="btn btn-primary btn-block">进入系统</a>
+                    </div>
+                </div>
+            </div>
             <div class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body text-center">
@@ -104,6 +121,7 @@
                     </div>
                 </div>
             </div>
+			<!-- 新增卡片 -->
             <div class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body text-center">
@@ -113,7 +131,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- 人工智能工具模块 -->
         <div class="section-title">人工智能工具模块</div>
         <div class="row">
@@ -139,6 +157,7 @@
                 </div>
             </div>
         </div>
+
     </div>
     
     <div class="footer text-center">
