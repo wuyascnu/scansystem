@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>图书推荐问答</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; }
+        .chat-container { width: 80%; max-width: 600px; margin: 20px auto; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        .chat-box { height: 400px; overflow-y: auto; border-bottom: 1px solid #ddd; padding: 10px; }
+        .chat-message { margin: 10px 0; padding: 10px; border-radius: 8px; max-width: 80%; }
+        .user-message { background: #dcf8c6; text-align: right; margin-left: auto; }
+        .bot-message { background: #fff; border: 1px solid #ddd; text-align: left; margin-right: auto; }
+        .input-container { display: flex; padding: 10px; }
+        .chat-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .send-btn { background: #007bff; color: white; padding: 10px; border: none; border-radius: 5px; margin-left: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <h2>图书推荐助手</h2>
+    <div class="chat-box" id="chatBox"></div>
+    <div class="input-container">
+        <input id="query" type="text" class="chat-input" placeholder="输入你的问题...">
+        <button class="send-btn" onclick="askQuestion()">发送</button>
+    </div>
+</div>
+
+<script>
+    async function askQuestion() {
+        let queryInput = document.getElementById("query");
+        let chatBox = document.getElementById("chatBox");
+        let userText = queryInput.value.trim();
+        if (!userText) return;
+
+        // 显示用户问题
+        chatBox.innerHTML += `<div class="chat-message user-message">${userText}</div>`;
+        queryInput.value = "";
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // 发送请求到后端
+        let res = await fetch(`/recommend?query=${encodeURIComponent(userText)}`);
+        let botReply = await res.text();
+
+        // 显示 AI 书籍推荐结果
+        chatBox.innerHTML += `<div class="chat-message bot-message">${botReply}</div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+</script>
+
+</body>
+</html>
