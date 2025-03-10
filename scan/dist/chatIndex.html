@@ -2,23 +2,130 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>图书推荐问答</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- 确保页面在移动设备上正确缩放 -->
+    <title>铁铮图书推荐问答</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; }
-        .chat-container { width: 80%; max-width: 600px; margin: 20px auto; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-        .chat-box { height: 400px; overflow-y: auto; border-bottom: 1px solid #ddd; padding: 10px; }
-        .chat-message { margin: 10px 0; padding: 10px; border-radius: 8px; max-width: 80%; }
-        .user-message { background: #dcf8c6; text-align: right; margin-left: auto; }
-        .bot-message { background: #fff; border: 1px solid #ddd; text-align: left; margin-right: auto; }
-        .input-container { display: flex; padding: 10px; }
-        .chat-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        .send-btn { background: #007bff; color: white; padding: 10px; border: none; border-radius: 5px; margin-left: 10px; cursor: pointer; }
+        /* 基础样式 */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chat-container {
+            width: 90%; /* 默认宽度为 90% */
+            max-width: 600px; /* 最大宽度为 600px */
+            margin: 20px auto;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .header img {
+            height: 32px;
+            margin-right: 10px;
+        }
+
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            border-bottom: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        .chat-message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 80%;
+            word-wrap: break-word; /* 确保长文本不会溢出 */
+        }
+
+        .user-message {
+            background: #dcf8c6;
+            text-align: right;
+            margin-left: auto;
+        }
+
+        .bot-message {
+            background: #fff;
+            border: 1px solid #ddd;
+            text-align: left;
+            margin-right: auto;
+        }
+
+        .input-container {
+            display: flex;
+            padding: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px; /* 输入框字体大小 */
+        }
+
+        .send-btn {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 16px; /* 按钮字体大小 */
+        }
+
+        /* 移动端样式 */
+        @media (max-width: 600px) {
+            .chat-container {
+                width: 95%; /* 在小屏幕上宽度更大 */
+                padding: 10px;
+            }
+
+            .header h2 {
+                font-size: 20px; /* 标题字体变小 */
+            }
+
+            .chat-box {
+                height: 300px; /* 聊天框高度变小 */
+            }
+
+            .chat-message {
+                max-width: 90%; /* 消息框宽度更大 */
+                font-size: 14px; /* 消息字体变小 */
+            }
+
+            .chat-input {
+                font-size: 14px; /* 输入框字体变小 */
+            }
+
+            .send-btn {
+                padding: 10px 15px; /* 按钮大小调整 */
+                font-size: 14px; /* 按钮字体变小 */
+            }
+        }
     </style>
 </head>
 <body>
 
 <div class="chat-container">
-    <h2>图书推荐助手</h2>
+    <div class="header">
+        <img src="./img/logo.png" alt="Logo"> <!-- 你的 Logo 图片 -->
+        <h2>图书推荐助手</h2>
+    </div>
     <div class="chat-box" id="chatBox"></div>
     <div class="input-container">
         <input id="query" type="text" class="chat-input" placeholder="输入你的问题...">
@@ -39,12 +146,18 @@
         chatBox.scrollTop = chatBox.scrollHeight;
 
         // 发送请求到后端
-        let res = await fetch(`/recommend?query=${encodeURIComponent(userText)}`);
-        let botReply = await res.text();
+        try {
+            let res = await fetch(`/recommend?query=${encodeURIComponent(userText)}`);
+            let botReply = await res.text();
 
-        // 显示 AI 书籍推荐结果
-        chatBox.innerHTML += `<div class="chat-message bot-message">${botReply}</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
+            // 显示 AI 书籍推荐结果
+            chatBox.innerHTML += `<div class="chat-message bot-message">${botReply}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        } catch (error) {
+            console.error("请求失败:", error);
+            chatBox.innerHTML += `<div class="chat-message bot-message">抱歉，请求失败，请稍后重试。</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
     }
 </script>
 

@@ -155,8 +155,11 @@
    
     <script>
         let apiUrl = '';  // 用于存储动态的 API 地址
+		  
+		// 在前端定义秘钥
+        const SECRET_KEY = "my-secret-key-123"; // 替换为你自己的秘钥
 
- // 统一的密钥验证函数
+       // 统一的密钥验证函数
 function verifySecretKey(callback) {
     Swal.fire({
         title: '请输入操作密钥',
@@ -961,9 +964,56 @@ $('#deleteBookAllocationBtn').click(function () {
 //================================bookAllocationTable===========================================
 
 $(document).ready(function () {
-    loadConfig();  // 页面加载时调用加载配置函数
+     verifySecretKeyToVisit(() => {
+                // 秘钥验证成功后显示页面内容
+                document.getElementById('content').style.display = 'block';
+                loadConfig();  // 加载配置并初始化页面
+            });
 });
 
+
+// 统一的密钥验证函数
+        function verifySecretKeyToVisit(callback) {
+            Swal.fire({
+                title: '请输入操作密钥再访问',
+                input: 'password',
+                inputLabel: '密钥',
+                inputPlaceholder: '请输入密钥',
+                inputAttributes: {
+                    autocapitalize: 'off',
+                },
+                showCancelButton: true,
+                confirmButtonText: '确认',
+                cancelButtonText: '取消',
+                showLoaderOnConfirm: false, // 不需要加载动画
+                preConfirm: (key) => {
+                    if (key === SECRET_KEY) {
+                        return true; // 密钥验证成功
+                    } else {
+                        Swal.showValidationMessage('密钥错误，请重试');
+                        return false; // 密钥验证失败
+                    }
+                },
+                allowOutsideClick: () => !Swal.isLoading(),
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    // 显示验证成功的提示框
+                    Swal.fire({
+                        title: '密钥验证成功！',
+                        icon: 'success',
+                        timer: 3000, // 3 秒后自动关闭
+                        showConfirmButton: false,
+                        willClose: () => {
+                            // 提示框关闭后执行回调操作
+                            callback();
+                        },
+                    });
+                } else {
+                    // 如果用户取消输入或验证失败，阻止页面加载
+                    Swal.fire('错误', '未提供有效密钥，页面无法加载。', 'error');
+                }
+            });
+        }
     </script>
 </body>
 </html>
