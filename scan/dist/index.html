@@ -10,53 +10,52 @@
             background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.6)), url('./img/logo1.png') no-repeat center center fixed;
             background-size: cover;
             font-family: 'Arial', sans-serif;
+            color: #ddd; /* 整体浅色风格 */
         }
         .container {
             margin-top: 50px;
-            color: #333;
             text-align: center;
         }
         h1 {
             font-size: 4rem;
             font-weight: bold;
-            color: #ff4081;
-            text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.4);
+            color: #ffffff; /* 纯白色标题，清晰可见 */
+            text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.5);
         }
         .section-title {
             font-size: 1.8rem;
             font-weight: bold;
-            color: #004d40;
+            color: #00bcd4; /* 柔和的蓝色 */
             margin-top: 30px;
-            border-bottom: 3px solid #004d40;
+            border-bottom: 3px solid #00bcd4;
             display: inline-block;
             padding-bottom: 5px;
         }
         .card {
-            background-color: rgba(255, 255, 255, 0.95);
+            background-color: rgba(255, 255, 255, 0.9);
             border-radius: 15px;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             padding: 15px;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            border: 2px solid #ff80ab;
+            border: none; /* 去掉粉色边框，简洁美观 */
         }
         .card:hover {
-            transform: scale(1.1);
-            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
         .card-title {
-            color: #ff4081;
-            font-size: 1.6rem;
+            color: #2196F3; /* 蓝色字体，清晰可读 */
+            font-size: 1.5rem;
             font-weight: bold;
         }
         .btn-primary {
             border-radius: 20px;
-            background: linear-gradient(to right, #ff4081, #ff80ab);
+            background: linear-gradient(to right, #2196F3, #42A5F5); /* 蓝色渐变 */
             border: none;
         }
         .footer {
             margin-top: 50px;
             font-size: 0.9rem;
-            color: #555;
+            color: #bbb;
         }
     </style>
 </head>
@@ -65,7 +64,7 @@
         <h1>铁铮信息管理门户</h1>
         <p>请选择需要进入的系统</p>
         
-        <!-- 图书馆查询模块 -->
+        <!-- 公共查询 -->
         <div class="section-title">公共查询</div>
         <div class="row">
             <div class="col-md-4 mb-4">
@@ -94,7 +93,7 @@
             </div>
         </div>
         
-        <!-- 图书馆工作模块 -->
+        <!-- 图书馆工作 -->
         <div class="section-title">图书馆工作</div>
         <div class="row">
             <div class="col-md-4 mb-4">
@@ -121,7 +120,6 @@
                     </div>
                 </div>
             </div>
-			<!-- 新增卡片 -->
             <div class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body text-center">
@@ -132,21 +130,20 @@
             </div>
         </div>
 
-        <!-- 人工智能工具模块 -->
+        <!-- 人工智能工具 -->
         <div class="section-title">人工智能工具</div>
         <div class="row">
             <div class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body text-center">
                         <h5 class="card-title">AI 图书推荐助手</h5>
-                        <!-- <button class="btn btn-primary btn-block disabled">开发中</button> -->
-						<a href="chatIndex.html" class="btn btn-primary btn-block">进入系统</a>
+                        <a href="chatIndex.html" class="btn btn-primary btn-block">进入系统</a>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- 信息检索工具模块 -->
+        <!-- 信息检索工具 -->
         <div class="section-title">信息检索工具</div>
         <div class="row">
             <div class="col-md-4 mb-4">
@@ -158,7 +155,6 @@
                 </div>
             </div>
         </div>
-
     </div>
     
     <div class="footer text-center">
