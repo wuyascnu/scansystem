@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>书籍信息采集盘点系统</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        #header {
+            height: 100px;
+            background: url('./img/logo.png') no-repeat center top;
+            background-size: 80px;
+        }
+        h3 { text-align: center; margin: 5px 0; font-size: 18px; }
+        #controls { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        input { width: 90%; padding: 15px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; }
+        .button-row { display: flex; justify-content: center; gap: 20px; width: 90%; }
+        button { padding: 10px 20px; font-size: 16px; border: none; border-radius: 25px; background: #4CAF50; color: #fff; cursor: pointer; }
+        #alertBox { position: fixed; top: 20%; left: 50%; transform: translateX(-50%); background-color: #f8d7da; color: #721c24; padding: 20px; font-size: 18px; border-radius: 15px; display: none; z-index: 1000; }
+        #reader { margin-top: 20px; max-width: 400px; display: none; }
+    </style>
+</head>
+<body>
+    <div id="header"></div>
+    <h3>书籍信息采集盘点系统</h3>
+    <div id="controls">
+        <input type="text" id="isbnInput" placeholder="请输入ISBN">
+        <div class="button-row">
+            <button id="exportBtn">导出数据</button>
+            <button id="clearBtn">清除数据</button>
+        </div>
+        <div class="button-row">
+            <button id="startScanBtn">开启扫码</button>
+            <button id="stopScanBtn" style="display: none;">停止扫码</button>
+        </div>
+        <div id="reader"></div>
+    </div>
+    <div id="alertBox"></div>
+
+    <script src="./js/html5-qrcode.min.js"></script>
+    <script>
+        const apiUrl = "https://e591-120-238-101-77.ngrok-free.app"; 
+        const input = document.getElementById('isbnInput');
+        const alertBox = document.getElementById('alertBox');
+        let html5QrCode = null;
+
+        window.onload = () => input.focus();
+
+        function showAlert(message) {
+            alertBox.textContent = message;
+            alertBox.style.display = 'block';
+            setTimeout(() => alertBox.style.display = 'none', 3000);
+        }
+
+        function searchBook(isbn) {
+            if (!isbn) return;
+            fetch(`${apiUrl}/api/bookCollection/search`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isbn })
+            })
+            .then(response => response.json())
+            .then(data => {
+                showAlert(data && data.title ? `书名: ${data.title}\n库存: ${data.quantity}` : '未找到书籍信息');
+            })
+            .catch(() => showAlert('查询失败，请重试'));
+        }
+
+        input.addEventListener('keyup', e => { if (e.key === 'Enter') searchBook(input.value.trim()); });
+        input.addEventListener('blur', () => searchBook(input.value.trim()));
+
+        document.getElementById('startScanBtn').addEventListener('click', () => {
+            if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, decodedText => {
+                showAlert(`扫描到: ${decodedText}`);
+                input.value = decodedText;
+                searchBook(decodedText);
+            });
+            document.getElementById('reader').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
