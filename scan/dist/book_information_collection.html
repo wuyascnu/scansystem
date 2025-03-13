@@ -4,8 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>书籍信息采集盘点系统</title>
-    <style>
-        /* 样式部分保持不变 */
+ <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        #header {
+            position: relative;
+            height: 100px;
+            background: url('./img/logo.png') no-repeat center top;
+            background-size: 80px;
+        }
+        h3 {
+            text-align: center;
+            margin: 5px 0;
+            font-size: 18px;
+        }
+        #controls {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        input {
+            width: 90%;
+            padding: 15px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .button-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            width: 90%;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(90deg, #4CAF50, #45A049);
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: linear-gradient(90deg, #45A049, #4CAF50);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        #alertBox {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 30px;
+            font-size: 24px;
+            font-weight: bold;
+            border: 2px solid #f5c6cb;
+            border-radius: 15px;
+            display: none;
+            z-index: 1000;
+            width: 50%;
+            min-width: 280px;
+            max-width: 500px;
+            text-align: left;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0 auto;
+        }
+        #reader {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 400px;
+            display: none;
+        }
+        #bookDetails {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #bookDetails p {
+            font-size: 16px;
+        }
+        @media (max-width: 600px) {
+            #alertBox {
+                font-size: 18px;
+                padding: 20px;
+                width: 80%;
+                max-width: 90%;
+                top: 30%;
+            }
+            button {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
     </style>
 </head>
 <body>
